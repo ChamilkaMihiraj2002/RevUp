@@ -2,6 +2,46 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Environment Setup
+
+1. Copy the environment template:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Fill in your Firebase configuration values in `.env.local`:
+   - Get these values from [Firebase Console](https://console.firebase.google.com/)
+   - Go to Project Settings > General > Your apps
+   - Copy the config values to `.env.local`
+
+3. The required environment variables are:
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+   - `VITE_FIREBASE_APP_ID`
+
+## Getting Started
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Firebase Setup
+
+This project uses Firebase Authentication. Make sure to:
+
+1. Enable Authentication in Firebase Console
+2. Enable Email/Password and Google sign-in providers
+3. Configure authorized domains if needed
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
