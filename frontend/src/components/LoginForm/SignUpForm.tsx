@@ -8,36 +8,53 @@ import { Input } from "../UI/Input"
 import { Label } from "../UI/Label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../UI/Card"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
-import { logIn, logInWithGoogle, passwordReset } from "../../firebase/auth"
+import { signUp, logInWithGoogle } from "../../firebase/auth"
 import { getFirebaseErrorMessage } from "../../firebase/errorUtils"
 import { useAuth } from "../../contexts/authContext/authContext"
 
-export function LoginForm() {
+export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }) {
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const [error, setError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
   const [formData, setFormData] = useState({
+    fullName: "",
     email: "",
     password: "",
+    confirmPassword: "",
   })
   const { userLoggedIn } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     setError("")
-    setSuccessMessage("")
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match!")
+      return
+    }
+
+    if (formData.password.length < 6) {
+      setError("Password should be at least 6 characters long.")
+      return
+    }
+
+    setIsLoading(true)
 
     try {
-      await logIn(formData.email, formData.password)
-      console.log("Login successful!")
-      navigate('/dashboard')
+      await signUp(formData.email, formData.password)
+      console.log("Sign-up successful!")
+      setSuccessMessage("Account created successfully! Please log in.")
+      // Switch to login form after successful signup
+      setTimeout(() => {
+        onSwitchToLogin?.()
+      }, 2000)
     } catch (err: any) {
       setError(getFirebaseErrorMessage(err))
-      console.error("Login error:", err)
+      console.error("Sign-up error:", err)
     } finally {
       setIsLoading(false)
     }
@@ -46,7 +63,6 @@ export function LoginForm() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true)
     setError("")
-    setSuccessMessage("")
 
     try {
       await logInWithGoogle()
@@ -57,24 +73,6 @@ export function LoginForm() {
       console.error("Google sign-in error:", err)
     } finally {
       setIsGoogleLoading(false)
-    }
-  }
-
-  const handleForgotPassword = async () => {
-    if (!formData.email) {
-      setError("Please enter your email address first.")
-      return
-    }
-
-    setError("")
-    setSuccessMessage("")
-
-    try {
-      await passwordReset(formData.email)
-      setSuccessMessage("Password reset email sent! Check your inbox.")
-    } catch (err: any) {
-      setError(getFirebaseErrorMessage(err))
-      console.error("Password reset error:", err)
     }
   }
 
@@ -95,8 +93,8 @@ export function LoginForm() {
   return (
     <Card className="border-0 shadow-2xl">
       <CardHeader className="space-y-2 text-center pb-8">
-        <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-        <CardDescription className="text-muted-foreground">Sign In To Your RevUp Account To Continue</CardDescription>
+        <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
+        <CardDescription className="text-muted-foreground">Sign Up For A New RevUp Account</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -111,13 +109,28 @@ export function LoginForm() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium">
+            <Label htmlFor="fullName" className="text-sm font-medium">
+              Full Name
+            </Label>
+            <Input
+              id="fullName"
+              type="text"
+              placeholder="Enter your full name"
+              value={formData.fullName}
+              onChange={(e) => handleInputChange("fullName", e.target.value)}
+              required
+              className="h-11"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="signup-email" className="text-sm font-medium">
               Email Address
             </Label>
             <Input
-              id="email"
+              id="signup-email"
               type="email"
               placeholder="Enter your email"
               value={formData.email}
@@ -128,14 +141,14 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium">
+            <Label htmlFor="signup-password" className="text-sm font-medium">
               Password
             </Label>
             <div className="relative">
               <Input
-                id="password"
+                id="signup-password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
+                placeholder="Create a password"
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
                 required
@@ -157,29 +170,51 @@ export function LoginForm() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" className="rounded border-border" />
-              <span className="text-muted-foreground">Remember me</span>
-            </label>
-            <Button 
-              type="button"
-              variant="link" 
-              className="p-0 h-auto text-primary hover:text-primary/80"
-              onClick={handleForgotPassword}
-            >
-              Forgot Password?
-            </Button>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword" className="text-sm font-medium">
+              Confirm Password
+            </Label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm your password"
+                value={formData.confirmPassword}
+                onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                required
+                className="h-11 pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-11 px-3 hover:bg-transparent"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <Eye className="h-4 w-4 text-muted-foreground" />
+                )}
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2 text-sm">
+            <input type="checkbox" required className="rounded border-border mt-1" aria-label="Accept terms and conditions" />
+            <span className="text-muted-foreground">
+              I agree to the <Button variant="link" className="p-0 h-auto text-primary hover:text-primary/80">Terms of Service</Button> and <Button variant="link" className="p-0 h-auto text-primary hover:text-primary/80">Privacy Policy</Button>
+            </span>
           </div>
 
           <Button type="submit" className="w-full h-11 text-base font-medium" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                Creating account...
               </>
             ) : (
-              "Sign in"
+              "Create Account"
             )}
           </Button>
 
@@ -224,7 +259,7 @@ export function LoginForm() {
                     fill="#EA4335"
                   />
                 </svg>
-                Sign in with Google
+                Sign up with Google
               </>
             )}
           </Button>
