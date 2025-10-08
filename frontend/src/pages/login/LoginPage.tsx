@@ -1,7 +1,11 @@
 import { LoginForm} from "@/components/LoginForm/LoginForm"
+import { SignUpForm } from "@/components/LoginForm/SignUpForm"
 import { Car, Wrench, Shield, Clock } from "lucide-react"
+import { useState } from "react"
 
 export function LoginPage() {
+  const [isSignUp, setIsSignUp] = useState(false)
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left side - Branding */}
@@ -73,7 +77,31 @@ export function LoginPage() {
             <p className="text-muted-foreground">Automobile care management</p>
           </div>
 
-          <LoginForm />
+          {/* Tab Switcher */}
+          <div className="flex gap-2 mb-6 p-1 bg-muted rounded-lg">
+            <button
+              onClick={() => setIsSignUp(false)}
+              className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${
+                !isSignUp
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => setIsSignUp(true)}
+              className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${
+                isSignUp
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Sign Up
+            </button>
+          </div>
+
+          {isSignUp ? <SignUpForm onSwitchToLogin={() => setIsSignUp(false)} /> : <LoginForm />}
         </div>
       </div>
     </div>
