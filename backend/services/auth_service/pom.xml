@@ -12,7 +12,7 @@
 	<artifactId>auth_service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>auth_service</name>
-	<description>Authentication Services</description>
+	<description>Authentication Service</description>
 	<url/>
 	<licenses>
 		<license/>
