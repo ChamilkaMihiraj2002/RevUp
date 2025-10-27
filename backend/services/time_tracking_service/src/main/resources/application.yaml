@@ -1,0 +1,52 @@
+server.port: 8083
+
+spring:
+  application:
+    name: SQ1AI-INSTRUCTOR-SERVICE
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 3000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      pool-name: Sq1AIInstructorServiceHikariCP
+      connection-test-query: SELECT 1
+      register-mbeans: true
+
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 5
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+# Commenting out the default datasource to use the custom one defined below so that database config would not crash
+#  datasource:
+#    url: jdbc:postgresql://crossover.proxy.rlwy.net:35550/sq1ai_instructor_service
+#    username: root
+#    password: zIpMqdsAgiKkmJPObCZxRDkKalJdRVQk
+  ds-dev:
+    jdbc-url: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+    username: postgres.cksrfhnqmjbrtzutnlim
+    password: "05102002"
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
