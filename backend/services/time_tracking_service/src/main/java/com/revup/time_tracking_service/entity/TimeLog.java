@@ -58,4 +58,17 @@ public class TimeLog {
             this.logDate = this.startTime.toLocalDate();
         }
     }
+
+    /**
+     * Calculates the duration in minutes.
+     * This is a "getter" that will be picked up by mapstruct/jackson
+     * but will not be a column in the database.
+     */
+    public Long getActualMinutes() {
+        if (this.startTime == null || this.endTime == null) {
+            return null;
+        }
+        // Use java.time.Duration to find the difference
+        return java.time.Duration.between(this.startTime, this.endTime).toMinutes();
+    }
 }
