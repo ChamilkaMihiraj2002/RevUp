@@ -77,6 +77,7 @@ public class TimeLogServiceImpl implements TimeLogService {
         dto.setLogDate(timeLog.getLogDate());
         dto.setCreatedAt(timeLog.getCreatedAt());
         dto.setUpdatedAt(timeLog.getUpdatedAt());
+        dto.setActualMinutes(timeLog.getActualMinutes());
         return dto;
     }
 
