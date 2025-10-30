@@ -23,4 +23,13 @@ public class GlobalExceptionHandler {
     }
 
     // You can add more handlers here for other exceptions like ValidationException
+    
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest request) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("timestamp", LocalDateTime.now());
+            body.put("message", "Internal Server Error");
+            body.put("details", ex.getMessage());
+            return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 }
