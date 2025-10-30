@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { LoginPage } from "@/pages/login/LoginPage"
+import  Home  from "@/pages/Home/home"
 import { Dashboard } from "@/pages/Dashboard"
+
 import { useAuth } from "@/contexts/authContext/authContext"
 
 function App() {
@@ -28,6 +30,7 @@ function App() {
           path="/dashboard"
           element={userLoggedIn ? <Dashboard /> : <Navigate to="/" replace />}
         />
+         <Route path="/home" element={<Home />} />
       </Routes>
     </Router>
   )
