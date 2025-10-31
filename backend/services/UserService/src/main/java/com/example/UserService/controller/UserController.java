@@ -1,13 +1,18 @@
 package com.example.UserService.controller;
 
-import com.example.UserService.entity.User;
+import com.example.UserService.dto.request.CreateUserRequest;
+import com.example.UserService.dto.request.UpdateUserRequest;
+import com.example.UserService.dto.response.UserResponse;
 import com.example.UserService.service.UserService;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
-import java.util.List;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
@@ -18,29 +23,41 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+    public Mono<ResponseEntity<UserResponse>> createUser(@Valid @RequestBody CreateUserRequest request) {
+        log.info("Creating new user with email: {}", request.getEmail());
+        return userService.createUser(request)
+                .map(user -> new ResponseEntity<>(user, HttpStatus.CREATED))
+                .doOnSuccess(user -> log.info("User created successfully with id: {}", user.getBody().getUserId()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public Mono<ResponseEntity<UserResponse>> getUser(@PathVariable Long id) {
+        log.info("Fetching user with id: {}", id);
+        return userService.getUserById(id)
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public Flux<UserResponse> getAllUsers() {
+        log.info("Fetching all users");
+        return userService.getAllUsers();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        return ResponseEntity.ok(userService.updateUser(id, user));
+    public Mono<ResponseEntity<UserResponse>> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserRequest request) {
+        log.info("Updating user with id: {}", id);
+        return userService.updateUser(id, request)
+                .map(ResponseEntity::ok)
+                .doOnSuccess(user -> log.info("User updated successfully with id: {}", id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+    public Mono<ResponseEntity<Void>> deleteUser(@PathVariable Long id) {
+        log.info("Deleting user with id: {}", id);
+        return userService.deleteUser(id)
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
+                .doOnSuccess(response -> log.info("User deleted successfully with id: {}", id));
     }
 }
-

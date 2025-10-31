@@ -1,13 +1,15 @@
 package com.example.UserService.service;
 
-import com.example.UserService.entity.User;
-
-import java.util.List;
+import com.example.UserService.dto.request.CreateUserRequest;
+import com.example.UserService.dto.request.UpdateUserRequest;
+import com.example.UserService.dto.response.UserResponse;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 public interface UserService {
-    User createUser(User user);
-    User getUserById(Long id);
-    List<User> getAllUsers();
-    User updateUser(Long id, User user);
-    void deleteUser(Long id);
+    Mono<UserResponse> createUser(CreateUserRequest request);
+    Mono<UserResponse> getUserById(Long id);
+    Flux<UserResponse> getAllUsers();
+    Mono<UserResponse> updateUser(Long id, UpdateUserRequest request);
+    Mono<Void> deleteUser(Long id);
 }

@@ -6,20 +6,33 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+    @Index(name = "idx_user_email", columnList = "email"),
+    @Index(name = "idx_user_role", columnList = "role")
+})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long userId;
 
+    @Column(name = "name")
     private String name;
+    
+    @Column(name = "email", unique = true)
     private String email;
+    
+    @Column(name = "phone")
     private String phone;
+    
+    @Column(name = "address")
     private String address;
+    
+    @Column(name = "role")
     private String role; // CUSTOMER, EMPLOYEE, ADMIN
 
-    // Relationships — optional if you’ll later add vehicles
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    // JPA supports @OneToMany relationships
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Vehicle> vehicles;
 

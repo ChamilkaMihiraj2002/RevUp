@@ -1,49 +1,73 @@
 package com.example.UserService.service.Impl;
 
+import com.example.UserService.dto.request.CreateUserRequest;
+import com.example.UserService.dto.request.UpdateUserRequest;
+import com.example.UserService.dto.response.UserResponse;
 import com.example.UserService.entity.User;
 import com.example.UserService.exception.ResourceNotFoundException;
+import com.example.UserService.mapper.UserMapper;
 import com.example.UserService.repository.UserRepository;
 import com.example.UserService.service.UserService;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final Scheduler jdbcScheduler;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, Scheduler jdbcScheduler, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.jdbcScheduler = jdbcScheduler;
+        this.userMapper = userMapper;
     }
 
     @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public Mono<UserResponse> createUser(CreateUserRequest request) {
+        return Mono.fromCallable(() -> {
+                    User user = userMapper.toEntity(request);
+                    User savedUser = userRepository.save(user);
+                    return userMapper.toResponse(savedUser);
+                })
+                .subscribeOn(jdbcScheduler);
     }
 
     @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    public Mono<UserResponse> getUserById(Long id) {
+        return Mono.fromCallable(() -> userRepository.findByIdWithVehicles(id))
+                .subscribeOn(jdbcScheduler)
+                .flatMap(optionalUser -> optionalUser
+                        .map(user -> Mono.just(userMapper.toResponse(user)))
+                        .orElseGet(() -> Mono.error(new ResourceNotFoundException("User not found with id: " + id))));
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public Flux<UserResponse> getAllUsers() {
+        return Mono.fromCallable(() -> userRepository.findAllWithVehicles())
+                .subscribeOn(jdbcScheduler)
+                .flatMapMany(Flux::fromIterable)
+                .map(userMapper::toResponse);
     }
 
     @Override
-    public User updateUser(Long id, User updatedUser) {
-        User user = getUserById(id);
-        user.setName(updatedUser.getName());
-        user.setPhone(updatedUser.getPhone());
-        user.setAddress(updatedUser.getAddress());
-        return userRepository.save(user);
+    public Mono<UserResponse> updateUser(Long id, UpdateUserRequest request) {
+        return Mono.fromCallable(() -> {
+                    User user = userRepository.findById(id)
+                            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                    userMapper.updateEntityFromDto(user, request);
+                    User updatedUser = userRepository.save(user);
+                    return userMapper.toResponse(updatedUser);
+                })
+                .subscribeOn(jdbcScheduler);
     }
 
     @Override
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+    public Mono<Void> deleteUser(Long id) {
+        return Mono.fromRunnable(() -> userRepository.deleteById(id))
+                .subscribeOn(jdbcScheduler)
+                .then();
     }
 }
-
