@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: notification-service
+  r2dbc:
+    url: r2dbc:postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres?schema=notification_schema
+    username: postgres.ykqzvugolgnudbcgklam
+    password: Riyad@123
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres?currentSchema=notification_schema
+    user: postgres.ykqzvugolgnudbcgklam
+    password: Riyad@123
+    schemas: notification_schema
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  codec:
+    max-in-memory-size: 10MB
+  websocket:
+    allowed-origins: http://localhost:3000,http://localhost:5173
+
+server:
+  port: 8089
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    com.revup.notification_service: DEBUG
+    org.springframework.r2dbc: DEBUG
+    io.r2dbc.postgresql: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

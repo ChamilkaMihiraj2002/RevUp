@@ -1,0 +1,216 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: RevUp-API-Gateway
+  
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:5173"
+              - "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
+      
+      routes:
+        # User Management Service Routes
+        - id: user-service
+          uri: lb://REVUP-USER-SERVICE
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userServiceCircuitBreaker
+                fallbackUri: forward:/fallback/user-service
+        
+        # Customer Service Routes
+        - id: customer-service
+          uri: lb://REVUP-CUSTOMER-SERVICE
+          predicates:
+            - Path=/api/v1/customers/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: customerServiceCircuitBreaker
+                fallbackUri: forward:/fallback/customer-service
+        
+        # Vehicle Service Routes
+        - id: vehicle-service
+          uri: lb://REVUP-VEHICLE-SERVICE
+          predicates:
+            - Path=/api/v1/vehicles/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: vehicleServiceCircuitBreaker
+                fallbackUri: forward:/fallback/vehicle-service
+        
+        # Employee Service Routes
+        - id: employee-service
+          uri: lb://REVUP-EMPLOYEE-SERVICE
+          predicates:
+            - Path=/api/v1/employees/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: employeeServiceCircuitBreaker
+                fallbackUri: forward:/fallback/employee-service
+        
+        # Appointment Service Routes
+        - id: appointment-service
+          uri: lb://REVUP-APPOINTMENT-SERVICE
+          predicates:
+            - Path=/api/v1/appointments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: appointmentServiceCircuitBreaker
+                fallbackUri: forward:/fallback/appointment-service
+        
+        # Service Management Service Routes
+        - id: service-management-service
+          uri: lb://REVUP-SERVICE-MANAGEMENT-SERVICE
+          predicates:
+            - Path=/api/v1/services/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: serviceManagementCircuitBreaker
+                fallbackUri: forward:/fallback/service-management-service
+        
+        # Project Service Routes
+        - id: project-service
+          uri: lb://REVUP-PROJECT-SERVICE
+          predicates:
+            - Path=/api/v1/projects/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: projectServiceCircuitBreaker
+                fallbackUri: forward:/fallback/project-service
+        
+        # Time Logging Service Routes
+        - id: timelog-service
+          uri: lb://REVUP-TIMELOG-SERVICE
+          predicates:
+            - Path=/api/v1/timelogs/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: timelogServiceCircuitBreaker
+                fallbackUri: forward:/fallback/timelog-service
+        
+        # Notification Service Routes
+        - id: notification-service
+          uri: lb://REVUP-NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/v1/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: notificationServiceCircuitBreaker
+                fallbackUri: forward:/fallback/notification-service
+        
+        # WebSocket Route for Real-time updates
+        - id: notification-websocket
+          uri: lb:ws://REVUP-NOTIFICATION-SERVICE
+          predicates:
+            - Path=/ws/**
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    fetchRegistry: true
+    registerWithEureka: true
+  instance:
+    preferIpAddress: true
+    instanceId: ${spring.application.name}:${random.value}
+
+# Firebase Configuration
+firebase:
+  enabled: true
+  # Firebase credentials will be loaded from environment variable or file
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Resilience4j Circuit Breaker Configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        registerHealthIndicator: true
+    instances:
+      userServiceCircuitBreaker:
+        baseConfig: default
+      customerServiceCircuitBreaker:
+        baseConfig: default
+      vehicleServiceCircuitBreaker:
+        baseConfig: default
+      employeeServiceCircuitBreaker:
+        baseConfig: default
+      appointmentServiceCircuitBreaker:
+        baseConfig: default
+      serviceManagementCircuitBreaker:
+        baseConfig: default
+      projectServiceCircuitBreaker:
+        baseConfig: default
+      timelogServiceCircuitBreaker:
+        baseConfig: default
+      notificationServiceCircuitBreaker:
+        baseConfig: default
+
+# Logging
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.revup.api_gateway: DEBUG
+    reactor.netty: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+firebase:
+  credentials-path: ${FIREBASE_CREDENTIALS_PATH:firebase-credentials.json}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    com.revup.api_gateway: TRACE
