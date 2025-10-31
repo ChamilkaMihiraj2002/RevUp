@@ -1,96 +1,78 @@
 package com.revup.time_tracking_service.service.impl;
 
-import com.revup.time_tracking_service.dto.TimeLogDTO;
+import com.revup.time_tracking_service.dto.request.TimeLogRequest;
+import com.revup.time_tracking_service.dto.response.TimeLogResponse;
 import com.revup.time_tracking_service.entity.TimeLog;
 import com.revup.time_tracking_service.exception.ResourceNotFoundException;
+import com.revup.time_tracking_service.mapper.TimeLogMapper;
 import com.revup.time_tracking_service.repository.TimeLogRepository;
 import com.revup.time_tracking_service.service.TimeLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers; // <-- Important
 
 @Service
-@RequiredArgsConstructor // Lombok for constructor-based dependency injection
+@RequiredArgsConstructor
 public class TimeLogServiceImpl implements TimeLogService {
 
-    private final TimeLogRepository timeLogRepository;
+    private final TimeLogRepository timeLogRepository; // The blocking JPA repo
+    private final TimeLogMapper timeLogMapper;
 
     @Override
-    public TimeLogDTO createTimeLog(TimeLogDTO timeLogDTO) {
-        TimeLog timeLog = convertToEntity(timeLogDTO);
-        TimeLog savedLog = timeLogRepository.save(timeLog);
-        return convertToDTO(savedLog);
-    }
-
-    @Override
-    public TimeLogDTO getTimeLogById(Long id) {
-        TimeLog timeLog = timeLogRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("TimeLog not found with id: " + id));
-        return convertToDTO(timeLog);
+    public Mono<TimeLogResponse> createTimeLog(TimeLogRequest request) {
+        // Run this blocking code on a different thread
+        return Mono.fromCallable(() -> {
+            TimeLog timeLog = timeLogMapper.mapToEntity(request);
+            TimeLog savedLog = timeLogRepository.save(timeLog); // BLOCKING CALL
+            return timeLogMapper.mapToResponse(savedLog);
+        }).subscribeOn(Schedulers.boundedElastic()); // <-- Moves the work
     }
 
     @Override
-    public List<TimeLogDTO> getAllTimeLogs() {
-        return timeLogRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public Mono<TimeLogResponse> getTimeLogById(Long id) {
+        return Mono.fromCallable(() -> {
+            TimeLog timeLog = timeLogRepository.findById(id) // BLOCKING CALL
+                    .orElseThrow(() -> new ResourceNotFoundException("TimeLog not found with id: " + id));
+            return timeLogMapper.mapToResponse(timeLog);
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override
-    public TimeLogDTO updateTimeLog(Long id, TimeLogDTO timeLogDTO) {
-        TimeLog existingLog = timeLogRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("TimeLog not found with id: " + id));
-
-        // Update fields
-        existingLog.setAppointmentServiceId(timeLogDTO.getAppointmentServiceId());
-        existingLog.setUserId(timeLogDTO.getUserId());
-        existingLog.setStartTime(timeLogDTO.getStartTime());
-        existingLog.setEndTime(timeLogDTO.getEndTime());
-        existingLog.setDescription(timeLogDTO.getDescription());
-        existingLog.setLogDate(timeLogDTO.getLogDate());
-        // createdAt and updatedAt are handled automatically by auditing
-
-        TimeLog updatedLog = timeLogRepository.save(existingLog);
-        return convertToDTO(updatedLog);
+    public Flux<TimeLogResponse> getAllTimeLogs() {
+        // For a List, we use fromCallable and then flatten it into a Flux
+        return Mono.fromCallable(() -> 
+            timeLogRepository.findAll().stream() // BLOCKING CALL
+                    .map(timeLogMapper::mapToResponse)
+                    .toList()
+        )
+        .flatMapMany(Flux::fromIterable) // Convert List<DTO> to Flux<DTO>
+        .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override
-    public void deleteTimeLog(Long id) {
-        if (!timeLogRepository.existsById(id)) {
-            throw new ResourceNotFoundException("TimeLog not found with id: " + id);
-        }
-        timeLogRepository.deleteById(id);
+    public Mono<TimeLogResponse> updateTimeLog(Long id, TimeLogRequest request) {
+        return Mono.fromCallable(() -> {
+            TimeLog existingLog = timeLogRepository.findById(id) // BLOCKING CALL
+                    .orElseThrow(() -> new ResourceNotFoundException("TimeLog not found with id: " + id));
+            
+            timeLogMapper.updateEntityFromRequest(existingLog, request);
+            TimeLog updatedLog = timeLogRepository.save(existingLog); // BLOCKING CALL
+            return timeLogMapper.mapToResponse(updatedLog);
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
-    // --- Helper Methods for Mapping ---
-
-    private TimeLogDTO convertToDTO(TimeLog timeLog) {
-        TimeLogDTO dto = new TimeLogDTO();
-        dto.setTimelogId(timeLog.getTimelogId());
-        dto.setAppointmentServiceId(timeLog.getAppointmentServiceId());
-        dto.setUserId(timeLog.getUserId());
-        dto.setStartTime(timeLog.getStartTime());
-        dto.setEndTime(timeLog.getEndTime());
-        dto.setDescription(timeLog.getDescription());
-        dto.setLogDate(timeLog.getLogDate());
-        dto.setCreatedAt(timeLog.getCreatedAt());
-        dto.setUpdatedAt(timeLog.getUpdatedAt());
-        dto.setActualMinutes(timeLog.getActualMinutes());
-        return dto;
-    }
-
-    private TimeLog convertToEntity(TimeLogDTO dto) {
-        TimeLog timeLog = new TimeLog();
-        // We don't set the ID for a new entity
-        timeLog.setAppointmentServiceId(dto.getAppointmentServiceId());
-        timeLog.setUserId(dto.getUserId());
-        timeLog.setStartTime(dto.getStartTime());
-        timeLog.setEndTime(dto.getEndTime());
-        timeLog.setDescription(dto.getDescription());
-        timeLog.setLogDate(dto.getLogDate());
-        // createdAt and updatedAt are set automatically
-        return timeLog;
+    @Override
+    public Mono<Void> deleteTimeLog(Long id) {
+        // For void methods, we use .then()
+        return Mono.fromRunnable(() -> {
+            if (!timeLogRepository.existsById(id)) { // BLOCKING CALL
+                throw new ResourceNotFoundException("TimeLog not found with id: " + id);
+            }
+            timeLogRepository.deleteById(id); // BLOCKING CALL
+        })
+        .subscribeOn(Schedulers.boundedElastic())
+        .then();
     }
 }
