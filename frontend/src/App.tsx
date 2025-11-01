@@ -2,7 +2,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { LoginPage } from "@/pages/login/LoginPage"
 import  Home  from "@/pages/Home/home"
 import { Dashboard } from "@/pages/Dashboard"
-import  Customer  from "@/pages/Customer_Dashboard/customer"
+import  Overview from "@/pages/Overview/overview"
+import  Book from "@/pages/Overview/book"
+
 
 
 import { useAuth } from "@/contexts/authContext/authContext"
@@ -33,7 +35,11 @@ function App() {
           element={userLoggedIn ? <Dashboard /> : <Navigate to="/" replace />}
         />
          <Route path="/home" element={<Home />} />
-          <Route path="/customer" element={<Customer />} />
+         <Route path="/overview" element={<Overview/>} />
+         <Route path="/book" element={<Book/>} />
+
+
+          
       </Routes>
     </Router>
   )
