@@ -1,6 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { LoginPage } from "@/pages/login/LoginPage"
+import  Home  from "@/pages/Home/home"
 import { Dashboard } from "@/pages/Dashboard"
+import  Overview from "@/pages/Overview/overview"
+import  Book from "@/pages/Overview/book"
+
+
+
 import { useAuth } from "@/contexts/authContext/authContext"
 
 function App() {
@@ -20,13 +26,19 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route
-          path="/"
-          element={userLoggedIn ? <Navigate to="/dashboard" replace /> : <LoginPage />}
-        />
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={userLoggedIn ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
         <Route
           path="/dashboard"
-          element={userLoggedIn ? <Dashboard /> : <Navigate to="/" replace />}
+          element={userLoggedIn ? <Dashboard /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/overview"
+          element={userLoggedIn ? <Overview /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/book"
+          element={userLoggedIn ? <Book /> : <Navigate to="/login" replace />}
         />
       </Routes>
     </Router>
