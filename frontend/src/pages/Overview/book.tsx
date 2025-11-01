@@ -162,22 +162,28 @@ export default function BookServicePage() {
 
   if (step === 4) {
     return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation (sticky so only content scrolls) */}
-      <nav className="sticky top-0 z-50 border-b border-border/50 backdrop-blur-sm bg-white/95">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-3">
-                <Link to="/" className="flex items-center space-x-3">
-                  <div className="bg-primary rounded-lg p-2">
-                    <Car className="h-6 w-6 text-primary-foreground" />
-                  </div>
-                  <span className="text-xl font-bold">RevUp</span>
-                </Link>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 border-b border-cyan-200 bg-gradient-to-r from-blue-50 via-cyan-50 to-blue-100 backdrop-blur-sm">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <Link to="/" className="flex items-center space-x-3">
+                <div className="bg-cyan-600 rounded-lg p-2">
+                  <Car className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-xl font-bold text-gray-900">RevUp</span>
+              </Link>
             </div>
+            <Link to="/overview">
+              <Button variant="ghost">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Button>
+            </Link>
           </div>
-        </nav>
+        </div>
+      </nav>
 
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
