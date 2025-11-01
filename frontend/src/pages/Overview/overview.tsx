@@ -5,6 +5,10 @@ import { Button } from "@/components/UI/Button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/UI/Card"
 import { Badge } from "@/components/UI/Badge"
 import { Progress } from "@/components/UI/Progress"
+import { Input } from "@/components/UI/Input"
+import { Label } from "@/components/UI/Label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/UI/Select"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/UI/Dialog"
 import {
   Car,
   Calendar,
@@ -21,6 +25,31 @@ import {
 
 export default function CustomerDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
+  const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(false)
+  const [newVehicle, setNewVehicle] = useState({
+    make: "",
+    model: "",
+    year: "",
+    plate: "",
+    mileage: "",
+    type: ""
+  })
+
+  const handleAddVehicle = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Here you would typically make an API call to save the vehicle
+    console.log("Adding vehicle:", newVehicle)
+    setIsAddVehicleOpen(false)
+    // Reset form
+    setNewVehicle({
+      make: "",
+      model: "",
+      year: "",
+      plate: "",
+      mileage: "",
+      type: ""
+    })
+  }
 
   // Navigation items for Customer Dashboard
   const navItems = [
@@ -72,7 +101,7 @@ export default function CustomerDashboard() {
       date: "2024-12-10",
       vehicle: "Toyota Corolla",
       services: ["Oil Change", "Brake Inspection"],
-      cost: "$120",
+  cost: "RS.120",
       status: "completed",
     },
     {
@@ -80,7 +109,7 @@ export default function CustomerDashboard() {
       date: "2024-11-05",
       vehicle: "Honda Civic",
       services: ["Tire Replacement"],
-      cost: "$280",
+  cost: "RS.280",
       status: "completed",
     },
   ]
@@ -104,12 +133,13 @@ export default function CustomerDashboard() {
         />
 
         {/* Main Content */}
+        {/* Main Content */}
         <main className="flex-1 min-h-[calc(100vh-64px)]">
-          <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="h-full max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12 py-8">
             {/* Header */}
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">Welcome back, Ravi</h1>
-              <p className="text-gray-600 mt-2">Manage your vehicles and track service appointments</p>
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold text-gray-900">Welcome back, Ravi</h1>
+              <p className="text-lg text-gray-600 mt-2">Manage your vehicles and track service appointments</p>
             </div>
 
             {/* Active Service Alert */}
@@ -216,7 +246,7 @@ export default function CustomerDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-cyan-50 transition-colors">
                         <div className="bg-green-100 rounded-full p-2.5">
                           <CheckCircle className="h-5 w-5 text-green-600" />
                         </div>
@@ -225,7 +255,7 @@ export default function CustomerDashboard() {
                           <p className="text-xs text-slate-500">Toyota Corolla • 2 hours ago</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-cyan-50 transition-colors">
                         <div className="bg-blue-100 rounded-full p-2.5">
                           <Wrench className="h-5 w-5 text-blue-600" />
                         </div>
@@ -234,7 +264,7 @@ export default function CustomerDashboard() {
                           <p className="text-xs text-slate-500">Toyota Corolla • 3 hours ago</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-cyan-50 transition-colors">
                         <div className="bg-indigo-100 rounded-full p-2.5">
                           <Calendar className="h-5 w-5 text-indigo-600" />
                         </div>
@@ -254,10 +284,127 @@ export default function CustomerDashboard() {
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-bold text-gray-900">My Vehicles</h2>
-                  <Button className="bg-cyan-600 hover:bg-cyan-700 shadow-md">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Vehicle
-                  </Button>
+                  <Dialog open={isAddVehicleOpen} onOpenChange={setIsAddVehicleOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-cyan-600 hover:bg-cyan-700 shadow-md">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Vehicle
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="w-full max-w-[90vw] sm:max-w-[900px] bg-white">
+                      <DialogHeader>
+                        <DialogTitle className="text-xl font-semibold text-gray-900">Add New Vehicle</DialogTitle>
+                        <DialogDescription className="text-gray-600">
+                          Enter your vehicle details below
+                        </DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handleAddVehicle} className="space-y-4 py-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="make" className="text-gray-700">Make</Label>
+                            <Input
+                              id="make"
+                              value={newVehicle.make}
+                              onChange={(e) => setNewVehicle({...newVehicle, make: e.target.value})}
+                              placeholder="e.g., Toyota"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="model" className="text-gray-700">Model</Label>
+                            <Input
+                              id="model"
+                              value={newVehicle.model}
+                              onChange={(e) => setNewVehicle({...newVehicle, model: e.target.value})}
+                              placeholder="e.g., Corolla"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="year" className="text-gray-700">Year</Label>
+                            <Input
+                              id="year"
+                              type="number"
+                              value={newVehicle.year}
+                              onChange={(e) => setNewVehicle({...newVehicle, year: e.target.value})}
+                              placeholder="e.g., 2020"
+                              min="1900"
+                              max="2025"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="plate" className="text-gray-700">License Plate</Label>
+                            <Input
+                              id="plate"
+                              value={newVehicle.plate}
+                              onChange={(e) => setNewVehicle({...newVehicle, plate: e.target.value})}
+                              placeholder="e.g., ABC-123"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="type" className="text-gray-700">Vehicle Type</Label>
+                            <Select
+                              value={newVehicle.type}
+                              onValueChange={(value) => setNewVehicle({...newVehicle, type: value})}
+                            >
+                              <SelectTrigger id="type" className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500">
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="sedan">Sedan</SelectItem>
+                                <SelectItem value="suv">SUV</SelectItem>
+                                <SelectItem value="hatchback">Hatchback</SelectItem>
+                                <SelectItem value="pickup">Pickup Truck</SelectItem>
+                                <SelectItem value="van">Van</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="mileage" className="text-gray-700">Current Mileage</Label>
+                            <Input
+                              id="mileage"
+                              type="number"
+                              value={newVehicle.mileage}
+                              onChange={(e) => setNewVehicle({...newVehicle, mileage: e.target.value})}
+                              placeholder="e.g., 45000"
+                              min="0"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end space-x-3 pt-4">
+                          <Button 
+                            type="button" 
+                            variant="outline"
+                            onClick={() => setIsAddVehicleOpen(false)}
+                            className="border-gray-200"
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            type="submit"
+                            className="bg-cyan-600 hover:bg-cyan-700 text-white"
+                          >
+                            Add Vehicle
+                          </Button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -287,10 +434,10 @@ export default function CustomerDashboard() {
                             <span className="font-semibold text-slate-900">{vehicle.nextService}</span>
                           </div>
                           <div className="flex space-x-2 pt-2">
-                            <Button variant="outline" size="sm" className="flex-1 border-blue-200 text-blue-700 hover:bg-blue-50">
+                            <Button variant="outline" size="sm" className="flex-1 border-cyan-200 text-cyan-700 hover:bg-cyan-50 hover:text-cyan-800">
                               Book Service
                             </Button>
-                            <Button variant="ghost" size="sm" className="hover:bg-slate-100">
+                            <Button variant="ghost" size="sm" className="hover:bg-cyan-50 hover:text-gray-900">
                               <Settings className="h-4 w-4" />
                             </Button>
                           </div>

@@ -19,7 +19,7 @@ export function CommonSidebar({ navItems, activeTab, onTabChange, dashboardName 
       <div className="p-6">
         {/* Dashboard Header */}
         <div className="mb-6 pb-4 border-b border-cyan-200">
-          <h2 className="text-lg font-bold text-gray-900">{dashboardName}</h2>
+          <h2 className="text-lg font-bold text-gray-900">{dashboardName} DashBoard</h2>
           <p className="text-sm text-cyan-700 mt-0.5">Manage your services</p>
         </div>
 

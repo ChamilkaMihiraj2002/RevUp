@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/UI/Badge"
 import { Checkbox } from "@/components/UI/Checkbox"
 import { Textarea } from "@/components/UI/Textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/UI/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/UI/Select"
 import { Calendar } from "@/components/UI/Calendar"
 import { Car, Clock, ArrowLeft, CheckCircle, Wrench, Shield, Zap } from "lucide-react"
 import { Link } from "react-router-dom"
@@ -30,7 +30,7 @@ export default function BookServicePage() {
       id: "oil-change",
       name: "Oil Change",
       duration: "45 min",
-      price: "$45",
+  price: "RS.45",
       description: "Full synthetic oil change with filter replacement",
       category: "maintenance",
     },
@@ -38,7 +38,7 @@ export default function BookServicePage() {
       id: "tire-rotation",
       name: "Tire Rotation",
       duration: "30 min",
-      price: "$25",
+  price: "RS.25",
       description: "Rotate tires for even wear and extended life",
       category: "maintenance",
     },
@@ -46,7 +46,7 @@ export default function BookServicePage() {
       id: "brake-inspection",
       name: "Brake Inspection",
       duration: "60 min",
-      price: "$75",
+  price: "RS.75",
       description: "Complete brake system inspection and testing",
       category: "safety",
     },
@@ -54,7 +54,7 @@ export default function BookServicePage() {
       id: "ac-service",
       name: "AC Service",
       duration: "90 min",
-      price: "$120",
+  price: "RS.120",
       description: "Air conditioning system check and refrigerant top-up",
       category: "comfort",
     },
@@ -62,7 +62,7 @@ export default function BookServicePage() {
       id: "battery-test",
       name: "Battery Test",
       duration: "20 min",
-      price: "$15",
+  price: "RS.15",
       description: "Battery health check and terminal cleaning",
       category: "electrical",
     },
@@ -70,7 +70,7 @@ export default function BookServicePage() {
       id: "diagnostic",
       name: "Diagnostic Scan",
       duration: "45 min",
-      price: "$85",
+  price: "RS.85",
       description: "Computer diagnostic scan for error codes",
       category: "electrical",
     },
@@ -116,8 +116,9 @@ export default function BookServicePage() {
   const getTotalPrice = () => {
     const selectedServicesDetails = getSelectedServicesDetails()
     return selectedServicesDetails.reduce((total, service) => {
-      const price = Number.parseInt(service.price.replace("$", ""))
-      return total + price
+      // Strip non-numeric characters (handles formats like "RS.120" or "$120")
+      const numeric = Number.parseFloat(service.price.replace(/[^0-9.]/g, "")) || 0
+      return total + numeric
     }, 0)
   }
 
@@ -161,9 +162,9 @@ export default function BookServicePage() {
 
   if (step === 4) {
     return (
-      <div className="min-h-screen bg-background">
-        {/* Navigation */}
-        <nav className="border-b border-border/50 backdrop-blur-sm">
+    <div className="min-h-screen bg-background">
+      {/* Navigation (sticky so only content scrolls) */}
+      <nav className="sticky top-0 z-50 border-b border-border/50 backdrop-blur-sm bg-white/95">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-3">
@@ -218,14 +219,14 @@ export default function BookServicePage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm pt-4 border-t">
-                  <div>
-                    <span className="text-muted-foreground">Estimated Duration:</span>
-                    <p className="font-medium">{getTotalDuration()} minutes</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Total Cost:</span>
-                    <p className="font-medium">${getTotalPrice()}</p>
-                  </div>
+                <div>
+                  <span className="text-muted-foreground">Estimated Duration:</span>
+                  <p className="font-medium">{getTotalDuration()} minutes</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Total Cost:</span>
+                  <p className="font-medium">RS.{getTotalPrice()}</p>
+                </div>
                 </div>
               </CardContent>
             </Card>
@@ -245,17 +246,17 @@ export default function BookServicePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100">
       {/* Navigation */}
-      <nav className="border-b border-border/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <nav className="sticky top-0 z-50 border-b border-cyan-200 bg-gradient-to-r from-blue-50 via-cyan-50 to-blue-100 backdrop-blur-sm">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <Link to="/" className="flex items-center space-x-3">
-                <div className="bg-primary rounded-lg p-2">
-                  <Car className="h-6 w-6 text-primary-foreground" />
+                <div className="bg-cyan-600 rounded-lg p-2">
+                  <Car className="h-6 w-6 text-white" />
                 </div>
-                <span className="text-xl font-bold">RevUp</span>
+                <span className="text-xl font-bold text-gray-900">RevUp</span>
               </Link>
             </div>
             <Link to="/dashboard">
@@ -268,28 +269,28 @@ export default function BookServicePage() {
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div style={{ maxWidth: "1440px" }} className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-balance">Book a Service</h1>
-          <p className="text-muted-foreground mt-2">Schedule your vehicle service appointment</p>
+          <h1 className="text-4xl font-bold text-gray-900">Book a Service</h1>
+          <p className="text-lg text-gray-600 mt-2">Schedule your vehicle service appointment</p>
         </div>
 
         {/* Progress Steps */}
         <div className="flex items-center justify-center mb-8">
           <div className="flex items-center space-x-4">
-            <div className={`flex items-center space-x-2 ${step >= 1 ? "text-primary" : "text-muted-foreground"}`}>
+            <div className={`flex items-center space-x-2 ${step >= 1 ? "text-cyan-600" : "text-gray-500"}`}>
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  step >= 1 ? "bg-primary text-primary-foreground" : "bg-muted"
+                  step >= 1 ? "bg-cyan-600 text-white" : "bg-gray-100"
                 }`}
               >
                 1
               </div>
-              <span className="text-sm font-medium">Vehicle & Services</span>
+              <span className="text-base font-medium">Vehicle & Services</span>
             </div>
-            <div className="w-8 h-px bg-border" />
-            <div className={`flex items-center space-x-2 ${step >= 2 ? "text-primary" : "text-muted-foreground"}`}>
+            <div className="w-8 h-px bg-gray-200" />
+            <div className={`flex items-center space-x-2 ${step >= 2 ? "text-cyan-600" : "text-gray-500"}`}>
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   step >= 2 ? "bg-primary text-primary-foreground" : "bg-muted"
@@ -319,32 +320,46 @@ export default function BookServicePage() {
             {step === 1 && (
               <div className="space-y-6">
                 {/* Vehicle Selection */}
-                <Card>
+                <Card className="border-gray-200 bg-white shadow-md">
                   <CardHeader>
-                    <CardTitle>Select Vehicle</CardTitle>
-                    <CardDescription>Choose which vehicle needs service</CardDescription>
+                    <CardTitle className="text-xl text-gray-900">Select Vehicle</CardTitle>
+                    <CardDescription className="text-gray-600">Choose which vehicle needs service</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Select value={selectedVehicle} onValueChange={setSelectedVehicle}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your vehicle" />
+                      <SelectTrigger className="w-full border-2 border-gray-200 text-gray-700 h-12 text-base hover:border-cyan-300 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500">
+                        <SelectValue placeholder="Select your vehicle" className="text-base" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent 
+                        className="bg-white border-2 border-gray-200 w-[100%] shadow-lg" 
+                        position="popper"
+                      >
                         {vehicles.map((vehicle) => (
-                          <SelectItem key={vehicle.id} value={vehicle.id}>
+                          <SelectItem 
+                            key={vehicle.id} 
+                            value={vehicle.id} 
+                            className="text-gray-700 text-base py-3 px-4 data-[highlighted]:bg-cyan-50 data-[highlighted]:text-gray-700 cursor-pointer border-b border-gray-100 last:border-0"
+                          >
                             {vehicle.name} ({vehicle.plate})
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {selectedVehicle && (
+                      <div className="mt-2 px-1">
+                        <p className="text-base text-cyan-600">
+                          Selected: {vehicles.find(v => v.id === selectedVehicle)?.name} ({vehicles.find(v => v.id === selectedVehicle)?.plate})
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
                 {/* Service Selection */}
-                <Card>
+                <Card className="border-gray-200 bg-white shadow-md">
                   <CardHeader>
-                    <CardTitle>Select Services</CardTitle>
-                    <CardDescription>Choose the services you need</CardDescription>
+                    <CardTitle className="text-xl text-gray-900">Select Services</CardTitle>
+                    <CardDescription className="text-gray-600">Choose the services you need</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid gap-4">
@@ -353,8 +368,8 @@ export default function BookServicePage() {
                           key={service.id}
                           className={`border rounded-lg p-4 cursor-pointer transition-colors ${
                             selectedServices.includes(service.id)
-                              ? "border-primary bg-primary/5"
-                              : "border-border hover:border-primary/50"
+                              ? "border-cyan-600 bg-cyan-50"
+                              : "border-gray-200 hover:border-cyan-300"
                           }`}
                           onClick={() => handleServiceToggle(service.id)}
                         >
@@ -362,22 +377,23 @@ export default function BookServicePage() {
                             <Checkbox
                               checked={selectedServices.includes(service.id)}
                               onChange={() => handleServiceToggle(service.id)}
+                              className="text-cyan-600"
                             />
                             <div className="flex-1">
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center space-x-2">
-                                  <h3 className="font-medium">{service.name}</h3>
-                                  <Badge variant="outline" className={getCategoryColor(service.category)}>
+                                  <h3 className="text-lg font-medium text-gray-900">{service.name}</h3>
+                                  <Badge variant="outline" className={`text-base px-3 py-1 ${getCategoryColor(service.category)}`}>
                                     {getCategoryIcon(service.category)}
-                                    <span className="ml-1 capitalize">{service.category}</span>
+                                    <span className="ml-2 capitalize">{service.category}</span>
                                   </Badge>
                                 </div>
                                 <div className="text-right">
-                                  <p className="font-bold text-primary">{service.price}</p>
-                                  <p className="text-sm text-muted-foreground">{service.duration}</p>
+                                  <p className="text-lg font-bold text-cyan-600">{service.price}</p>
+                                  <p className="text-base text-gray-600">{service.duration}</p>
                                 </div>
                               </div>
-                              <p className="text-sm text-muted-foreground">{service.description}</p>
+                              <p className="text-base text-gray-600 mt-2">{service.description}</p>
                             </div>
                           </div>
                         </div>
@@ -387,7 +403,11 @@ export default function BookServicePage() {
                 </Card>
 
                 <div className="flex justify-end">
-                  <Button onClick={() => setStep(2)} disabled={!selectedVehicle || selectedServices.length === 0}>
+                  <Button 
+                    onClick={() => setStep(2)} 
+                    disabled={!selectedVehicle || selectedServices.length === 0}
+                    className="bg-cyan-600 hover:bg-cyan-700"
+                  >
                     Continue to Date & Time
                   </Button>
                 </div>
@@ -397,27 +417,27 @@ export default function BookServicePage() {
             {step === 2 && (
               <div className="space-y-6">
                 {/* Date Selection */}
-                <Card>
+                <Card className="border-gray-200 bg-white shadow-md">
                   <CardHeader>
-                    <CardTitle>Select Date</CardTitle>
-                    <CardDescription>Choose your preferred service date</CardDescription>
+                    <CardTitle className="text-xl text-gray-900">Select Date</CardTitle>
+                    <CardDescription className="text-base text-gray-600">Choose your preferred service date</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Calendar
                       mode="single"
                       selected={selectedDate}
                       onSelect={setSelectedDate}
-                      disabled={(date) => date < new Date() || date.getDay() === 0} // Disable past dates and Sundays
-                      className="rounded-md border"
+                      disabled={(date) => date < new Date() || date.getDay() === 0}
+                      className="rounded-lg border-gray-200 p-4 bg-white [&_.rdp-day]:text-base [&_.rdp-day_button]:h-10 [&_.rdp-day_button]:w-10 [&_.rdp-caption]:text-lg [&_.rdp-head_cell]:text-base [&_.rdp-head_cell]:font-semibold [&_.rdp-nav_button]:h-10 [&_.rdp-nav_button]:w-10 [&_.rdp-nav_button]:bg-gray-50 [&_.rdp-day_selected]:bg-cyan-600 [&_.rdp-day_selected]:text-white [&_.rdp-day_today]:bg-cyan-50 [&_.rdp-day_today]:text-cyan-600"
                     />
                   </CardContent>
                 </Card>
 
                 {/* Time Selection */}
-                <Card>
+                <Card className="border-gray-200 bg-white shadow-md">
                   <CardHeader>
-                    <CardTitle>Select Time</CardTitle>
-                    <CardDescription>Choose your preferred time slot</CardDescription>
+                    <CardTitle className="text-xl text-gray-900">Select Time</CardTitle>
+                    <CardDescription className="text-base text-gray-600">Choose your preferred time slot</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-4 gap-3">
@@ -425,9 +445,12 @@ export default function BookServicePage() {
                         <Button
                           key={time}
                           variant={selectedTime === time ? "default" : "outline"}
-                          size="sm"
                           onClick={() => setSelectedTime(time)}
-                          className="bg-transparent"
+                          className={`h-12 text-base font-medium ${
+                            selectedTime === time 
+                              ? "bg-cyan-600 hover:bg-cyan-700 text-white"
+                              : "bg-white border-gray-200 text-gray-700 hover:bg-cyan-50 hover:text-cyan-700"
+                          }`}
                         >
                           {time}
                         </Button>
@@ -450,20 +473,20 @@ export default function BookServicePage() {
             {step === 3 && (
               <div className="space-y-6">
                 {/* Review */}
-                <Card>
+                <Card className="border-gray-200 bg-white shadow-md">
                   <CardHeader>
-                    <CardTitle>Review Your Booking</CardTitle>
-                    <CardDescription>Please review your appointment details</CardDescription>
+                    <CardTitle className="text-xl text-gray-900">Review Your Booking</CardTitle>
+                    <CardDescription className="text-base text-gray-600">Please review your appointment details</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <h4 className="font-medium mb-2">Vehicle</h4>
-                        <p className="text-muted-foreground">{vehicles.find((v) => v.id === selectedVehicle)?.name}</p>
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">Vehicle</h4>
+                        <p className="text-base text-gray-600">{vehicles.find((v) => v.id === selectedVehicle)?.name}</p>
                       </div>
                       <div>
-                        <h4 className="font-medium mb-2">Date & Time</h4>
-                        <p className="text-muted-foreground">
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">Date & Time</h4>
+                        <p className="text-base text-gray-600">
                           {selectedDate?.toLocaleDateString()} at {selectedTime}
                         </p>
                       </div>
@@ -507,18 +530,18 @@ export default function BookServicePage() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-8">
+            <Card className="sticky top-8 border-gray-200 bg-white shadow-md">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Clock className="h-5 w-5" />
+                <CardTitle className="flex items-center space-x-2 text-xl text-gray-900">
+                  <Clock className="h-6 w-6 text-cyan-600" />
                   <span>Booking Summary</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
                 {selectedVehicle && (
                   <div>
-                    <h4 className="font-medium text-sm text-muted-foreground">Vehicle</h4>
-                    <p className="font-medium">{vehicles.find((v) => v.id === selectedVehicle)?.name}</p>
+                    <h4 className="font-medium text-base text-gray-600 mb-1">Vehicle</h4>
+                    <p className="text-lg font-medium text-gray-900">{vehicles.find((v) => v.id === selectedVehicle)?.name}</p>
                   </div>
                 )}
 
@@ -553,7 +576,7 @@ export default function BookServicePage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-medium">Total Cost</span>
-                      <span className="font-bold text-primary text-lg">${getTotalPrice()}</span>
+                      <span className="font-bold text-primary text-lg">RS.{getTotalPrice()}</span>
                     </div>
                   </div>
                 )}
