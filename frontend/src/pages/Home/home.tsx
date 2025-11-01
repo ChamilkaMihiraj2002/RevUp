@@ -1,36 +1,37 @@
-import { Button } from "@/components/UI/Button"
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/UI/Card"
+
 import { Car, Clock, Shield, Users, Wrench, Calendar, BarChart3, Bell } from "lucide-react"
 import { Link } from "react-router-dom"
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="border-b border-border/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="bg-white shadow-sm">
+        <div className="mx-auto px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="bg-primary rounded-lg p-2">
-                <Car className="h-6 w-6 text-primary-foreground" />
+              <div className="bg-cyan-600 rounded-lg p-2">
+                <Car className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold">RevUp</span>
+              <span className="text-xl font-bold text-gray-900">RevUp</span>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-8">
               <Link to="/dashboard">
-                <Button variant="ghost">Customer Dashboard</Button>
+                <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">Customer Dashboard</button>
               </Link>
               <Link to="/technician">
-                <Button variant="ghost">Technician Portal</Button>
+                <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">Technician Portal</button>
               </Link>
               <Link to="/admin">
-                <Button variant="ghost">Admin Panel</Button>
+                <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">Admin Panel</button>
               </Link>
               <Link to="/login">
-                <Button variant="ghost">Sign In</Button>
+                <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">Sign In</button>
               </Link>
               <Link to="/login">
-                <Button>Get Started</Button>
+                <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2 rounded-md text-sm font-medium shadow-sm">
+                  Get Started
+                </button>
               </Link>
             </div>
           </div>
@@ -38,65 +39,58 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 border border-primary/20 rounded-full animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 border border-accent/20 rounded-full animate-pulse delay-1000" />
-        </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-5xl font-bold text-balance leading-tight">
-                The complete platform to <span className="text-primary">revolutionize</span> auto service.
+      <section className="bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100 py-20 px-8">
+        <div className="mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-start">
+            <div className="pt-8">
+              <h1 className="text-5xl font-bold leading-tight text-gray-900">
+                The complete platform to <span className="text-cyan-600">revolutionize</span> auto service.
               </h1>
-              <p className="text-xl text-muted-foreground mt-6 text-pretty">
+              <p className="text-lg text-gray-700 mt-6 leading-relaxed">
                 Streamline your service center operations with real-time tracking, automated scheduling, and seamless
                 customer communication. Join the automotive service revolution.
               </p>
               <div className="flex items-center space-x-4 mt-8">
                 <Link to="/login">
-                  <Button size="lg" className="px-8">
+                  <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-3 rounded-md text-base font-semibold shadow-md">
                     Get Started
-                  </Button>
+                  </button>
                 </Link>
-                <Button variant="outline" size="lg">
+                <button className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 rounded-md text-base font-medium shadow-sm">
                   Watch Demo
-                </Button>
+                </button>
               </div>
             </div>
 
             {/* Hero Visual */}
             <div className="relative">
-              <div className="bg-card border border-border/50 rounded-2xl p-6 backdrop-blur-sm">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold">Service Dashboard</h3>
+                    <h3 className="font-semibold text-gray-900">Service Dashboard</h3>
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-sm text-muted-foreground">Live</span>
+                      <span className="text-sm text-gray-600">Live</span>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-secondary rounded-lg p-4">
-                      <div className="flex items-center space-x-2">
-                        <Wrench className="h-5 w-5 text-primary" />
-                        <span className="text-sm">Oil Change</span>
+                    <div className="bg-gradient-to-br from-blue-100 to-cyan-100 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <Wrench className="h-4 w-4 text-cyan-700" />
+                        <span className="text-sm text-gray-800">Oil Change</span>
                       </div>
-                      <p className="text-2xl font-bold mt-2">45 min</p>
+                      <p className="text-2xl font-bold text-gray-900">45 min</p>
                     </div>
-                    <div className="bg-secondary rounded-lg p-4">
-                      <div className="flex items-center space-x-2">
-                        <Clock className="h-5 w-5 text-primary" />
-                        <span className="text-sm">Tire Rotation</span>
+                    <div className="bg-gradient-to-br from-green-100 to-cyan-100 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <Clock className="h-4 w-4 text-cyan-700" />
+                        <span className="text-sm text-gray-800">Tire Rotation</span>
                       </div>
-                      <p className="text-2xl font-bold mt-2">30 min</p>
+                      <p className="text-2xl font-bold text-gray-900">30 min</p>
                     </div>
                   </div>
-                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                    <p className="text-sm text-primary font-medium">Service completed! Customer notified.</p>
+                  <div className="bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg p-4">
+                    <p className="text-sm text-cyan-700 font-medium">Service completed! Customer notified.</p>
                   </div>
                 </div>
               </div>
@@ -106,144 +100,136 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 border-t border-border/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+      <section className="bg-white py-16 px-8 shadow-inner">
+        <div className="mx-auto">
+          <div className="grid grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary">100+</div>
-              <div className="text-sm text-muted-foreground mt-1">Vehicles per week</div>
+              <div className="text-4xl font-bold text-cyan-600">100+</div>
+              <div className="text-sm text-gray-600 mt-2">Vehicles per week</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary">50%</div>
-              <div className="text-sm text-muted-foreground mt-1">Faster service</div>
+              <div className="text-4xl font-bold text-cyan-600">50%</div>
+              <div className="text-sm text-gray-600 mt-2">Faster service</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary">95%</div>
-              <div className="text-sm text-muted-foreground mt-1">Customer satisfaction</div>
+              <div className="text-4xl font-bold text-cyan-600">95%</div>
+              <div className="text-sm text-gray-600 mt-2">Customer satisfaction</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary">24/7</div>
-              <div className="text-sm text-muted-foreground mt-1">Real-time tracking</div>
+              <div className="text-4xl font-bold text-cyan-600">24/7</div>
+              <div className="text-sm text-gray-600 mt-2">Real-time tracking</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-balance">Everything you need to manage your service center</h2>
-            <p className="text-muted-foreground mt-4 text-pretty max-w-2xl mx-auto">
+      <section className="bg-gradient-to-b from-gray-50 to-white py-20 px-8">
+        <div className="mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900">Everything you need to manage your service center</h2>
+            <p className="text-gray-600 mt-4 text-lg max-w-3xl mx-auto">
               From appointment booking to service completion, RevUp provides all the tools your team needs to deliver
               exceptional automotive service.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="border-border/50">
-              <CardHeader>
-                <div className="bg-primary/10 rounded-lg p-3 w-fit">
-                  <Calendar className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Smart Scheduling</CardTitle>
-                <CardDescription>
-                  Automated appointment booking with real-time availability and customer notifications.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+          <div className="grid grid-cols-3 gap-6">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg p-3 w-fit mb-4">
+                <Calendar className="h-6 w-6 text-cyan-700" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Smart Scheduling</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Automated appointment booking with real-time availability and customer notifications.
+              </p>
+            </div>
 
-            <Card className="border-border/50">
-              <CardHeader>
-                <div className="bg-primary/10 rounded-lg p-3 w-fit">
-                  <Clock className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Time Tracking</CardTitle>
-                <CardDescription>
-                  Precise service time logging with progress updates and completion notifications.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg p-3 w-fit mb-4">
+                <Clock className="h-6 w-6 text-cyan-700" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Time Tracking</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Precise service time logging with progress updates and completion notifications.
+              </p>
+            </div>
 
-            <Card className="border-border/50">
-              <CardHeader>
-                <div className="bg-primary/10 rounded-lg p-3 w-fit">
-                  <Bell className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Real-time Updates</CardTitle>
-                <CardDescription>
-                  Instant notifications keep customers informed throughout the service process.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg p-3 w-fit mb-4">
+                <Bell className="h-6 w-6 text-cyan-700" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Real-time Updates</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Instant notifications keep customers informed throughout the service process.
+              </p>
+            </div>
 
-            <Card className="border-border/50">
-              <CardHeader>
-                <div className="bg-primary/10 rounded-lg p-3 w-fit">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Team Management</CardTitle>
-                <CardDescription>Assign technicians, track workloads, and monitor service performance.</CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg p-3 w-fit mb-4">
+                <Users className="h-6 w-6 text-cyan-700" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Team Management</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Assign technicians, track workloads, and monitor service performance.
+              </p>
+            </div>
 
-            <Card className="border-border/50">
-              <CardHeader>
-                <div className="bg-primary/10 rounded-lg p-3 w-fit">
-                  <BarChart3 className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Analytics Dashboard</CardTitle>
-                <CardDescription>
-                  Comprehensive insights into service metrics, efficiency, and customer satisfaction.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg p-3 w-fit mb-4">
+                <BarChart3 className="h-6 w-6 text-cyan-700" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics Dashboard</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Comprehensive insights into service metrics, efficiency, and customer satisfaction.
+              </p>
+            </div>
 
-            <Card className="border-border/50">
-              <CardHeader>
-                <div className="bg-primary/10 rounded-lg p-3 w-fit">
-                  <Shield className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Secure & Reliable</CardTitle>
-                <CardDescription>Enterprise-grade security with reliable uptime and data protection.</CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg p-3 w-fit mb-4">
+                <Shield className="h-6 w-6 text-cyan-700" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure & Reliable</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Enterprise-grade security with reliable uptime and data protection.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-card/50">
+      <section className="bg-gradient-to-br from-cyan-50 via-blue-50 to-cyan-100 py-20 px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-balance">Ready to revolutionize your auto service?</h2>
-          <p className="text-muted-foreground mt-4 text-pretty">
+          <h2 className="text-4xl font-bold text-gray-900">Ready to revolutionize your auto service?</h2>
+          <p className="text-gray-700 mt-4 text-lg">
             Join hundreds of service centers already using RevUp to streamline operations and delight customers.
           </p>
           
-          <div className="flex items-center justify-center space-x-4 mt-6">
+          <div className="flex items-center justify-center space-x-4 mt-8">
             <Link to="/login">
-              <Button size="lg" className="px-8">
+              <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-3 rounded-md text-base font-semibold shadow-md">
                 Start Free Trial
-              </Button>
+              </button>
             </Link>
-            <Button variant="outline" size="lg">
+            <button className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 rounded-md text-base font-medium shadow-sm">
               Schedule Demo
-            </Button>
+            </button>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <footer className="border-t border-gray-200 bg-white py-8 px-8">
+        <div className="mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="bg-primary rounded-lg p-2">
-                <Car className="h-5 w-5 text-primary-foreground" />
+              <div className="bg-cyan-600 rounded-lg p-2">
+                <Car className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold">RevUp</span>
+              <span className="font-bold text-gray-900">RevUp</span>
             </div>
-            <p className="text-sm text-muted-foreground">© 2025 RevUp. All rights reserved.</p>
+            <p className="text-sm text-gray-600">© 2025 RevUp. All rights reserved.</p>
           </div>
         </div>
       </footer>
