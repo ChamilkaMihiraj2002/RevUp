@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { LoginPage } from "@/pages/login/LoginPage"
 import { Dashboard } from "@/pages/Dashboard"
 import { useAuth } from "@/contexts/authContext/authContext"
+import AdminDashboard from "@/pages/admin/AdminDashboard.tsx"
 
 function App() {
   const { userLoggedIn, loading } = useAuth()
@@ -28,6 +29,10 @@ function App() {
           path="/dashboard"
           element={userLoggedIn ? <Dashboard /> : <Navigate to="/" replace />}
         />
+          <Route
+              path="/admin-dashboard"
+              element={userLoggedIn ? <AdminDashboard /> : <Navigate to="/" replace />}
+              />
       </Routes>
     </Router>
   )
