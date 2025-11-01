@@ -26,20 +26,20 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route
-          path="/"
-          element={userLoggedIn ? <Navigate to="/dashboard" replace /> : <LoginPage />}
-        />
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={userLoggedIn ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
         <Route
           path="/dashboard"
-          element={userLoggedIn ? <Dashboard /> : <Navigate to="/" replace />}
+          element={userLoggedIn ? <Dashboard /> : <Navigate to="/login" replace />}
         />
-         <Route path="/home" element={<Home />} />
-         <Route path="/overview" element={<Overview/>} />
-         <Route path="/book" element={<Book/>} />
-
-
-          
+        <Route
+          path="/overview"
+          element={userLoggedIn ? <Overview /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/book"
+          element={userLoggedIn ? <Book /> : <Navigate to="/login" replace />}
+        />
       </Routes>
     </Router>
   )

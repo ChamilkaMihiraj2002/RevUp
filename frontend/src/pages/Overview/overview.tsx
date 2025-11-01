@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import { CommonNavbar } from "@/components/Layout/Navbar"
 import { CommonSidebar } from "@/components/Layout/Slidebar"
 import { Button } from "@/components/UI/Button"
@@ -434,9 +435,11 @@ export default function CustomerDashboard() {
                             <span className="font-semibold text-slate-900">{vehicle.nextService}</span>
                           </div>
                           <div className="flex space-x-2 pt-2">
-                            <Button variant="outline" size="sm" className="flex-1 border-cyan-200 text-cyan-700 hover:bg-cyan-50 hover:text-cyan-800">
-                              Book Service
-                            </Button>
+                            <Link to="/book" className="flex-1">
+                              <Button variant="outline" size="sm" className="w-full border-cyan-200 text-cyan-700 hover:bg-cyan-50 hover:text-cyan-800">
+                                Book Service
+                              </Button>
+                            </Link>
                             <Button variant="ghost" size="sm" className="hover:bg-cyan-50 hover:text-gray-900">
                               <Settings className="h-4 w-4" />
                             </Button>
@@ -454,10 +457,12 @@ export default function CustomerDashboard() {
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-bold text-gray-900">Appointments</h2>
-                  <Button className="bg-cyan-600 hover:bg-cyan-700 shadow-md">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Book Service
-                  </Button>
+                  <Link to="/book">
+                    <Button className="bg-cyan-600 hover:bg-cyan-700 shadow-md">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Book Service
+                    </Button>
+                  </Link>
                 </div>
 
                 {currentAppointments.length > 0 ? (
@@ -526,9 +531,11 @@ export default function CustomerDashboard() {
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">No upcoming appointments</h3>
                       <p className="text-gray-600 mb-6">Schedule your next service appointment</p>
-                      <Button className="bg-cyan-600 hover:bg-cyan-700 shadow-md">
-                        Book Service
-                      </Button>
+                      <Link to="/book">
+                        <Button className="bg-cyan-600 hover:bg-cyan-700 shadow-md">
+                          Book Service
+                        </Button>
+                      </Link>
                     </CardContent>
                   </Card>
                 )}

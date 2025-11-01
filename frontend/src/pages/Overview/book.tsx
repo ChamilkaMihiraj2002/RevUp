@@ -232,7 +232,7 @@ export default function BookServicePage() {
             </Card>
 
             <div className="flex space-x-4 justify-center">
-              <Link to="/dashboard">
+              <Link to="/overview">
                 <Button>Go to Dashboard</Button>
               </Link>
               <Link to="/overview">
@@ -259,7 +259,7 @@ export default function BookServicePage() {
                 <span className="text-xl font-bold text-gray-900">RevUp</span>
               </Link>
             </div>
-            <Link to="/dashboard">
+            <Link to="/overview">
               <Button variant="ghost">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard

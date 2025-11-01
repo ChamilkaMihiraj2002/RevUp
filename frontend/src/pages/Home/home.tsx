@@ -202,8 +202,13 @@ export default function HomePage() {
           <p className="text-gray-700 mt-4 text-lg">
             Join hundreds of service centers already using RevUp to streamline operations and delight customers.
           </p>
-          
-          
+          <div className="mt-8">
+            <Link to="/login">
+              <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-4 rounded-lg text-lg font-semibold shadow-md">
+                Get Started Now
+              </button>
+            </Link>
+          </div>
         </div>
       </section>
 
