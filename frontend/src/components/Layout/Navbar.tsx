@@ -87,7 +87,7 @@ export function CommonNavbar({
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-cyan-50"
+            className="md:hidden p-2 rounded-lg hover:bg-cyan-50 text-gray-700"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

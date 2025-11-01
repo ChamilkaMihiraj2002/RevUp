@@ -6,7 +6,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm">
+      <nav className="border-b border-cyan-200/80 bg-gradient-to-r from-blue-50 via-cyan-50 to-blue-100 shadow-sm">
         <div className="mx-auto px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
@@ -16,17 +16,14 @@ export default function HomePage() {
               <span className="text-xl font-bold text-gray-900">RevUp</span>
             </div>
             <div className="flex items-center space-x-8">
-              <Link to="/dashboard">
-                <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">Customer Dashboard</button>
+              <Link to="/about">
+                <button className="text-gray-700 hover:text-cyan-700 transition-colors text-sm font-medium">About Us</button>
               </Link>
-              <Link to="/technician">
-                <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">Technician Portal</button>
-              </Link>
-              <Link to="/admin">
-                <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">Admin Panel</button>
+              <Link to="/contact">
+                <button className="text-gray-700 hover:text-cyan-700 transition-colors text-sm font-medium">Contact Us</button>
               </Link>
               <Link to="/login">
-                <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">Sign In</button>
+                <button className="text-gray-700 hover:text-cyan-700 transition-colors text-sm font-medium">Sign In</button>
               </Link>
               <Link to="/login">
                 <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2 rounded-md text-sm font-medium shadow-sm">
@@ -206,30 +203,27 @@ export default function HomePage() {
             Join hundreds of service centers already using RevUp to streamline operations and delight customers.
           </p>
           
-          <div className="flex items-center justify-center space-x-4 mt-8">
-            <Link to="/login">
-              <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-3 rounded-md text-base font-semibold shadow-md">
-                Start Free Trial
-              </button>
-            </Link>
-            <button className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 rounded-md text-base font-medium shadow-sm">
-              Schedule Demo
-            </button>
-          </div>
+          
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white py-8 px-8">
-        <div className="mx-auto">
-          <div className="flex items-center justify-between">
+      <footer className="bg-gradient-to-r from-cyan-600 to-cyan-700 text-white py-10">
+  <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex items-center space-x-3">
-              <div className="bg-cyan-600 rounded-lg p-2">
+              <div className="bg-white/10 rounded-lg p-2">
                 <Car className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-gray-900">RevUp</span>
+              <div>
+                <span className="font-bold text-white">RevUp</span>
+                <p className="text-sm text-cyan-100 mt-1">Simplifying automotive service operations</p>
+              </div>
             </div>
-            <p className="text-sm text-gray-600">© 2025 RevUp. All rights reserved.</p>
+
+              <div className="flex items-center space-x-6">
+                <p className="text-sm text-cyan-100">© 2025 RevUp. All rights reserved.</p>
+              </div>
           </div>
         </div>
       </footer>
