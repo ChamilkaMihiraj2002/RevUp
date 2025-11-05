@@ -6,9 +6,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-
-// service-to-service REST communication
-
 @Slf4j
 @Component
 public class UserServiceClient {
@@ -18,9 +15,6 @@ public class UserServiceClient {
     public UserServiceClient(@Qualifier("userServiceWebClient") WebClient userServiceWebClient) {
         this.userServiceWebClient = userServiceWebClient;
     }
-
-
- //Check if a user exists in User Service
 
     public Mono<Boolean> userExists(Long userId) {
         log.debug("Checking if user exists with id: {}", userId);

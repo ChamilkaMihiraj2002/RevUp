@@ -32,13 +32,11 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private Role role; // TECHNICIAN, CUSTOMER
+    private Role role;
 
     @Column(name = "firebase_uid", unique = true)
     private String firebaseUID;
 
-    // In microservices architecture, we store vehicle IDs instead of Vehicle objects
-    // This maintains loose coupling between services
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_vehicles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "vehicle_id")

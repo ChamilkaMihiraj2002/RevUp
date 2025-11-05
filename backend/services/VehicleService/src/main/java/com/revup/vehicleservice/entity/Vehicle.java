@@ -26,9 +26,8 @@ public class Vehicle {
     private String color;
     
     @Column(name = "vehicle_type")
-    private String vehicleType; // CAR, TRUCK, MOTORCYCLE, etc.
+    private String vehicleType;
 
-    // In microservices, we store the user ID reference instead of the full User object
     @Column(name = "user_id", nullable = false)
     private Long userId;
 

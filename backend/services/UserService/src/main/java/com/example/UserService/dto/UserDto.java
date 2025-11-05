@@ -19,5 +19,6 @@ public class UserDto {
     private String phone;
     private String address;
     private Role role;
+    private String firebaseUID;
     private List<Long> vehicleIds;
 }

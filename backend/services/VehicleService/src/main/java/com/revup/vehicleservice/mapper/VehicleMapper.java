@@ -6,15 +6,9 @@ import com.revup.vehicleservice.dto.response.VehicleResponse;
 import com.revup.vehicleservice.entity.Vehicle;
 import org.springframework.stereotype.Component;
 
-/**
- * Mapper for converting between Vehicle entities and DTOs
- */
 @Component
 public class VehicleMapper {
 
-    /**
-     * Convert CreateVehicleRequest DTO to Vehicle entity
-     */
     public Vehicle toEntity(CreateVehicleRequest request) {
         Vehicle vehicle = new Vehicle();
         vehicle.setModel(request.getModel());
@@ -26,9 +20,6 @@ public class VehicleMapper {
         return vehicle;
     }
 
-    /**
-     * Update Vehicle entity from UpdateVehicleRequest DTO
-     */
     public void updateEntityFromDto(Vehicle vehicle, UpdateVehicleRequest request) {
         if (request.getModel() != null) {
             vehicle.setModel(request.getModel());
@@ -47,9 +38,6 @@ public class VehicleMapper {
         }
     }
 
-    /**
-     * Convert Vehicle entity to VehicleResponse DTO
-     */
     public VehicleResponse toResponse(Vehicle vehicle) {
         return VehicleResponse.builder()
                 .vehicleId(vehicle.getVehicleId())

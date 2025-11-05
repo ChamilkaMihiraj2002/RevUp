@@ -9,11 +9,11 @@ import reactor.core.publisher.Flux;
 public interface UserService {
     Mono<UserDto> createUser(CreateUserRequest request);
     Mono<UserDto> getUserById(Long id);
+    Mono<UserDto> getUserByFirebaseUID(String firebaseUID);
     Flux<UserDto> getAllUsers();
     Mono<UserDto> updateUser(Long id, UpdateUserRequest request);
     Mono<Void> deleteUser(Long id);
     
-    // Vehicle synchronization methods
     Mono<Void> addVehicleToUser(Long userId, Long vehicleId);
     Mono<Void> removeVehicleFromUser(Long userId, Long vehicleId);
     Mono<Boolean> userExists(Long userId);

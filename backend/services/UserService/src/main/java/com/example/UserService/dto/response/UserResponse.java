@@ -23,8 +23,7 @@ public class UserResponse {
     private String phone;
     private String address;
     private Role role;
+    private String firebaseUID;
     
-    // In microservices, we only store vehicle IDs
-    // To get full vehicle details, the client should call the VehicleService
     private List<Long> vehicleIds;
 }

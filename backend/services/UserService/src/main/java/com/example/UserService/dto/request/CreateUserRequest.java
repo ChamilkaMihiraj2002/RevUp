@@ -33,4 +33,7 @@ public class CreateUserRequest {
     @NotBlank(message = "Role is required")
     @Pattern(regexp = "TECHNICIAN|CUSTOMER", message = "Role must be TECHNICIAN or CUSTOMER")
     private String role;
+
+    @NotBlank(message = "Firebase UID is required")
+    private String firebaseUID;
 }

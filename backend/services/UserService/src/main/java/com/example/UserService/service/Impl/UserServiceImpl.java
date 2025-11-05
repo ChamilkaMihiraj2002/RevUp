@@ -51,6 +51,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Mono<UserDto> getUserByFirebaseUID(String firebaseUID) {
+        return Mono.fromCallable(() -> userRepository.findByFirebaseUID(firebaseUID))
+                .subscribeOn(jdbcScheduler)
+                .flatMap(optionalUser -> optionalUser
+                        .map(user -> Mono.just(userMapper.toDto(user)))
+                        .orElseGet(() -> Mono.error(new ResourceNotFoundException("User not found with Firebase UID: " + firebaseUID))));
+    }
+
+    @Override
     public Flux<com.example.UserService.dto.UserDto> getAllUsers() {
         return Mono.fromCallable(() -> userRepository.findAll())
                 .subscribeOn(jdbcScheduler)

@@ -37,6 +37,13 @@ public class UserController {
                 .map(ResponseEntity::ok);
     }
 
+    @GetMapping("/firebase/{firebaseUID}")
+    public Mono<ResponseEntity<UserDto>> getUserByFirebaseUID(@PathVariable String firebaseUID) {
+        log.info("Fetching user with Firebase UID: {}", firebaseUID);
+        return userService.getUserByFirebaseUID(firebaseUID)
+                .map(ResponseEntity::ok);
+    }
+
     @GetMapping
     public Flux<UserDto> getAllUsers() {
         log.info("Fetching all users");
@@ -61,7 +68,7 @@ public class UserController {
                 .doOnSuccess(response -> log.info("User deleted successfully with id: {}", id));
     }
 
-    // Internal endpoints for service-to-service communication
+    
     @PostMapping("/{userId}/vehicles/{vehicleId}")
     public Mono<ResponseEntity<Void>> addVehicleToUser(
             @PathVariable Long userId,
