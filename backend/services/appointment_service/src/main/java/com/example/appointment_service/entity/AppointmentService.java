@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "appointment_services")
+@Table(name = "appointment_services", indexes = {
+    @Index(name = "idx_appointment_id", columnList = "appointment_id"),
+    @Index(name = "idx_service_type_id", columnList = "service_type_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,6 +28,7 @@ public class AppointmentService {
     @JoinColumn(name = "appointment_id", nullable = false)
     private Appointment appointment;
 
-    @Column(name = "service_type_id", nullable = false)
-    private Long serviceTypeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_type_id", nullable = false)
+    private ServiceType serviceType;
 }

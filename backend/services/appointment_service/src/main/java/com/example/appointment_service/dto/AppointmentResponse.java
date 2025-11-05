@@ -1,5 +1,6 @@
 package com.example.appointment_service.dto;
 
+import com.example.appointment_service.enums.AppointmentStatus;
 import lombok.Data;
 import java.time.OffsetDateTime;
 
@@ -9,7 +10,7 @@ public class AppointmentResponse {
     private Long customerId;
     private Long vehicleId;
     private Long technicianId;
-    private String status;
+    private AppointmentStatus status;
     private OffsetDateTime scheduledStart;
     private OffsetDateTime scheduledEnd;
     private OffsetDateTime createdAt;

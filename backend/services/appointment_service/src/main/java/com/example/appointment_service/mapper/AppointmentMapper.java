@@ -4,15 +4,12 @@ import com.example.appointment_service.dto.*;
 import com.example.appointment_service.entity.Appointment;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 @Component
 public class AppointmentMapper {
 
     public Appointment toEntity(CreateAppointmentRequest request) {
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-
         return Appointment.builder()
                 .customerId(request.getCustomerId())
                 .vehicleId(request.getVehicleId())
@@ -23,9 +20,6 @@ public class AppointmentMapper {
                 .scheduledEnd(request.getScheduledEnd() != null
                         ? request.getScheduledEnd().atOffset(ZoneOffset.UTC)
                         : null)
-                .status("SCHEDULED")
-                .createdAt(now)
-                .updatedAt(now)
                 .build();
     }
 

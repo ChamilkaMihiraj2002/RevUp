@@ -2,6 +2,7 @@ package com.example.appointment_service.service.impl;
 
 import com.example.appointment_service.dto.*;
 import com.example.appointment_service.entity.Appointment;
+import com.example.appointment_service.exception.ResourceNotFoundException;
 import com.example.appointment_service.mapper.AppointmentMapper;
 import com.example.appointment_service.repository.AppointmentRepository;
 import com.example.appointment_service.service.AppointmentServiceInterface;
@@ -12,7 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Slf4j
 @Service
@@ -25,6 +26,10 @@ public class AppointmentServiceImpl implements AppointmentServiceInterface {
     @Override
     public Mono<AppointmentResponse> createAppointment(CreateAppointmentRequest request) {
         return Mono.fromCallable(() -> {
+            if (request.getScheduledEnd().isBefore(request.getScheduledStart())) {
+                throw new IllegalArgumentException("End time must be after start time");
+            }
+            
             Appointment appointment = appointmentMapper.toEntity(request);
             Appointment saved = appointmentRepository.save(appointment);
             return appointmentMapper.toResponse(saved);
@@ -35,7 +40,7 @@ public class AppointmentServiceImpl implements AppointmentServiceInterface {
     public Mono<AppointmentResponse> getAppointmentById(Long id) {
         return Mono.fromCallable(() -> appointmentRepository.findById(id)
                 .map(appointmentMapper::toResponse)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"))
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id: " + id))
         ).subscribeOn(Schedulers.boundedElastic());
     }
 
@@ -50,18 +55,27 @@ public class AppointmentServiceImpl implements AppointmentServiceInterface {
     public Mono<AppointmentResponse> updateAppointment(Long id, UpdateAppointmentRequest request) {
         return Mono.fromCallable(() -> {
             Appointment existing = appointmentRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id: " + id));
 
-            if (request.getTechnicianId() != null)
+            if (request.getTechnicianId() != null) {
                 existing.setTechnicianId(request.getTechnicianId());
-            if (request.getScheduledStart() != null)
-                existing.setScheduledStart(request.getScheduledStart().atOffset(OffsetDateTime.now().getOffset()));
-            if (request.getScheduledEnd() != null)
-                existing.setScheduledEnd(request.getScheduledEnd().atOffset(OffsetDateTime.now().getOffset()));
-            if (request.getStatus() != null)
+            }
+            
+            if (request.getScheduledStart() != null) {
+                existing.setScheduledStart(request.getScheduledStart().atOffset(ZoneOffset.UTC));
+            }
+            
+            if (request.getScheduledEnd() != null) {
+                existing.setScheduledEnd(request.getScheduledEnd().atOffset(ZoneOffset.UTC));
+            }
+            
+            if (request.getStatus() != null) {
                 existing.setStatus(request.getStatus());
+            }
 
-            existing.setUpdatedAt(OffsetDateTime.now());
+            if (existing.getScheduledEnd().isBefore(existing.getScheduledStart())) {
+                throw new IllegalArgumentException("End time must be after start time");
+            }
 
             Appointment updated = appointmentRepository.save(existing);
             return appointmentMapper.toResponse(updated);
@@ -70,8 +84,11 @@ public class AppointmentServiceImpl implements AppointmentServiceInterface {
 
     @Override
     public Mono<Void> deleteAppointment(Long id) {
-        return Mono.fromRunnable(() -> appointmentRepository.deleteById(id))
-                .subscribeOn(Schedulers.boundedElastic())
-                .then();
+        return Mono.fromRunnable(() -> {
+            if (!appointmentRepository.existsById(id)) {
+                throw new ResourceNotFoundException("Appointment not found with id: " + id);
+            }
+            appointmentRepository.deleteById(id);
+        }).subscribeOn(Schedulers.boundedElastic()).then();
     }
 }

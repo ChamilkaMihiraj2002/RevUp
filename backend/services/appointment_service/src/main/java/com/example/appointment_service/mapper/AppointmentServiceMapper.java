@@ -4,17 +4,18 @@ import com.example.appointment_service.dto.CreateAppointmentServiceRequest;
 import com.example.appointment_service.dto.AppointmentServiceResponse;
 import com.example.appointment_service.entity.Appointment;
 import com.example.appointment_service.entity.AppointmentService;
+import com.example.appointment_service.entity.ServiceType;
 
 public class AppointmentServiceMapper {
 
-    public static AppointmentService toEntity(CreateAppointmentServiceRequest dto, Appointment appointment) {
+    public static AppointmentService toEntity(CreateAppointmentServiceRequest dto, Appointment appointment, ServiceType serviceType) {
         return AppointmentService.builder()
                 .actualMinutes(dto.getActualMinutes())
                 .status(dto.getStatus())
                 .quantity(dto.getQuantity())
                 .estimatedMinutes(dto.getEstimatedMinutes())
                 .appointment(appointment)
-                .serviceTypeId(dto.getServiceTypeId())
+                .serviceType(serviceType)
                 .build();
     }
 
@@ -26,7 +27,7 @@ public class AppointmentServiceMapper {
                 .quantity(entity.getQuantity())
                 .estimatedMinutes(entity.getEstimatedMinutes())
                 .appointmentId(entity.getAppointment().getAppointmentId())
-                .serviceTypeId(entity.getServiceTypeId())
+                .serviceTypeId(entity.getServiceType().getServiceTypeId())
                 .build();
     }
 }
