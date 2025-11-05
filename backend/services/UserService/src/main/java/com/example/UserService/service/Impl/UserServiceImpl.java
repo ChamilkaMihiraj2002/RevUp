@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mono<UserResponse> getUserById(Long id) {
-        return Mono.fromCallable(() -> userRepository.findByIdWithVehicles(id))
+        return Mono.fromCallable(() -> userRepository.findById(id))
                 .subscribeOn(jdbcScheduler)
                 .flatMap(optionalUser -> optionalUser
                         .map(user -> Mono.just(userMapper.toResponse(user)))
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Flux<UserResponse> getAllUsers() {
-        return Mono.fromCallable(() -> userRepository.findAllWithVehicles())
+        return Mono.fromCallable(() -> userRepository.findAll())
                 .subscribeOn(jdbcScheduler)
                 .flatMapMany(Flux::fromIterable)
                 .map(userMapper::toResponse);

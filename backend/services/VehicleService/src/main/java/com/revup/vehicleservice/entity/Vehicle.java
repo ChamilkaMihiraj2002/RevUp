@@ -1,7 +1,6 @@
-package com.example.UserService.entity;
+package com.revup.vehicleservice.entity;
 
 import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "vehicles", indexes = {
@@ -17,16 +16,21 @@ public class Vehicle {
     @Column(name = "model")
     private String model;
     
-    @Column(name = "registration_no")
+    @Column(name = "registration_no", unique = true)
     private String registrationNo;
     
     @Column(name = "year")
-    private int year;
+    private Integer year;
+    
+    @Column(name = "color")
+    private String color;
+    
+    @Column(name = "vehicle_type")
+    private String vehicleType; // CAR, TRUCK, MOTORCYCLE, etc.
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    @JsonIgnore
-    private User user;
+    // In microservices, we store the user ID reference instead of the full User object
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     // Getters and setters
     public Long getVehicleId() { return vehicleId; }
@@ -38,9 +42,15 @@ public class Vehicle {
     public String getRegistrationNo() { return registrationNo; }
     public void setRegistrationNo(String registrationNo) { this.registrationNo = registrationNo; }
 
-    public int getYear() { return year; }
-    public void setYear(int year) { this.year = year; }
+    public Integer getYear() { return year; }
+    public void setYear(Integer year) { this.year = year; }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
+
+    public String getVehicleType() { return vehicleType; }
+    public void setVehicleType(String vehicleType) { this.vehicleType = vehicleType; }
+
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 }

@@ -1,8 +1,8 @@
 package com.example.UserService.entity;
 
 import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -31,10 +31,12 @@ public class User {
     @Column(name = "role")
     private String role; // CUSTOMER, EMPLOYEE, ADMIN
 
-    // JPA supports @OneToMany relationships
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Vehicle> vehicles;
+    // In microservices architecture, we store vehicle IDs instead of Vehicle objects
+    // This maintains loose coupling between services
+    @ElementCollection
+    @CollectionTable(name = "user_vehicles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "vehicle_id")
+    private List<Long> vehicleIds = new ArrayList<>();
 
     // ====== Getters and Setters ======
     public Long getUserId() { return userId; }
@@ -55,6 +57,7 @@ public class User {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
-    public List<Vehicle> getVehicles() { return vehicles; }
-    public void setVehicles(List<Vehicle> vehicles) { this.vehicles = vehicles; }
+    public List<Long> getVehicleIds() { return vehicleIds; }
+    public void setVehicleIds(List<Long> vehicleIds) { this.vehicleIds = vehicleIds; }
 }
+

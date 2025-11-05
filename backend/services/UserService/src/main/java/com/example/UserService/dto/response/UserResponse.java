@@ -22,5 +22,8 @@ public class UserResponse {
     private String phone;
     private String address;
     private String role;
-    private List<VehicleResponse> vehicles;
+    
+    // In microservices, we only store vehicle IDs
+    // To get full vehicle details, the client should call the VehicleService
+    private List<Long> vehicleIds;
 }

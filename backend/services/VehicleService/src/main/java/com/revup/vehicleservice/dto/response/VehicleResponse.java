@@ -1,4 +1,4 @@
-package com.example.UserService.dto.response;
+package com.revup.vehicleservice.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,5 +17,8 @@ public class VehicleResponse {
     private Long vehicleId;
     private String model;
     private String registrationNo;
-    private int year;
+    private Integer year;
+    private String color;
+    private String vehicleType;
+    private Long userId;
 }
