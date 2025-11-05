@@ -4,9 +4,12 @@ import com.example.UserService.dto.request.CreateUserRequest;
 import com.example.UserService.dto.request.UpdateUserRequest;
 import com.example.UserService.dto.response.UserResponse;
 import com.example.UserService.entity.User;
+import com.example.UserService.dto.UserDto;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collections;
 
 /**
@@ -14,6 +17,26 @@ import java.util.Collections;
  */
 @Component
 public class UserMapper {
+    private final WebClient webClient;
+
+    public UserMapper(WebClient.Builder webClientBuilder) {
+        // Replace the baseUrl with your Vehicle service URL
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8084/api/v1/vehicles").build();
+    }
+    /**
+     * Convert User entity to UserDto with only vehicleIds
+     */
+    public UserDto toDto(User user) {
+        UserDto dto = new UserDto();
+        dto.setUserId(user.getUserId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setAddress(user.getAddress());
+        dto.setRole(user.getRole());
+        dto.setVehicleIds(user.getVehicleIds() != null ? user.getVehicleIds() : new ArrayList<>());
+        return dto;
+    }
 
     /**
      * Convert CreateUserRequest DTO to User entity
@@ -24,7 +47,9 @@ public class UserMapper {
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
         user.setAddress(request.getAddress());
-        user.setRole(request.getRole());
+        if (request.getRole() != null) {
+            user.setRole(com.example.UserService.Enum.Role.valueOf(request.getRole().toUpperCase()));
+        }
         user.setVehicleIds(new ArrayList<>());
         return user;
     }
@@ -46,7 +71,7 @@ public class UserMapper {
             user.setAddress(request.getAddress());
         }
         if (request.getRole() != null) {
-            user.setRole(request.getRole());
+            user.setRole(com.example.UserService.Enum.Role.valueOf(request.getRole().toUpperCase()));
         }
     }
 
@@ -65,3 +90,4 @@ public class UserMapper {
                 .build();
     }
 }
+

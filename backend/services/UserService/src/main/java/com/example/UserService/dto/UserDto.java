@@ -1,30 +1,23 @@
-package com.example.UserService.dto.response;
+package com.example.UserService.dto;
 
+import com.example.UserService.Enum.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import com.example.UserService.Enum.Role;
 
-/**
- * DTO for user response with all details
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse {
-
+public class UserDto {
     private Long userId;
     private String name;
     private String email;
     private String phone;
     private String address;
     private Role role;
-    
-    // In microservices, we only store vehicle IDs
-    // To get full vehicle details, the client should call the VehicleService
     private List<Long> vehicleIds;
 }

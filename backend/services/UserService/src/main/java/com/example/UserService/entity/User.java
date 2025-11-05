@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.UserService.Enum.Role;
 
 @Entity
 @Table(name = "users", indexes = {
-    @Index(name = "idx_user_email", columnList = "email"),
-    @Index(name = "idx_user_role", columnList = "role")
+        @Index(name = "idx_user_email", columnList = "email"),
+        @Index(name = "idx_user_role", columnList = "role")
 })
 public class User {
     @Id
@@ -18,22 +20,26 @@ public class User {
 
     @Column(name = "name")
     private String name;
-    
+
     @Column(name = "email", unique = true)
     private String email;
-    
+
     @Column(name = "phone")
     private String phone;
-    
+
     @Column(name = "address")
     private String address;
-    
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private String role; // CUSTOMER, EMPLOYEE, ADMIN
+    private Role role; // TECHNICIAN, CUSTOMER
+
+    @Column(name = "firebase_uid", unique = true)
+    private String firebaseUID;
 
     // In microservices architecture, we store vehicle IDs instead of Vehicle objects
     // This maintains loose coupling between services
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_vehicles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "vehicle_id")
     private List<Long> vehicleIds = new ArrayList<>();
@@ -54,8 +60,11 @@ public class User {
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
+
+    public String getFirebaseUID() { return firebaseUID; }
+    public void setFirebaseUID(String firebaseUID) { this.firebaseUID = firebaseUID; }
 
     public List<Long> getVehicleIds() { return vehicleIds; }
     public void setVehicleIds(List<Long> vehicleIds) { this.vehicleIds = vehicleIds; }

@@ -2,7 +2,7 @@ package com.example.UserService.controller;
 
 import com.example.UserService.dto.request.CreateUserRequest;
 import com.example.UserService.dto.request.UpdateUserRequest;
-import com.example.UserService.dto.response.UserResponse;
+import com.example.UserService.dto.UserDto;
 import com.example.UserService.service.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping
-    public Mono<ResponseEntity<UserResponse>> createUser(@Valid @RequestBody CreateUserRequest request) {
+    public Mono<ResponseEntity<UserDto>> createUser(@Valid @RequestBody CreateUserRequest request) {
         log.info("Creating new user with email: {}", request.getEmail());
         return userService.createUser(request)
                 .map(user -> new ResponseEntity<>(user, HttpStatus.CREATED))
@@ -31,20 +31,20 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<UserResponse>> getUser(@PathVariable Long id) {
+    public Mono<ResponseEntity<UserDto>> getUser(@PathVariable Long id) {
         log.info("Fetching user with id: {}", id);
         return userService.getUserById(id)
                 .map(ResponseEntity::ok);
     }
 
     @GetMapping
-    public Flux<UserResponse> getAllUsers() {
+    public Flux<UserDto> getAllUsers() {
         log.info("Fetching all users");
         return userService.getAllUsers();
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<UserResponse>> updateUser(
+    public Mono<ResponseEntity<UserDto>> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserRequest request) {
         log.info("Updating user with id: {}", id);

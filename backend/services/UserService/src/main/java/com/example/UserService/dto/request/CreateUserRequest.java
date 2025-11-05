@@ -31,6 +31,6 @@ public class CreateUserRequest {
     private String address;
 
     @NotBlank(message = "Role is required")
-    @Pattern(regexp = "CUSTOMER|EMPLOYEE|ADMIN", message = "Role must be CUSTOMER, EMPLOYEE, or ADMIN")
+    @Pattern(regexp = "TECHNICIAN|CUSTOMER", message = "Role must be TECHNICIAN or CUSTOMER")
     private String role;
 }
