@@ -66,4 +66,12 @@ public class VehicleController {
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
                 .doOnSuccess(response -> log.info("Vehicle deleted successfully with id: {}", id));
     }
+
+    @DeleteMapping("/user/{userId}")
+    public Mono<ResponseEntity<Void>> deleteVehiclesByUserId(@PathVariable Long userId) {
+        log.info("Deleting all vehicles for user with id: {}", userId);
+        return vehicleService.deleteVehiclesByUserId(userId)
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
+                .doOnSuccess(response -> log.info("All vehicles deleted successfully for user with id: {}", userId));
+    }
 }

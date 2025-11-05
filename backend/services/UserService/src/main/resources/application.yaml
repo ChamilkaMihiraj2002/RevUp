@@ -23,6 +23,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
+
+vehicle:
+  service:
+    url: http://localhost:8082
+
 ---
 spring:
   config:

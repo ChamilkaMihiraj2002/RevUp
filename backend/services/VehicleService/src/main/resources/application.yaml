@@ -24,6 +24,11 @@ spring:
         format_sql: true
     open-in-view: false
 
+
+user:
+  service:
+    url: http://localhost:8083
+
 # Logging configuration
 logging:
   level:

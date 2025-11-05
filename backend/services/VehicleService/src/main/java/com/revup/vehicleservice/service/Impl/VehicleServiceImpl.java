@@ -1,5 +1,6 @@
 package com.revup.vehicleservice.service.Impl;
 
+import com.revup.vehicleservice.client.UserServiceClient;
 import com.revup.vehicleservice.dto.request.CreateVehicleRequest;
 import com.revup.vehicleservice.dto.request.UpdateVehicleRequest;
 import com.revup.vehicleservice.dto.response.VehicleResponse;
@@ -8,36 +9,58 @@ import com.revup.vehicleservice.exception.ResourceNotFoundException;
 import com.revup.vehicleservice.mapper.VehicleMapper;
 import com.revup.vehicleservice.repository.VehicleRepository;
 import com.revup.vehicleservice.service.VehicleService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
+import java.util.List;
+
+@Slf4j
 @Service
 public class VehicleServiceImpl implements VehicleService {
     private final VehicleRepository vehicleRepository;
     private final Scheduler jdbcScheduler;
     private final VehicleMapper vehicleMapper;
+    private final UserServiceClient userServiceClient;
 
-    public VehicleServiceImpl(VehicleRepository vehicleRepository, Scheduler jdbcScheduler, VehicleMapper vehicleMapper) {
+    public VehicleServiceImpl(VehicleRepository vehicleRepository, 
+                              Scheduler jdbcScheduler, 
+                              VehicleMapper vehicleMapper,
+                              UserServiceClient userServiceClient) {
         this.vehicleRepository = vehicleRepository;
         this.jdbcScheduler = jdbcScheduler;
         this.vehicleMapper = vehicleMapper;
+        this.userServiceClient = userServiceClient;
     }
 
     @Override
     public Mono<VehicleResponse> createVehicle(CreateVehicleRequest request) {
-        return Mono.fromCallable(() -> {
-                    // Check if registration number already exists
-                    if (vehicleRepository.existsByRegistrationNo(request.getRegistrationNo())) {
-                        throw new IllegalArgumentException("Vehicle with registration number " + request.getRegistrationNo() + " already exists");
+        // validate that the user exists
+        return userServiceClient.userExists(request.getUserId())
+                .flatMap(exists -> {
+                    if (!exists) {
+                        return Mono.error(new ResourceNotFoundException("User not found with id: " + request.getUserId()));
                     }
                     
-                    Vehicle vehicle = vehicleMapper.toEntity(request);
-                    Vehicle savedVehicle = vehicleRepository.save(vehicle);
-                    return vehicleMapper.toResponse(savedVehicle);
-                })
-                .subscribeOn(jdbcScheduler);
+                    return Mono.fromCallable(() -> {
+                                // Check if registration number already exists
+                                if (vehicleRepository.existsByRegistrationNo(request.getRegistrationNo())) {
+                                    throw new IllegalArgumentException("Vehicle with registration number " + request.getRegistrationNo() + " already exists");
+                                }
+                                
+                                Vehicle vehicle = vehicleMapper.toEntity(request);
+                                Vehicle savedVehicle = vehicleRepository.save(vehicle);
+                                return vehicleMapper.toResponse(savedVehicle);
+                            })
+                            .subscribeOn(jdbcScheduler)
+                            .flatMap(vehicleResponse -> 
+               
+                                userServiceClient.addVehicleToUser(request.getUserId(), vehicleResponse.getVehicleId())
+                                    .thenReturn(vehicleResponse)
+                            );
+                });
     }
 
     @Override
@@ -87,11 +110,27 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public Mono<Void> deleteVehicle(Long id) {
-        return Mono.fromRunnable(() -> {
-                    if (!vehicleRepository.existsById(id)) {
-                        throw new ResourceNotFoundException("Vehicle not found with id: " + id);
-                    }
+        return Mono.fromCallable(() -> {
+                    Vehicle vehicle = vehicleRepository.findById(id)
+                            .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + id));
                     vehicleRepository.deleteById(id);
+                    return vehicle; 
+                })
+                .subscribeOn(jdbcScheduler)
+                .flatMap(deletedVehicle -> 
+                    
+                    userServiceClient.removeVehicleFromUser(deletedVehicle.getUserId(), id)
+                )
+                .then();
+    }
+
+    @Override
+    public Mono<Void> deleteVehiclesByUserId(Long userId) {
+        log.info("Deleting all vehicles for user {}", userId);
+        return Mono.fromRunnable(() -> {
+                    List<Vehicle> vehicles = vehicleRepository.findByUserId(userId);
+                    vehicleRepository.deleteAll(vehicles);
+                    log.info("Deleted {} vehicles for user {}", vehicles.size(), userId);
                 })
                 .subscribeOn(jdbcScheduler)
                 .then();

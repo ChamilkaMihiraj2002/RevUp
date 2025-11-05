@@ -60,4 +60,32 @@ public class UserController {
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
                 .doOnSuccess(response -> log.info("User deleted successfully with id: {}", id));
     }
+
+    // Internal endpoints for service-to-service communication
+    @PostMapping("/{userId}/vehicles/{vehicleId}")
+    public Mono<ResponseEntity<Void>> addVehicleToUser(
+            @PathVariable Long userId,
+            @PathVariable Long vehicleId) {
+        log.info("Adding vehicle {} to user {}", vehicleId, userId);
+        return userService.addVehicleToUser(userId, vehicleId)
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK)))
+                .doOnSuccess(response -> log.info("Vehicle {} added to user {}", vehicleId, userId));
+    }
+
+    @DeleteMapping("/{userId}/vehicles/{vehicleId}")
+    public Mono<ResponseEntity<Void>> removeVehicleFromUser(
+            @PathVariable Long userId,
+            @PathVariable Long vehicleId) {
+        log.info("Removing vehicle {} from user {}", vehicleId, userId);
+        return userService.removeVehicleFromUser(userId, vehicleId)
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
+                .doOnSuccess(response -> log.info("Vehicle {} removed from user {}", vehicleId, userId));
+    }
+
+    @GetMapping("/{userId}/exists")
+    public Mono<ResponseEntity<Boolean>> checkUserExists(@PathVariable Long userId) {
+        log.info("Checking if user exists with id: {}", userId);
+        return userService.userExists(userId)
+                .map(ResponseEntity::ok);
+    }
 }

@@ -13,4 +13,5 @@ public interface VehicleService {
     Flux<VehicleResponse> getVehiclesByUserId(Long userId);
     Mono<VehicleResponse> updateVehicle(Long id, UpdateVehicleRequest request);
     Mono<Void> deleteVehicle(Long id);
+    Mono<Void> deleteVehiclesByUserId(Long userId);
 }

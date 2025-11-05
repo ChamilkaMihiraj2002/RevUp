@@ -12,4 +12,9 @@ public interface UserService {
     Flux<UserDto> getAllUsers();
     Mono<UserDto> updateUser(Long id, UpdateUserRequest request);
     Mono<Void> deleteUser(Long id);
+    
+    // Vehicle synchronization methods
+    Mono<Void> addVehicleToUser(Long userId, Long vehicleId);
+    Mono<Void> removeVehicleFromUser(Long userId, Long vehicleId);
+    Mono<Boolean> userExists(Long userId);
 }

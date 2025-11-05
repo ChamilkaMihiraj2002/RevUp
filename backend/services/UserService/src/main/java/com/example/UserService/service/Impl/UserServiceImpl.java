@@ -1,5 +1,6 @@
 package com.example.UserService.service.Impl;
 
+import com.example.UserService.client.VehicleServiceClient;
 import com.example.UserService.dto.request.CreateUserRequest;
 import com.example.UserService.dto.request.UpdateUserRequest;
 import com.example.UserService.dto.UserDto;
@@ -18,11 +19,16 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final Scheduler jdbcScheduler;
     private final UserMapper userMapper;
+    private final VehicleServiceClient vehicleServiceClient;
 
-    public UserServiceImpl(UserRepository userRepository, Scheduler jdbcScheduler, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, 
+                          Scheduler jdbcScheduler, 
+                          UserMapper userMapper,
+                          VehicleServiceClient vehicleServiceClient) {
         this.userRepository = userRepository;
         this.jdbcScheduler = jdbcScheduler;
         this.userMapper = userMapper;
+        this.vehicleServiceClient = vehicleServiceClient;
     }
 
     @Override
@@ -66,8 +72,48 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mono<Void> deleteUser(Long id) {
-        return Mono.fromRunnable(() -> userRepository.deleteById(id))
+        return Mono.fromRunnable(() -> {
+                    // Check if user exists 
+                    if (!userRepository.existsById(id)) {
+                        throw new ResourceNotFoundException("User not found with id: " + id);
+                    }
+                })
+                .subscribeOn(jdbcScheduler)
+                .then(vehicleServiceClient.deleteVehiclesByUserId(id)) // Delete all vehicles first
+                .then(Mono.fromRunnable(() -> userRepository.deleteById(id))
+                        .subscribeOn(jdbcScheduler))
+                .then();
+    }
+
+    @Override
+    public Mono<Void> addVehicleToUser(Long userId, Long vehicleId) {
+        return Mono.fromRunnable(() -> {
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+                    if (!user.getVehicleIds().contains(vehicleId)) {
+                        user.getVehicleIds().add(vehicleId);
+                        userRepository.save(user);
+                    }
+                })
                 .subscribeOn(jdbcScheduler)
                 .then();
+    }
+
+    @Override
+    public Mono<Void> removeVehicleFromUser(Long userId, Long vehicleId) {
+        return Mono.fromRunnable(() -> {
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+                    user.getVehicleIds().remove(vehicleId);
+                    userRepository.save(user);
+                })
+                .subscribeOn(jdbcScheduler)
+                .then();
+    }
+
+    @Override
+    public Mono<Boolean> userExists(Long userId) {
+        return Mono.fromCallable(() -> userRepository.existsById(userId))
+                .subscribeOn(jdbcScheduler);
     }
 }
