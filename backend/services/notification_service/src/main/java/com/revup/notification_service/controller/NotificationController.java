@@ -1,7 +1,7 @@
 package com.revup.notification_service.controller;
 
 import com.revup.notification_service.dto.NotificationMessage;
-import com.revup.notification_service.model.Notification;
+import com.revup.notification_service.entity.Notification;
 import com.revup.notification_service.service.NotificationService;
 import com.revup.notification_service.rabbit.RabbitConfig;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

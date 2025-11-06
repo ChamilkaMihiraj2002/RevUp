@@ -1,7 +1,7 @@
 package com.revup.notification_service.service;
 
 import com.revup.notification_service.dto.NotificationMessage;
-import com.revup.notification_service.model.Notification;
+import com.revup.notification_service.entity.Notification;
 import com.revup.notification_service.repository.NotificationRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
