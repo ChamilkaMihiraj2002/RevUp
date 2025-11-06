@@ -43,5 +43,16 @@ public class NotificationController {
     public ResponseEntity<List<Notification>> getForUser(@PathVariable Long userId) {
         return ResponseEntity.ok(notificationService.getForUser(userId));
     }
+
+    @PatchMapping("/{notificationId}/mark-read")
+    public ResponseEntity<Notification> markAsRead(@PathVariable Long notificationId) {
+        return ResponseEntity.ok(notificationService.markAsRead(notificationId));
+    }
+
+    @PatchMapping("/user/{userId}/mark-all-read")
+    public ResponseEntity<String> markAllAsRead(@PathVariable Long userId) {
+        notificationService.markAllAsRead(userId);
+        return ResponseEntity.ok("All notifications marked as read");
+    }
 }
 

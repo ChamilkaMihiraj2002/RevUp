@@ -39,5 +39,20 @@ public class NotificationService {
     public List<Notification> getForUser(Long userId) {
         return repository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+
+    @Transactional
+    public Notification markAsRead(Long notificationId) {
+        Notification notification = repository.findById(notificationId)
+            .orElseThrow(() -> new RuntimeException("Notification not found: " + notificationId));
+        notification.setRead(true);
+        return repository.save(notification);
+    }
+
+    @Transactional
+    public void markAllAsRead(Long userId) {
+        List<Notification> notifications = repository.findByUserIdOrderByCreatedAtDesc(userId);
+        notifications.forEach(n -> n.setRead(true));
+        repository.saveAll(notifications);
+    }
 }
 
