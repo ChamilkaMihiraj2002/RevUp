@@ -70,4 +70,13 @@ public class ServiceTypeServiceImpl implements ServiceTypeService {
                 })
                 .map(ServiceTypeMapper::toResponse);
     }
+
+    @Override
+    public Mono<List<ServiceTypeResponse>> findAll() {
+        List<ServiceTypeResponse> list = serviceTypeRepository.findAll()
+                .stream()
+                .map(ServiceTypeMapper::toResponse)
+                .collect(Collectors.toList());
+        return Mono.just(list);
+    }
 }
