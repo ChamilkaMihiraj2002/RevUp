@@ -22,6 +22,10 @@ import {
   CheckCircle,
   LayoutDashboard,
   History,
+  User,
+  Phone,
+  Mail,
+  Lock,
 } from "lucide-react"
 
 export default function CustomerDashboard() {
@@ -41,6 +45,14 @@ export default function CustomerDashboard() {
     mileage: "",
     type: ""
   })
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
+  const [profileData, setProfileData] = useState({
+    name: userData?.name || "",
+    email: userData?.email || "",
+    phone: userData?.phone || "",
+  })
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null)
+  const [password, setPassword] = useState("********")
 
   // Fetch data on mount
   useEffect(() => {
@@ -144,12 +156,29 @@ export default function CustomerDashboard() {
     }
   }
 
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Just update local state - no backend call
+    setIsEditingProfile(false)
+    alert("Profile updated successfully!")
+  }
+
+  const handleCancelEdit = () => {
+    setProfileData({
+      name: userData?.name || "",
+      email: userData?.email || "",
+      phone: userData?.phone || "",
+    })
+    setIsEditingProfile(false)
+  }
+
   // Navigation items for Customer Dashboard
   const navItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "vehicles", label: "My Vehicles", icon: Car },
     { id: "appointments", label: "Appointments", icon: Calendar },
     { id: "history", label: "Service History", icon: History },
+    { id: "profile", label: "My Profile", icon: User },
   ]
 
   return (
@@ -468,7 +497,7 @@ export default function CustomerDashboard() {
                               </div>
                               <div className="flex justify-between text-sm p-2 bg-slate-50 rounded-lg">
                                 <span className="text-slate-600">Color</span>
-                                <span className="font-semibold text-slate-900">{vehicle.color || "N/A"}</span>
+                                <span className="font-semibold text-slate-900">{vehicle.color}</span>
                               </div>
                               <div className="flex justify-between text-sm p-2 bg-slate-50 rounded-lg">
                                 <span className="text-slate-600">Vehicle Type</span>
@@ -653,6 +682,179 @@ export default function CustomerDashboard() {
                     </CardContent>
                   </Card>
                 )}
+              </div>
+            )}
+
+            {activeTab === 'profile' && (
+              <div>
+                <Card className="border-gray-200 bg-white">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-slate-900">My Profile</CardTitle>
+                      {!isEditingProfile && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsEditingProfile(true)}
+                          className="border-cyan-200 text-cyan-700 hover:bg-cyan-50 hover:text-cyan-800"
+                        >
+                          Edit Profile
+                        </Button>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {isEditingProfile ? (
+                      <div className="space-y-6">
+                        <div className="flex items-center space-x-4">
+                          <div className="relative">
+                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
+                              {profilePhoto ? (
+                                <img src={profilePhoto} alt="Profile" className="w-24 h-24 rounded-full object-cover" />
+                              ) : (
+                                <User className="h-12 w-12 text-cyan-600" />
+                              )}
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0 border-2 border-white bg-white hover:bg-gray-50"
+                            >
+                              <input
+                                type="file"
+                                accept="image/*"
+                                aria-label="Upload profile photo"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0]
+                                  if (file) {
+                                    const reader = new FileReader()
+                                    reader.onloadend = () => {
+                                      setProfilePhoto(reader.result as string)
+                                    }
+                                    reader.readAsDataURL(file)
+                                  }
+                                }}
+                              />
+                              📷
+                            </Button>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-slate-900">{profileData.name}</h3>
+                            <p className="text-sm text-slate-600">Update your profile information</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-name" className="text-gray-700 flex items-center space-x-2">
+                              <User className="h-4 w-4" />
+                              <span>Full Name</span>
+                            </Label>
+                            <Input
+                              id="edit-name"
+                              value={profileData.name}
+                              onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-email" className="text-gray-700 flex items-center space-x-2">
+                              <Mail className="h-4 w-4" />
+                              <span>Email</span>
+                            </Label>
+                            <Input
+                              id="edit-email"
+                              type="email"
+                              value={profileData.email}
+                              onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-phone" className="text-gray-700 flex items-center space-x-2">
+                              <Phone className="h-4 w-4" />
+                              <span>Phone Number</span>
+                            </Label>
+                            <Input
+                              id="edit-phone"
+                              value={profileData.phone}
+                              onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-password" className="text-gray-700 flex items-center space-x-2">
+                              <Lock className="h-4 w-4" />
+                              <span>New Password (optional)</span>
+                            </Label>
+                            <Input
+                              id="edit-password"
+                              type="password"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              placeholder="Leave blank to keep current password"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex space-x-3 pt-4">
+                          <Button
+                            onClick={handleSaveProfile}
+                            className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white"
+                          >
+                            Save Changes
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={handleCancelEdit}
+                            className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
+                            {profilePhoto ? (
+                              <img src={profilePhoto} alt="Profile" className="w-24 h-24 rounded-full object-cover" />
+                            ) : (
+                              <User className="h-12 w-12 text-cyan-600" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-slate-900">{profileData.name}</h3>
+                            <p className="text-sm text-slate-600">Customer</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
+                            <Mail className="h-5 w-5 text-slate-600" />
+                            <div>
+                              <p className="text-xs text-slate-500">Email</p>
+                              <p className="text-sm font-medium text-slate-900">{profileData.email}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
+                            <Phone className="h-5 w-5 text-slate-600" />
+                            <div>
+                              <p className="text-xs text-slate-500">Phone</p>
+                              <p className="text-sm font-medium text-slate-900">{profileData.phone}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             )}
               </>
