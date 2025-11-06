@@ -24,8 +24,6 @@ public class CreateUserRequest {
     @Email(message = "Email must be valid")
     private String email;
 
-    @NotBlank(message = "Phone is required")
-    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Phone number must be valid")
     private String phone;
 
     private String address;

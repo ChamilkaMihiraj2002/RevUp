@@ -41,25 +41,28 @@ spring:
             predicates:
               - Path=/api/v1/service-types/**
 
+
+          - id: vehicle-service
+            uri: lb://RevUp-Vehicle-Service
+            predicates:
+              - Path=/api/v1/vehicles/**
           # Eureka Server Routes (Optional - for monitoring)
           - id: eureka-server
             uri: http://localhost:8761
             predicates:
               - Path=/eureka/**
-      
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: false
+
+# Firebase Configuration
+firebase:
+  credentials:
+    # Path to Firebase service account JSON file
+    # Leave empty to load from classpath: src/main/resources/service-account.json
+    path: 
+
+# User Service Configuration (for authentication)
+user:
+  service:
+    url: lb://RevUp-User-Service
 
 eureka:
   client:

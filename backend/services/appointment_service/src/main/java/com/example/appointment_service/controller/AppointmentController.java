@@ -4,10 +4,14 @@ import com.example.appointment_service.dto.*;
 import com.example.appointment_service.service.AppointmentServiceInterface;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/api/v1/appointments")
@@ -32,6 +36,16 @@ public class AppointmentController {
         return appointmentService.getAllAppointments();
     }
 
+    @GetMapping("/customer/{customerId}")
+    public Flux<AppointmentResponse> getByCustomerId(@PathVariable Long customerId) {
+        return appointmentService.getAppointmentsByCustomerId(customerId);
+    }
+
+    @GetMapping("/vehicle/{vehicleId}")
+    public Flux<AppointmentResponse> getByVehicleId(@PathVariable Long vehicleId) {
+        return appointmentService.getAppointmentsByVehicleId(vehicleId);
+    }
+
     @PutMapping("/{id}")
     public Mono<AppointmentResponse> update(@PathVariable Long id, @Valid @RequestBody UpdateAppointmentRequest request) {
         return appointmentService.updateAppointment(id, request);
@@ -41,5 +55,12 @@ public class AppointmentController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> delete(@PathVariable Long id) {
         return appointmentService.deleteAppointment(id);
+    }
+
+    @GetMapping("/slots/availability")
+    public Mono<SlotAvailabilityResponse> checkSlotAvailability(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime time) {
+        return appointmentService.checkSlotAvailability(date, time);
     }
 }
