@@ -1,4 +1,4 @@
-package com.revup.notification_service.model;
+package com.revup.notification_service.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -45,4 +45,5 @@ public class Notification {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
+
 
