@@ -434,7 +434,7 @@ export default function BookServicePage() {
                       selected={selectedDate}
                       onSelect={setSelectedDate}
                       disabled={(date) => date < new Date() || date.getDay() === 0}
-                      className="rounded-lg border-gray-200 p-4 bg-white [&_.rdp-day]:text-base [&_.rdp-day_button]:h-10 [&_.rdp-day_button]:w-10 [&_.rdp-caption]:text-lg [&_.rdp-head_cell]:text-base [&_.rdp-head_cell]:font-semibold [&_.rdp-nav_button]:h-10 [&_.rdp-nav_button]:w-10 [&_.rdp-nav_button]:bg-gray-50 [&_.rdp-day_selected]:bg-cyan-600 [&_.rdp-day_selected]:text-white [&_.rdp-day_today]:bg-cyan-50 [&_.rdp-day_today]:text-cyan-600"
+                      className="rounded-lg border-gray-200 p-4 bg-white [&_.rdp-day]:text-base [&_.rdp-day_button]:h-10 [&_.rdp-day_button]:w-10 [&_.rdp-caption]:text-lg [&_.rdp-head_cell]:text-base [&_.rdp-head_cell]:font-semibold [&_.rdp-nav_button]:h-10 [&_.rdp-nav_button]:w-10 [&_.rdp-nav_button]:bg-gray-50 [&_.rdp-day_selected]:bg-cyan-600 [&_.rdp-day_selected]:text-white [&_.rdp-day_today]:bg-cyan-600 [&_.rdp-day_today]:text-white [&_.rdp-day_today]:ring-2 [&_.rdp-day_today]:ring-cyan-300"
                     />
                   </CardContent>
                 </Card>
