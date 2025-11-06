@@ -19,7 +19,28 @@ spring:
             uri: lb://RevUp-Vehicle-Service
             predicates:
               - Path=/api/v1/vehicles/**
-          
+
+          - id: project-service
+            uri: lb://RevUp-Project-Service
+            predicates:
+              - Path=/api/v1/projects/**  
+   
+
+          - id: appointment-service
+            uri: lb://RevUp-Appointment-Service
+            predicates:
+              - Path=/api/v1/appointment-services/**
+
+          - id: appointment
+            uri: lb://RevUp-Appointment-Service
+            predicates:
+              - Path=/api/v1/appointments/**
+
+          - id: appointment-service-type
+            uri: lb://RevUp-Appointment-Service
+            predicates:
+              - Path=/api/v1/service-types/**
+
           # Eureka Server Routes (Optional - for monitoring)
           - id: eureka-server
             uri: http://localhost:8761

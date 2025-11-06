@@ -1,4 +1,4 @@
-server.port: 8083
+server.port: 8086
 
 spring:
   application:
@@ -22,12 +22,30 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+eureka:
+client:
+  serviceUrl:
+    defaultZone: "http://localhost:8761/eureka/"
+  initialInstanceInfoReplicationIntervalSeconds: 5
+  registryFetchIntervalSeconds: 5
+instance:
+  preferIpAddress: true
+  leaseRenewalIntervalInSeconds: 5
+  leaseExpirationDurationInSeconds: 5
+
 
 ---
 spring:
   config:
     activate:
-      on-profile: dev, no_eureka
+      on-profile: no_eureka
 
 eureka:
   client:

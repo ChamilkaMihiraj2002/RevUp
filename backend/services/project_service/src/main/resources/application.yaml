@@ -4,8 +4,8 @@ spring:
   application:
     name: RevUp-Project-Service
   datasource:
-    url: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres
-    username: postgres.bpswqweiwbacnoxkzrbc
+    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
+    username: postgres.oyuwuxtdmvyzfngndplz
     password: "05102002"
     hikari:
       maximum-pool-size: 2
@@ -48,7 +48,26 @@ user:
 spring:
   config:
     activate:
-      on-profile: dev, no_eureka
+      on-profile: dev
+
+eureka:
+client:
+  serviceUrl:
+    defaultZone: "http://localhost:8761/eureka/"
+  initialInstanceInfoReplicationIntervalSeconds: 5
+  registryFetchIntervalSeconds: 5
+instance:
+  preferIpAddress: true
+  leaseRenewalIntervalInSeconds: 5
+  leaseExpirationDurationInSeconds: 5      
+
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: no_eureka
 
 eureka:
   client:
