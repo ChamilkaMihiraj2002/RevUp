@@ -41,7 +41,10 @@ public class FirebaseAuthenticationFilter implements Filter {
         "/gateway/services",
         "/actuator/health",
         "/actuator/info",
-        "/api/v1/users"
+        "/api/v1/users",
+        "/api/v1/service-types",
+        "/api/v1/appointment-services",
+        "/api/v1/appointments"
     );
 
     // Endpoints that require TECHNICIAN role

@@ -117,6 +117,10 @@ export default function BookServicePage() {
       hours = '00'
     }
     
+    // Ensure hours and minutes have leading zeros
+    hours = hours.padStart(2, '0')
+    minutes = minutes.padStart(2, '0')
+    
     return `${hours}:${minutes}:00`
   }
 

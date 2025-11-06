@@ -4,7 +4,7 @@ spring:
   application:
     name: RevUp-Project-Service
   datasource:
-    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
+    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?prepareThreshold=0
     username: postgres.oyuwuxtdmvyzfngndplz
     password: "05102002"
     hikari:

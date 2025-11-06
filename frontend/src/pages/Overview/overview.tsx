@@ -37,6 +37,7 @@ export default function CustomerDashboard() {
     model: "",
     year: "",
     plate: "",
+    color: "",
     mileage: "",
     type: ""
   })
@@ -103,7 +104,7 @@ export default function CustomerDashboard() {
         model: newVehicle.model,
         registrationNo: newVehicle.plate,
         year: parseInt(newVehicle.year),
-        color: "", // You can add a color field to the form if needed
+        color: newVehicle.color,
         vehicleType: newVehicle.type,
         userId: userData.userId
       }
@@ -122,6 +123,7 @@ export default function CustomerDashboard() {
         model: "",
         year: "",
         plate: "",
+        color: "",
         mileage: "",
         type: ""
       })
@@ -385,6 +387,20 @@ export default function CustomerDashboard() {
                             />
                           </div>
                           <div className="space-y-2">
+                            <Label htmlFor="color" className="text-gray-700">Color</Label>
+                            <Input
+                              id="color"
+                              value={newVehicle.color}
+                              onChange={(e) => setNewVehicle({...newVehicle, color: e.target.value})}
+                              placeholder="e.g., White"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="space-y-2">
                             <Label htmlFor="type" className="text-gray-700">Vehicle Type</Label>
                             <Select
                               value={newVehicle.type}
@@ -449,6 +465,10 @@ export default function CustomerDashboard() {
                               <div className="flex justify-between text-sm p-2 bg-slate-50 rounded-lg">
                                 <span className="text-slate-600">Total Appointments</span>
                                 <span className="font-semibold text-slate-900">{vehicleAppointments.length}</span>
+                              </div>
+                              <div className="flex justify-between text-sm p-2 bg-slate-50 rounded-lg">
+                                <span className="text-slate-600">Color</span>
+                                <span className="font-semibold text-slate-900">{vehicle.color || "N/A"}</span>
                               </div>
                               <div className="flex justify-between text-sm p-2 bg-slate-50 rounded-lg">
                                 <span className="text-slate-600">Vehicle Type</span>
@@ -541,11 +561,11 @@ export default function CustomerDashboard() {
                                 <div>
                                   <span className="text-slate-600 font-medium">Vehicle:</span>
                                   <p className="font-semibold text-slate-900 mt-1">
-                                    {vehicle ? `${vehicle.year} ${vehicle.model}` : 'Unknown'}
+                                    {vehicle ? `${vehicle.year} ${vehicle.model} : ${vehicle.registrationNo}` : 'Unknown'}
                                   </p>
                                 </div>
                                 <div>
-                                  <span className="text-slate-600 font-medium">Scheduled End:</span>
+                                  <span className="text-slate-600 font-medium">Estimate Ending Time:</span>
                                   <p className="font-semibold text-slate-900 mt-1">
                                     {new Date(appointment.scheduledEnd).toLocaleString()}
                                   </p>
