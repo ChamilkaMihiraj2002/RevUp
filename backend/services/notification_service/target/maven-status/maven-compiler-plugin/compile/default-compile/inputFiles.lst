@@ -1,0 +1,10 @@
+/home/runner/work/RevUp/RevUp/backend/services/notification_service/src/main/java/com/revup/notification_service/NotificationServiceApplication.java
+/home/runner/work/RevUp/RevUp/backend/services/notification_service/src/main/java/com/revup/notification_service/configs/DatabaseConfig.java
+/home/runner/work/RevUp/RevUp/backend/services/notification_service/src/main/java/com/revup/notification_service/configs/WebSocketConfig.java
+/home/runner/work/RevUp/RevUp/backend/services/notification_service/src/main/java/com/revup/notification_service/controller/NotificationController.java
+/home/runner/work/RevUp/RevUp/backend/services/notification_service/src/main/java/com/revup/notification_service/dto/NotificationMessage.java
+/home/runner/work/RevUp/RevUp/backend/services/notification_service/src/main/java/com/revup/notification_service/model/Notification.java
+/home/runner/work/RevUp/RevUp/backend/services/notification_service/src/main/java/com/revup/notification_service/rabbit/RabbitConfig.java
+/home/runner/work/RevUp/RevUp/backend/services/notification_service/src/main/java/com/revup/notification_service/repository/NotificationRepository.java
+/home/runner/work/RevUp/RevUp/backend/services/notification_service/src/main/java/com/revup/notification_service/service/NotificationConsumer.java
+/home/runner/work/RevUp/RevUp/backend/services/notification_service/src/main/java/com/revup/notification_service/service/NotificationService.java
