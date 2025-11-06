@@ -24,7 +24,8 @@ import {
     Calendar,
     LogOut,
 } from "lucide-react"
-import Link from "next/link"
+import { Link } from "react-router-dom"
+
 
 export default function TechnicianDashboard() {
     const { userData, logout } = useAuth()
@@ -187,7 +188,7 @@ export default function TechnicianDashboard() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center space-x-3">
-                            <Link href="/" className="flex items-center space-x-3">
+                            <Link to="/" className="flex items-center space-x-3">
                                 <div className="bg-primary rounded-lg p-2">
                                     <Car className="h-6 w-6 text-primary-foreground" />
                                 </div>

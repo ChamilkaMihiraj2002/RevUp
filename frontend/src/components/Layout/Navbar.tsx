@@ -1,6 +1,4 @@
-// ============================================
-// FILE: components/Layout/CommonNavbar.tsx
-// ============================================
+
 import { useState } from "react"
 import { Button } from "@/components/UI/Button"
 import { Bell, User, Settings, Menu, X, Car, LogOut } from "lucide-react"
