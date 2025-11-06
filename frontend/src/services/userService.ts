@@ -34,3 +34,19 @@ export const getUserByFirebaseUID = async (firebaseUID: string, token: string): 
   });
   return response.data;
 };
+
+export interface UpdateUserData {
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
+export const updateUser = async (userId: number, userData: UpdateUserData, token: string): Promise<UserData> => {
+  const response = await axios.put(`${API_BASE}/users/${userId}`, userData, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  return response.data;
+};

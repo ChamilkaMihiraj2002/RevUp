@@ -77,3 +77,18 @@ export const checkSlotAvailability = async (date: string, time: string, token: s
   });
   return response.data;
 };
+
+export interface UpdateAppointmentRequest {
+  status?: 'SCHEDULED' | 'ONGOING' | 'COMPLETED' | 'CANCELLED';
+  technicianId?: number;
+}
+
+export const updateAppointment = async (appointmentId: number, request: UpdateAppointmentRequest, token: string): Promise<AppointmentResponse> => {
+  const response = await axios.put(`${API_BASE}/appointments/${appointmentId}`, request, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+};

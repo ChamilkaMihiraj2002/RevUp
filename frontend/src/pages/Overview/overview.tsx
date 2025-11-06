@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useAuth } from "@/contexts/authContext/authContext"
 import { getAppointmentsByCustomerId, type AppointmentResponse } from "@/services/appointmentService"
 import { getVehiclesByUserId, type VehicleResponse, createVehicle } from "@/services/vehicleService"
+import { updateUser } from "@/services/userService"
+import { passwordReset } from "@/firebase/auth"
 import {
   Car,
   Calendar,
@@ -29,7 +31,7 @@ import {
 } from "lucide-react"
 
 export default function CustomerDashboard() {
-  const { userData, logout, accessToken } = useAuth()
+  const { userData, logout, accessToken, setUserData } = useAuth()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("overview")
   const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(false)
@@ -51,8 +53,17 @@ export default function CustomerDashboard() {
     email: userData?.email || "",
     phone: userData?.phone || "",
   })
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(null)
-  const [password, setPassword] = useState("********")
+
+  // Update profile data when userData changes
+  useEffect(() => {
+    if (userData) {
+      setProfileData({
+        name: userData.name || "",
+        email: userData.email || "",
+        phone: userData.phone || "",
+      })
+    }
+  }, [userData])
 
   // Fetch data on mount
   useEffect(() => {
@@ -156,11 +167,52 @@ export default function CustomerDashboard() {
     }
   }
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Just update local state - no backend call
-    setIsEditingProfile(false)
-    alert("Profile updated successfully!")
+    
+    if (!userData?.userId || !accessToken) {
+      alert("User not authenticated")
+      return
+    }
+
+    // Validate phone number
+    if (!profileData.phone || profileData.phone.length !== 10 || !/^\d+$/.test(profileData.phone)) {
+      alert("Phone number must be exactly 10 digits")
+      return
+    }
+
+    try {
+      const updateData = {
+        name: profileData.name,
+        phone: profileData.phone,
+      }
+
+      const updatedUser = await updateUser(userData.userId, updateData, accessToken)
+      
+      // Update the context with the new user data
+      setUserData(updatedUser)
+      
+      setIsEditingProfile(false)
+      alert("Profile updated successfully!")
+    } catch (error) {
+      console.error("Error updating profile:", error)
+      alert("Failed to update profile. Please try again.")
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    if (!userData?.email) {
+      alert("No email found")
+      return
+    }
+
+    try {
+      await passwordReset(userData.email)
+      alert("Password reset email sent! Please check your inbox.")
+    } catch (error) {
+      console.error("Error sending password reset email:", error)
+      alert("Failed to send password reset email. Please try again.")
+    }
   }
 
   const handleCancelEdit = () => {
@@ -187,7 +239,7 @@ export default function CustomerDashboard() {
       <CommonNavbar 
         userName={userData?.name || "User"}
         onNotificationClick={() => console.log("Notifications")}
-        onProfileClick={() => console.log("Profile")}
+        onProfileClick={() => setActiveTab('profile')}
         onSettingsClick={() => console.log("Settings")}
         onLogoutClick={handleLogout}
       />
@@ -297,16 +349,26 @@ export default function CustomerDashboard() {
                     <CardContent>
                       {nextScheduledAppointment ? (
                         <>
-                          <div className="text-3xl font-bold text-slate-900">
-                            {new Date(nextScheduledAppointment.scheduledStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          <div className="text-2xl font-bold text-slate-900">
+                            {new Date(nextScheduledAppointment.scheduledStart).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
                           </div>
                           <p className="text-xs text-slate-500 mt-1">
+                            {new Date(nextScheduledAppointment.scheduledStart).toLocaleTimeString('en-US', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </p>
+                          <p className="text-xs text-slate-600 mt-1 font-medium">
                             {vehicles.find(v => v.vehicleId === nextScheduledAppointment.vehicleId)?.model || "Vehicle"}
                           </p>
                         </>
                       ) : (
                         <>
-                          <div className="text-2xl font-bold text-slate-900">None</div>
+                          <div className="text-xl font-bold text-slate-900">Not Scheduled</div>
                           <p className="text-xs text-slate-500 mt-1">No upcoming services</p>
                         </>
                       )}
@@ -509,9 +571,6 @@ export default function CustomerDashboard() {
                                     Book Service
                                   </Button>
                                 </Link>
-                                <Button variant="ghost" size="sm" className="hover:bg-cyan-50 hover:text-gray-900">
-                                  <Settings className="h-4 w-4" />
-                                </Button>
                               </div>
                             </div>
                           </CardContent>
@@ -686,7 +745,7 @@ export default function CustomerDashboard() {
             )}
 
             {activeTab === 'profile' && (
-              <div>
+              <div className="max-w-3xl mx-auto">
                 <Card className="border-gray-200 bg-white">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -707,37 +766,8 @@ export default function CustomerDashboard() {
                     {isEditingProfile ? (
                       <div className="space-y-6">
                         <div className="flex items-center space-x-4">
-                          <div className="relative">
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
-                              {profilePhoto ? (
-                                <img src={profilePhoto} alt="Profile" className="w-24 h-24 rounded-full object-cover" />
-                              ) : (
-                                <User className="h-12 w-12 text-cyan-600" />
-                              )}
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0 border-2 border-white bg-white hover:bg-gray-50"
-                            >
-                              <input
-                                type="file"
-                                accept="image/*"
-                                aria-label="Upload profile photo"
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0]
-                                  if (file) {
-                                    const reader = new FileReader()
-                                    reader.onloadend = () => {
-                                      setProfilePhoto(reader.result as string)
-                                    }
-                                    reader.readAsDataURL(file)
-                                  }
-                                }}
-                              />
-                              📷
-                            </Button>
+                          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
+                            <User className="h-12 w-12 text-cyan-600" />
                           </div>
                           <div>
                             <h3 className="text-lg font-semibold text-slate-900">{profileData.name}</h3>
@@ -756,6 +786,7 @@ export default function CustomerDashboard() {
                               value={profileData.name}
                               onChange={(e) => setProfileData({...profileData, name: e.target.value})}
                               className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
                             />
                           </div>
 
@@ -768,9 +799,11 @@ export default function CustomerDashboard() {
                               id="edit-email"
                               type="email"
                               value={profileData.email}
-                              onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              className="border-gray-200 bg-gray-50 cursor-not-allowed"
+                              disabled
+                              readOnly
                             />
+                            <p className="text-xs text-slate-500">Email cannot be changed</p>
                           </div>
 
                           <div className="space-y-2">
@@ -781,40 +814,43 @@ export default function CustomerDashboard() {
                             <Input
                               id="edit-phone"
                               value={profileData.phone}
-                              onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '').slice(0, 10)
+                                setProfileData({...profileData, phone: value})
+                              }}
+                              placeholder="10 digit phone number"
+                              maxLength={10}
                               className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
                             />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-password" className="text-gray-700 flex items-center space-x-2">
-                              <Lock className="h-4 w-4" />
-                              <span>New Password (optional)</span>
-                            </Label>
-                            <Input
-                              id="edit-password"
-                              type="password"
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
-                              placeholder="Leave blank to keep current password"
-                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
-                            />
+                            <p className="text-xs text-slate-500">Must be exactly 10 digits</p>
                           </div>
                         </div>
 
-                        <div className="flex space-x-3 pt-4">
+                        <div className="flex flex-col space-y-3 pt-4">
+                          <div className="flex space-x-3">
+                            <Button
+                              onClick={handleSaveProfile}
+                              className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white"
+                            >
+                              Save Changes
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={handleCancelEdit}
+                              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
                           <Button
-                            onClick={handleSaveProfile}
-                            className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white"
+                            type="button"
+                            variant="ghost"
+                            onClick={handleForgotPassword}
+                            className="w-full text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50"
                           >
-                            Save Changes
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={handleCancelEdit}
-                            className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
-                          >
-                            Cancel
+                            <Lock className="h-4 w-4 mr-2" />
+                            Forgot Password?
                           </Button>
                         </div>
                       </div>
@@ -822,11 +858,7 @@ export default function CustomerDashboard() {
                       <div className="space-y-6">
                         <div className="flex items-center space-x-4">
                           <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
-                            {profilePhoto ? (
-                              <img src={profilePhoto} alt="Profile" className="w-24 h-24 rounded-full object-cover" />
-                            ) : (
-                              <User className="h-12 w-12 text-cyan-600" />
-                            )}
+                            <User className="h-12 w-12 text-cyan-600" />
                           </div>
                           <div>
                             <h3 className="text-lg font-semibold text-slate-900">{profileData.name}</h3>

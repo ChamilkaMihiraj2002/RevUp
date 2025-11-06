@@ -63,16 +63,6 @@ export function CommonNavbar({
                 <span className="text-sm font-medium text-gray-700">{userName}</span>
               </div>
             </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="hover:bg-cyan-50 hover:text-gray-900 rounded-md h-10 px-3 text-gray-600"
-              onClick={onSettingsClick}
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-
             <Button 
               variant="ghost" 
               size="sm" 
@@ -101,6 +91,14 @@ export function CommonNavbar({
               <Bell className="h-4 w-4 mr-3" />
               Notifications
               <span className="ml-auto h-2 w-2 bg-red-500 rounded-full"></span>
+            </Button>
+            <Button variant="ghost" className="w-full justify-start hover:bg-cyan-50 text-gray-600" onClick={onProfileClick}>
+              <User className="h-4 w-4 mr-3" />
+              Profile - {userName}
+            </Button>
+            <Button variant="ghost" className="w-full justify-start hover:bg-cyan-50 text-gray-600" onClick={onSettingsClick}>
+              <Settings className="h-4 w-4 mr-3" />
+              Settings
             </Button>
             <Button variant="ghost" className="w-full justify-start hover:bg-cyan-50 text-gray-600" onClick={onProfileClick}>
               <User className="h-4 w-4 mr-3" />
