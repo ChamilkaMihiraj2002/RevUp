@@ -64,6 +64,29 @@ public class TimeLogServiceImpl implements TimeLogService {
     }
 
     @Override
+    public Mono<TimeLogResponse> getTimeLogByAppointmentServiceAndUser(Long appointmentServiceId, Long userId) {
+        return Mono.fromCallable(() -> {
+            TimeLog timeLog = timeLogRepository.findByAppointmentServiceIdAndUserId(appointmentServiceId, userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("TimeLog not found with appointmentServiceId: "
+                            + appointmentServiceId + " and userId: " + userId));
+            return timeLogMapper.mapToResponse(timeLog);
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    public Mono<TimeLogResponse> updateTimeLogByAppointmentServiceAndUser(Long appointmentServiceId, Long userId, TimeLogRequest request) {
+        return Mono.fromCallable(() -> {
+            TimeLog existingLog = timeLogRepository.findByAppointmentServiceIdAndUserId(appointmentServiceId, userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("TimeLog not found with appointmentServiceId: "
+                            + appointmentServiceId + " and userId: " + userId));
+
+            timeLogMapper.updateEntityFromRequest(existingLog, request);
+            TimeLog updatedLog = timeLogRepository.save(existingLog); // BLOCKING CALL
+            return timeLogMapper.mapToResponse(updatedLog);
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
     public Mono<Void> deleteTimeLog(Long id) {
         // For void methods, we use .then()
         return Mono.fromRunnable(() -> {

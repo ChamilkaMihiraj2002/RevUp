@@ -3,22 +3,22 @@ package com.revup.time_tracking_service.controller;
 import com.revup.time_tracking_service.dto.request.TimeLogRequest;
 import com.revup.time_tracking_service.dto.response.TimeLogResponse;
 import com.revup.time_tracking_service.service.TimeLogService;
-import jakarta.validation.Valid; // Use jakarta validation
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux; // Import Flux
-import reactor.core.publisher.Mono;  // Import Mono
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-@Slf4j // For logging
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/timelogs")
 public class TimeLogController {
 
     private final TimeLogService timeLogService;
 
-    // Use constructor injection as in your example
+
     public TimeLogController(TimeLogService timeLogService) {
         this.timeLogService = timeLogService;
     }
@@ -45,6 +45,29 @@ public class TimeLogController {
     public Flux<TimeLogResponse> getAllTimeLogs() {
         log.info("Fetching all time logs");
         return timeLogService.getAllTimeLogs();
+    }
+
+    // READ (Get by appointmentServiceId and userId)
+    @GetMapping("/appointment/{appointmentServiceId}/user/{userId}")
+    public Mono<ResponseEntity<TimeLogResponse>> getByAppointmentServiceAndUser(
+            @PathVariable Long appointmentServiceId,
+            @PathVariable Long userId) {
+        log.info("Fetching time log for appointmentServiceId: {} and userId: {}", appointmentServiceId, userId);
+        return timeLogService.getTimeLogByAppointmentServiceAndUser(appointmentServiceId, userId)
+                .map(ResponseEntity::ok);
+    }
+
+    // UPDATE (by appointmentServiceId and userId)
+    @PutMapping("/appointment/{appointmentServiceId}/user/{userId}")
+    public Mono<ResponseEntity<TimeLogResponse>> updateByAppointmentServiceAndUser(
+            @PathVariable Long appointmentServiceId,
+            @PathVariable Long userId,
+            @Valid @RequestBody TimeLogRequest request) {
+        log.info("Updating time log for appointmentServiceId: {} and userId: {}", appointmentServiceId, userId);
+        return timeLogService.updateTimeLogByAppointmentServiceAndUser(appointmentServiceId, userId, request)
+                .map(ResponseEntity::ok)
+                .doOnSuccess(response -> log.info("Time log updated for appointmentServiceId: {} and userId: {}",
+                        appointmentServiceId, userId));
     }
 
     // UPDATE

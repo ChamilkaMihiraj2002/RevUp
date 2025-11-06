@@ -8,15 +8,21 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="time_tracking_service" />
-        <module name="UserService" />
         <module name="auth_service" />
+        <module name="UserService" />
+        <module name="chatboat_service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="chat_service" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="UserService" options="-parameters" />
       <module name="auth_service" options="-parameters" />
+      <module name="chat_service" options="-parameters" />
+      <module name="chatboat_service" options="-parameters" />
       <module name="time_tracking_service" options="-parameters" />
     </option>
   </component>

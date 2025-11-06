@@ -28,6 +28,16 @@ public interface TimeLogService {
     Flux<TimeLogResponse> getAllTimeLogs();
 
     /**
+     * Get a time log by appointmentServiceId and userId.
+     */
+    Mono<TimeLogResponse> getTimeLogByAppointmentServiceAndUser(Long appointmentServiceId, Long userId);
+
+    /**
+     * Update a time log identified by appointmentServiceId and userId.
+     */
+    Mono<TimeLogResponse> updateTimeLogByAppointmentServiceAndUser(Long appointmentServiceId, Long userId, TimeLogRequest request);
+
+    /**
      * Update an existing time log.
      * @param id The ID of the time log to update.
      * @param request The DTO containing the update data.

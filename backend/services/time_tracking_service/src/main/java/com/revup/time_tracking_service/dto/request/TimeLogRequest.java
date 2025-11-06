@@ -2,7 +2,7 @@ package com.revup.time_tracking_service.dto.request;
 
 import lombok.Data;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * DTO for client requests (POST/PUT) to create or update a time log.
@@ -15,9 +15,9 @@ public class TimeLogRequest {
 
     private Long userId;
 
-    private LocalDateTime startTime;
+    private Instant startTime;
 
-    private LocalDateTime endTime;
+    private Instant endTime;
 
     private Long actualMinutes;
 

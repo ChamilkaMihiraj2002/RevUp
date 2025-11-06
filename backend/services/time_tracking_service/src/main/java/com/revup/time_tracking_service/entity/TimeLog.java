@@ -9,16 +9,17 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Entity
 @Table(name = "time_logs")
-@EntityListeners(AuditingEntityListener.class) // Enable auditing
-@Getter // Lombok
-@Setter // Lombok
-@NoArgsConstructor // Lombok
-@AllArgsConstructor // Lombok
+@EntityListeners(AuditingEntityListener.class)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class TimeLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,10 +32,10 @@ public class TimeLog {
     private Long userId;
 
     @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
+    private Instant startTime;
 
     @Column(name = "end_time")
-    private LocalDateTime endTime;
+    private Instant endTime;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -42,20 +43,21 @@ public class TimeLog {
     @Column(name = "log_date")
     private LocalDate logDate;
 
-    @CreatedDate // Managed by Auditing
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 
-    @LastModifiedDate // Managed by Auditing
+    private Instant createdAt;
+
+    @LastModifiedDate
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @PrePersist
     @PreUpdate
     public void updateLogDate() {
         if (this.startTime != null) {
-            // Extracts the "date" part from the "date-time"
-            this.logDate = this.startTime.toLocalDate();
+            // Convert Instant to UTC LocalDate for logDate
+            this.logDate = Instant.ofEpochMilli(this.startTime.toEpochMilli()).atZone(ZoneOffset.UTC).toLocalDate();
         }
     }
 
@@ -68,7 +70,7 @@ public class TimeLog {
         if (this.startTime == null || this.endTime == null) {
             return null;
         }
-        // Use java.time.Duration to find the difference
+        // Use java.time.Duration to find the difference (Instant supports Duration)
         return java.time.Duration.between(this.startTime, this.endTime).toMinutes();
     }
 }

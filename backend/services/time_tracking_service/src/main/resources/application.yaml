@@ -57,9 +57,14 @@ spring:
   application:
     name: RevUp-User-Service
   datasource:
-    url: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true
-    username: postgres.bpswqweiwbacnoxkzrbc
-    password: "05102002"
+    # url: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+    # username: postgres.bpswqweiwbacnoxkzrbc
+    # password: "05102002"
+
+    url: jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true
+    username: postgres.pomermxliroehfuuroqk
+    password: "ChamilkaM@2002"
+
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
@@ -75,6 +80,15 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+        # Ensure Hibernate uses UTC when writing/reading TIMESTAMP WITH TIME ZONE
+        jdbc:
+          time_zone: UTC
+
+  # Jackson and JVM timezone settings: prefer UTC and ISO date-times
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
 
 ---
 spring:

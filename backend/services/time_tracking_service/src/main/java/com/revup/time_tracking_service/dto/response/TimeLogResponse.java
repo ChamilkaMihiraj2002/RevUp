@@ -2,7 +2,7 @@ package com.revup.time_tracking_service.dto.response;
 
 import lombok.Data;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * DTO for server responses (GET).
@@ -18,9 +18,9 @@ public class TimeLogResponse {
 
     private Long userId;
 
-    private LocalDateTime startTime;
+    private Instant startTime;
 
-    private LocalDateTime endTime;
+    private Instant endTime;
 
     private Long actualMinutes;
 
@@ -28,7 +28,7 @@ public class TimeLogResponse {
 
     private LocalDate logDate;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 }
