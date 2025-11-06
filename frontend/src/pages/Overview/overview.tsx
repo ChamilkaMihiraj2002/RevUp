@@ -1,15 +1,35 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { CommonNavbar } from "@/components/Layout/Navbar"
-import { CommonSidebar } from "@/components/Layout/Slidebar"
-import { Button } from "@/components/UI/Button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/UI/Card"
-import { Badge } from "@/components/UI/Badge"
-import { Progress } from "@/components/UI/Progress"
-import { Input } from "@/components/UI/Input"
-import { Label } from "@/components/UI/Label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/UI/Select"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/UI/Dialog"
+import { useState } from "react";
+import { CommonNavbar } from "@/components/Layout/Navbar";
+import { CommonSidebar } from "@/components/Layout/Slidebar";
+import { Button } from "@/components/UI/Button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/UI/Card";
+import { Badge } from "@/components/UI/Badge";
+import { Progress } from "@/components/UI/Progress";
+import { Input } from "@/components/UI/Input";
+import { Label } from "@/components/UI/Label";
+import { Link } from "react-router-dom";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/UI/Select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/UI/Dialog";
 import {
   Car,
   Calendar,
@@ -17,30 +37,42 @@ import {
   Wrench,
   Plus,
   User,
-  Settings,
   CheckCircle,
   AlertCircle,
   LayoutDashboard,
   History,
-} from "lucide-react"
+  Edit,
+  Trash2,
+} from "lucide-react";
 
 export default function CustomerDashboard() {
-  const [activeTab, setActiveTab] = useState("overview")
-  const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState("overview");
+  const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(false);
   const [newVehicle, setNewVehicle] = useState({
     make: "",
     model: "",
     year: "",
     plate: "",
     mileage: "",
-    type: ""
-  })
+    type: "",
+  });
+
+  const [isEditVehicleOpen, setIsEditVehicleOpen] = useState(false);
+  const [isDeleteVehicleOpen, setIsDeleteVehicleOpen] = useState(false);
+  const [editVehicle, setEditVehicle] = useState({
+    make: "",
+    model: "",
+    year: "",
+    plate: "",
+    mileage: "",
+    type: "",
+  });
 
   const handleAddVehicle = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Here you would typically make an API call to save the vehicle
-    console.log("Adding vehicle:", newVehicle)
-    setIsAddVehicleOpen(false)
+    console.log("Adding vehicle:", newVehicle);
+    setIsAddVehicleOpen(false);
     // Reset form
     setNewVehicle({
       make: "",
@@ -48,9 +80,32 @@ export default function CustomerDashboard() {
       year: "",
       plate: "",
       mileage: "",
-      type: ""
-    })
-  }
+      type: "",
+    });
+  };
+
+  const handleEditClick = (vehicle) => {
+    setEditVehicle({
+      make: vehicle.make,
+      model: vehicle.model,
+      year: vehicle.year.toString(),
+      plate: vehicle.plate,
+      mileage: vehicle.mileage.toString(),
+      type: "",
+    });
+    setIsEditVehicleOpen(true);
+  };
+
+  const handleEditVehicle = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Editing vehicle:", editVehicle);
+    setIsEditVehicleOpen(false);
+  };
+
+  const handleDeleteVehicle = () => {
+    console.log("Vehicle deleted");
+    setIsDeleteVehicleOpen(false);
+  };
 
   // Navigation items for Customer Dashboard
   const navItems = [
@@ -58,7 +113,7 @@ export default function CustomerDashboard() {
     { id: "vehicles", label: "My Vehicles", icon: Car },
     { id: "appointments", label: "Appointments", icon: Calendar },
     { id: "history", label: "Service History", icon: History },
-  ]
+  ];
 
   // Mock data
   const vehicles = [
@@ -80,7 +135,7 @@ export default function CustomerDashboard() {
       nextService: "2025-03-20",
       mileage: 52000,
     },
-  ]
+  ];
 
   const currentAppointments = [
     {
@@ -94,7 +149,7 @@ export default function CustomerDashboard() {
       progress: 65,
       estimatedCompletion: "11:30 AM",
     },
-  ]
+  ];
 
   const serviceHistory = [
     {
@@ -102,7 +157,7 @@ export default function CustomerDashboard() {
       date: "2024-12-10",
       vehicle: "Toyota Corolla",
       services: ["Oil Change", "Brake Inspection"],
-  cost: "RS.120",
+      cost: "RS.120",
       status: "completed",
     },
     {
@@ -110,15 +165,15 @@ export default function CustomerDashboard() {
       date: "2024-11-05",
       vehicle: "Honda Civic",
       services: ["Tire Replacement"],
-  cost: "RS.280",
+      cost: "RS.280",
       status: "completed",
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100">
       {/* IMPORTED COMMON NAVBAR */}
-      <CommonNavbar 
+      <CommonNavbar
         userName="Ravi"
         onNotificationClick={() => console.log("Notifications")}
         onProfileClick={() => console.log("Profile")}
@@ -127,7 +182,7 @@ export default function CustomerDashboard() {
 
       <div className="flex">
         {/* IMPORTED COMMON SIDEBAR WITH CUSTOM NAV ITEMS */}
-        <CommonSidebar 
+        <CommonSidebar
           navItems={navItems}
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -139,8 +194,12 @@ export default function CustomerDashboard() {
           <div className="h-full max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12 py-8">
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900">Welcome back, Ravi</h1>
-              <p className="text-lg text-gray-600 mt-2">Manage your vehicles and track service appointments</p>
+              <h1 className="text-4xl font-bold text-gray-900">
+                Welcome back, Ravi
+              </h1>
+              <p className="text-lg text-gray-600 mt-2">
+                Manage your vehicles and track service appointments
+              </p>
             </div>
 
             {/* Active Service Alert */}
@@ -153,8 +212,12 @@ export default function CustomerDashboard() {
                         <Wrench className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <CardTitle className="text-gray-900">Service in Progress</CardTitle>
-                        <CardDescription className="text-cyan-700">Your Toyota Corolla is currently being serviced</CardDescription>
+                        <CardTitle className="text-gray-900">
+                          Service in Progress
+                        </CardTitle>
+                        <CardDescription className="text-cyan-700">
+                          Your Toyota Corolla is currently being serviced
+                        </CardDescription>
                       </div>
                     </div>
                     <Badge className="bg-cyan-100 text-cyan-700 border-cyan-200 hover:bg-cyan-200">
@@ -166,27 +229,38 @@ export default function CustomerDashboard() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Progress</span>
-                      <span className="text-cyan-700 font-semibold">65% Complete</span>
+                      <span className="text-cyan-700 font-semibold">
+                        65% Complete
+                      </span>
                     </div>
                     <Progress value={65} className="h-2 bg-cyan-100" />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
                         <User className="h-4 w-4 text-slate-500" />
-                        <span className="text-slate-700">Technician: <span className="font-medium">Nimal</span></span>
+                        <span className="text-slate-700">
+                          Technician: <span className="font-medium">Nimal</span>
+                        </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4 text-slate-500" />
-                        <span className="text-slate-700">Est. completion: <span className="font-medium">11:30 AM</span></span>
+                        <span className="text-slate-700">
+                          Est. completion:{" "}
+                          <span className="font-medium">11:30 AM</span>
+                        </span>
                       </div>
                     </div>
                     <div className="space-y-2 pt-2 border-t border-blue-100">
                       <div className="flex items-center space-x-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
-                        <span className="text-sm text-slate-700">Oil Change Completed</span>
+                        <span className="text-sm text-slate-700">
+                          Oil Change Completed
+                        </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <AlertCircle className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm text-slate-700">Tire Rotation in Progress</span>
+                        <span className="text-sm text-slate-700">
+                          Tire Rotation in Progress
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -201,40 +275,56 @@ export default function CustomerDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Card className="hover:shadow-lg transition-shadow border-slate-200">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-slate-700">Registered Vehicles</CardTitle>
+                      <CardTitle className="text-sm font-medium text-slate-700">
+                        Registered Vehicles
+                      </CardTitle>
                       <div className="bg-blue-100 rounded-lg p-2">
                         <Car className="h-4 w-4 text-blue-600" />
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold text-slate-900">{vehicles.length}</div>
-                      <p className="text-xs text-slate-500 mt-1">Active vehicles</p>
+                      <div className="text-3xl font-bold text-slate-900">
+                        {vehicles.length}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Active vehicles
+                      </p>
                     </CardContent>
                   </Card>
 
                   <Card className="hover:shadow-lg transition-shadow border-slate-200">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-slate-700">Active Services</CardTitle>
+                      <CardTitle className="text-sm font-medium text-slate-700">
+                        Active Services
+                      </CardTitle>
                       <div className="bg-green-100 rounded-lg p-2">
                         <Wrench className="h-4 w-4 text-green-600" />
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold text-slate-900">{currentAppointments.length}</div>
+                      <div className="text-3xl font-bold text-slate-900">
+                        {currentAppointments.length}
+                      </div>
                       <p className="text-xs text-slate-500 mt-1">In progress</p>
                     </CardContent>
                   </Card>
 
                   <Card className="hover:shadow-lg transition-shadow border-slate-200">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-slate-700">Next Service</CardTitle>
+                      <CardTitle className="text-sm font-medium text-slate-700">
+                        Next Service
+                      </CardTitle>
                       <div className="bg-purple-100 rounded-lg p-2">
                         <Calendar className="h-4 w-4 text-purple-600" />
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold text-slate-900">Feb 15</div>
-                      <p className="text-xs text-slate-500 mt-1">Toyota Corolla</p>
+                      <div className="text-3xl font-bold text-slate-900">
+                        Feb 15
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Toyota Corolla
+                      </p>
                     </CardContent>
                   </Card>
                 </div>
@@ -242,8 +332,12 @@ export default function CustomerDashboard() {
                 {/* Recent Activity */}
                 <Card className="border-gray-200 shadow-md bg-white">
                   <CardHeader>
-                    <CardTitle className="text-gray-900">Recent Activity</CardTitle>
-                    <CardDescription className="text-cyan-700">Your latest service updates and notifications</CardDescription>
+                    <CardTitle className="text-gray-900">
+                      Recent Activity
+                    </CardTitle>
+                    <CardDescription className="text-cyan-700">
+                      Your latest service updates and notifications
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -252,8 +346,12 @@ export default function CustomerDashboard() {
                           <CheckCircle className="h-5 w-5 text-green-600" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-900">Oil change completed</p>
-                          <p className="text-xs text-slate-500">Toyota Corolla • 2 hours ago</p>
+                          <p className="text-sm font-medium text-slate-900">
+                            Oil change completed
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            Toyota Corolla • 2 hours ago
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-cyan-50 transition-colors">
@@ -261,8 +359,12 @@ export default function CustomerDashboard() {
                           <Wrench className="h-5 w-5 text-blue-600" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-900">Service started</p>
-                          <p className="text-xs text-slate-500">Toyota Corolla • 3 hours ago</p>
+                          <p className="text-sm font-medium text-slate-900">
+                            Service started
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            Toyota Corolla • 3 hours ago
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-cyan-50 transition-colors">
@@ -270,8 +372,12 @@ export default function CustomerDashboard() {
                           <Calendar className="h-5 w-5 text-indigo-600" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-900">Appointment confirmed</p>
-                          <p className="text-xs text-slate-500">Toyota Corolla • Yesterday</p>
+                          <p className="text-sm font-medium text-slate-900">
+                            Appointment confirmed
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            Toyota Corolla • Yesterday
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -284,8 +390,15 @@ export default function CustomerDashboard() {
             {activeTab === "vehicles" && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-gray-900">My Vehicles</h2>
-                  <Dialog open={isAddVehicleOpen} onOpenChange={setIsAddVehicleOpen}>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    My Vehicles
+                  </h2>
+
+                  {/* Add Vehicle Dialog */}
+                  <Dialog
+                    open={isAddVehicleOpen}
+                    onOpenChange={setIsAddVehicleOpen}
+                  >
                     <DialogTrigger asChild>
                       <Button className="bg-cyan-600 hover:bg-cyan-700 shadow-md">
                         <Plus className="h-4 w-4 mr-2" />
@@ -294,45 +407,71 @@ export default function CustomerDashboard() {
                     </DialogTrigger>
                     <DialogContent className="w-full max-w-[90vw] sm:max-w-[900px] bg-white">
                       <DialogHeader>
-                        <DialogTitle className="text-xl font-semibold text-gray-900">Add New Vehicle</DialogTitle>
+                        <DialogTitle className="text-xl font-semibold text-gray-900">
+                          Add New Vehicle
+                        </DialogTitle>
                         <DialogDescription className="text-gray-600">
                           Enter your vehicle details below
                         </DialogDescription>
                       </DialogHeader>
-                      <form onSubmit={handleAddVehicle} className="space-y-4 py-4">
+                      <form
+                        onSubmit={handleAddVehicle}
+                        className="space-y-4 py-4"
+                      >
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="make" className="text-gray-700">Make</Label>
+                            <Label htmlFor="make" className="text-gray-700">
+                              Make
+                            </Label>
                             <Input
                               id="make"
                               value={newVehicle.make}
-                              onChange={(e) => setNewVehicle({...newVehicle, make: e.target.value})}
+                              onChange={(e) =>
+                                setNewVehicle({
+                                  ...newVehicle,
+                                  make: e.target.value,
+                                })
+                              }
                               placeholder="e.g., Toyota"
                               className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
                               required
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="model" className="text-gray-700">Model</Label>
+                            <Label htmlFor="model" className="text-gray-700">
+                              Model
+                            </Label>
                             <Input
                               id="model"
                               value={newVehicle.model}
-                              onChange={(e) => setNewVehicle({...newVehicle, model: e.target.value})}
+                              onChange={(e) =>
+                                setNewVehicle({
+                                  ...newVehicle,
+                                  model: e.target.value,
+                                })
+                              }
                               placeholder="e.g., Corolla"
                               className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
                               required
                             />
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="year" className="text-gray-700">Year</Label>
+                            <Label htmlFor="year" className="text-gray-700">
+                              Year
+                            </Label>
                             <Input
                               id="year"
                               type="number"
                               value={newVehicle.year}
-                              onChange={(e) => setNewVehicle({...newVehicle, year: e.target.value})}
+                              onChange={(e) =>
+                                setNewVehicle({
+                                  ...newVehicle,
+                                  year: e.target.value,
+                                })
+                              }
                               placeholder="e.g., 2020"
                               min="1900"
                               max="2025"
@@ -341,11 +480,18 @@ export default function CustomerDashboard() {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="plate" className="text-gray-700">License Plate</Label>
+                            <Label htmlFor="plate" className="text-gray-700">
+                              License Plate
+                            </Label>
                             <Input
                               id="plate"
                               value={newVehicle.plate}
-                              onChange={(e) => setNewVehicle({...newVehicle, plate: e.target.value})}
+                              onChange={(e) =>
+                                setNewVehicle({
+                                  ...newVehicle,
+                                  plate: e.target.value,
+                                })
+                              }
                               placeholder="e.g., ABC-123"
                               className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
                               required
@@ -355,30 +501,48 @@ export default function CustomerDashboard() {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="type" className="text-gray-700">Vehicle Type</Label>
+                            <Label htmlFor="type" className="text-gray-700">
+                              Vehicle Type
+                            </Label>
                             <Select
                               value={newVehicle.type}
-                              onValueChange={(value) => setNewVehicle({...newVehicle, type: value})}
+                              onValueChange={(value) =>
+                                setNewVehicle({ ...newVehicle, type: value })
+                              }
                             >
-                              <SelectTrigger id="type" className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500">
+                              <SelectTrigger
+                                id="type"
+                                className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              >
                                 <SelectValue placeholder="Select type" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="sedan">Sedan</SelectItem>
                                 <SelectItem value="suv">SUV</SelectItem>
-                                <SelectItem value="hatchback">Hatchback</SelectItem>
-                                <SelectItem value="pickup">Pickup Truck</SelectItem>
+                                <SelectItem value="hatchback">
+                                  Hatchback
+                                </SelectItem>
+                                <SelectItem value="pickup">
+                                  Pickup Truck
+                                </SelectItem>
                                 <SelectItem value="van">Van</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="mileage" className="text-gray-700">Current Mileage</Label>
+                            <Label htmlFor="mileage" className="text-gray-700">
+                              Current Mileage
+                            </Label>
                             <Input
                               id="mileage"
                               type="number"
                               value={newVehicle.mileage}
-                              onChange={(e) => setNewVehicle({...newVehicle, mileage: e.target.value})}
+                              onChange={(e) =>
+                                setNewVehicle({
+                                  ...newVehicle,
+                                  mileage: e.target.value,
+                                })
+                              }
                               placeholder="e.g., 45000"
                               min="0"
                               className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
@@ -388,15 +552,15 @@ export default function CustomerDashboard() {
                         </div>
 
                         <div className="flex justify-end space-x-3 pt-4">
-                          <Button 
-                            type="button" 
+                          <Button
+                            type="button"
                             variant="outline"
                             onClick={() => setIsAddVehicleOpen(false)}
                             className="border-gray-200"
                           >
                             Cancel
                           </Button>
-                          <Button 
+                          <Button
                             type="submit"
                             className="bg-cyan-600 hover:bg-cyan-700 text-white"
                           >
@@ -406,18 +570,251 @@ export default function CustomerDashboard() {
                       </form>
                     </DialogContent>
                   </Dialog>
+
+                  {/* Edit Vehicle Dialog */}
+                  <Dialog
+                    open={isEditVehicleOpen}
+                    onOpenChange={setIsEditVehicleOpen}
+                  >
+                    <DialogContent className="w-full max-w-[90vw] sm:max-w-[900px] bg-white">
+                      <DialogHeader>
+                        <DialogTitle className="text-xl font-semibold text-gray-900">
+                          Edit Vehicle
+                        </DialogTitle>
+                        <DialogDescription className="text-gray-600">
+                          Update your vehicle details below
+                        </DialogDescription>
+                      </DialogHeader>
+                      <form
+                        onSubmit={handleEditVehicle}
+                        className="space-y-4 py-4"
+                      >
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label
+                              htmlFor="edit-make"
+                              className="text-gray-700"
+                            >
+                              Make
+                            </Label>
+                            <Input
+                              id="edit-make"
+                              value={editVehicle.make}
+                              onChange={(e) =>
+                                setEditVehicle({
+                                  ...editVehicle,
+                                  make: e.target.value,
+                                })
+                              }
+                              placeholder="e.g., Toyota"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label
+                              htmlFor="edit-model"
+                              className="text-gray-700"
+                            >
+                              Model
+                            </Label>
+                            <Input
+                              id="edit-model"
+                              value={editVehicle.model}
+                              onChange={(e) =>
+                                setEditVehicle({
+                                  ...editVehicle,
+                                  model: e.target.value,
+                                })
+                              }
+                              placeholder="e.g., Corolla"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label
+                              htmlFor="edit-year"
+                              className="text-gray-700"
+                            >
+                              Year
+                            </Label>
+                            <Input
+                              id="edit-year"
+                              type="number"
+                              value={editVehicle.year}
+                              onChange={(e) =>
+                                setEditVehicle({
+                                  ...editVehicle,
+                                  year: e.target.value,
+                                })
+                              }
+                              placeholder="e.g., 2020"
+                              min="1900"
+                              max="2025"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label
+                              htmlFor="edit-plate"
+                              className="text-gray-700"
+                            >
+                              License Plate
+                            </Label>
+                            <Input
+                              id="edit-plate"
+                              value={editVehicle.plate}
+                              onChange={(e) =>
+                                setEditVehicle({
+                                  ...editVehicle,
+                                  plate: e.target.value,
+                                })
+                              }
+                              placeholder="e.g., ABC-123"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label
+                              htmlFor="edit-type"
+                              className="text-gray-700"
+                            >
+                              Vehicle Type
+                            </Label>
+                            <Select
+                              value={editVehicle.type}
+                              onValueChange={(value) =>
+                                setEditVehicle({ ...editVehicle, type: value })
+                              }
+                            >
+                              <SelectTrigger
+                                id="edit-type"
+                                className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              >
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="sedan">Sedan</SelectItem>
+                                <SelectItem value="suv">SUV</SelectItem>
+                                <SelectItem value="hatchback">
+                                  Hatchback
+                                </SelectItem>
+                                <SelectItem value="pickup">
+                                  Pickup Truck
+                                </SelectItem>
+                                <SelectItem value="van">Van</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label
+                              htmlFor="edit-mileage"
+                              className="text-gray-700"
+                            >
+                              Current Mileage
+                            </Label>
+                            <Input
+                              id="edit-mileage"
+                              type="number"
+                              value={editVehicle.mileage}
+                              onChange={(e) =>
+                                setEditVehicle({
+                                  ...editVehicle,
+                                  mileage: e.target.value,
+                                })
+                              }
+                              placeholder="e.g., 45000"
+                              min="0"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end space-x-3 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsEditVehicleOpen(false)}
+                            className="border-gray-200"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-cyan-600 hover:bg-cyan-700 text-white"
+                          >
+                            Save Changes
+                          </Button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Delete Vehicle Dialog */}
+                  <Dialog
+                    open={isDeleteVehicleOpen}
+                    onOpenChange={setIsDeleteVehicleOpen}
+                  >
+                    <DialogContent className="bg-white max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="text-xl font-semibold text-gray-900">
+                          Delete Vehicle
+                        </DialogTitle>
+                        <DialogDescription className="text-gray-600">
+                          Are you sure you want to delete this vehicle?
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4">
+                        <p className="text-sm text-red-600">
+                          This action cannot be undone. All service history for
+                          this vehicle will be permanently deleted.
+                        </p>
+                      </div>
+                      <div className="flex justify-end space-x-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsDeleteVehicleOpen(false)}
+                          className="border-gray-200"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleDeleteVehicle}
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          Delete Vehicle
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
+                {/* Vehicle Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {vehicles.map((vehicle) => (
-                    <Card key={vehicle.id} className="hover:shadow-md transition-all border-gray-200 bg-white">
+                    <Card
+                      key={vehicle.id}
+                      className="hover:shadow-md transition-all border-gray-200 bg-white"
+                    >
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <div>
                             <CardTitle className="text-slate-900">
                               {vehicle.year} {vehicle.make} {vehicle.model}
                             </CardTitle>
-                            <CardDescription>License: {vehicle.plate}</CardDescription>
+                            <CardDescription>
+                              License: {vehicle.plate}
+                            </CardDescription>
                           </div>
                           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3">
                             <Car className="h-6 w-6 text-blue-600" />
@@ -428,20 +825,41 @@ export default function CustomerDashboard() {
                         <div className="space-y-3">
                           <div className="flex justify-between text-sm p-2 bg-slate-50 rounded-lg">
                             <span className="text-slate-600">Mileage</span>
-                            <span className="font-semibold text-slate-900">{vehicle.mileage.toLocaleString()} miles</span>
+                            <span className="font-semibold text-slate-900">
+                              {vehicle.mileage.toLocaleString()} miles
+                            </span>
                           </div>
                           <div className="flex justify-between text-sm p-2 bg-slate-50 rounded-lg">
                             <span className="text-slate-600">Next Service</span>
-                            <span className="font-semibold text-slate-900">{vehicle.nextService}</span>
+                            <span className="font-semibold text-slate-900">
+                              {vehicle.nextService}
+                            </span>
                           </div>
                           <div className="flex space-x-2 pt-2">
                             <Link to="/book" className="flex-1">
-                              <Button variant="outline" size="sm" className="w-full border-cyan-200 text-cyan-700 hover:bg-cyan-50 hover:text-cyan-800">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full border-cyan-200 text-cyan-700 hover:bg-cyan-50 hover:text-cyan-800"
+                              >
                                 Book Service
                               </Button>
                             </Link>
-                            <Button variant="ghost" size="sm" className="hover:bg-cyan-50 hover:text-gray-900">
-                              <Settings className="h-4 w-4" />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="hover:bg-blue-50 hover:text-blue-700"
+                              onClick={() => handleEditClick(vehicle)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="hover:bg-red-50 hover:text-red-700"
+                              onClick={() => setIsDeleteVehicleOpen(true)}
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
@@ -456,7 +874,9 @@ export default function CustomerDashboard() {
             {activeTab === "appointments" && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-gray-900">Appointments</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Appointments
+                  </h2>
                   <Link to="/book">
                     <Button className="bg-cyan-600 hover:bg-cyan-700 shadow-md">
                       <Plus className="h-4 w-4 mr-2" />
@@ -468,18 +888,25 @@ export default function CustomerDashboard() {
                 {currentAppointments.length > 0 ? (
                   <div className="space-y-4">
                     {currentAppointments.map((appointment) => (
-                      <Card key={appointment.id} className="border-gray-200 shadow-md bg-white">
+                      <Card
+                        key={appointment.id}
+                        className="border-gray-200 shadow-md bg-white"
+                      >
                         <CardHeader>
                           <div className="flex items-center justify-between">
                             <div>
                               <CardTitle className="flex items-center space-x-2 text-slate-900">
                                 <span>Service Appointment</span>
-                                <Badge className={
-                                  appointment.status === "in-progress" 
-                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" 
-                                    : "bg-slate-200 text-slate-700"
-                                }>
-                                  {appointment.status === "in-progress" ? "In Progress" : appointment.status}
+                                <Badge
+                                  className={
+                                    appointment.status === "in-progress"
+                                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
+                                      : "bg-slate-200 text-slate-700"
+                                  }
+                                >
+                                  {appointment.status === "in-progress"
+                                    ? "In Progress"
+                                    : appointment.status}
                                 </Badge>
                               </CardTitle>
                               <CardDescription>
@@ -492,29 +919,51 @@ export default function CustomerDashboard() {
                           <div className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                               <div>
-                                <span className="text-slate-600 font-medium">Services:</span>
+                                <span className="text-slate-600 font-medium">
+                                  Services:
+                                </span>
                                 <div className="mt-2 flex flex-wrap gap-2">
-                                  {appointment.services.map((service, index) => (
-                                    <Badge key={index} variant="outline" className="border-blue-200 text-blue-700">
-                                      {service}
-                                    </Badge>
-                                  ))}
+                                  {appointment.services.map(
+                                    (service, index) => (
+                                      <Badge
+                                        key={index}
+                                        variant="outline"
+                                        className="border-blue-200 text-blue-700"
+                                      >
+                                        {service}
+                                      </Badge>
+                                    )
+                                  )}
                                 </div>
                               </div>
                               <div>
-                                <span className="text-slate-600 font-medium">Technician:</span>
-                                <p className="font-semibold text-slate-900 mt-1">{appointment.technician}</p>
+                                <span className="text-slate-600 font-medium">
+                                  Technician:
+                                </span>
+                                <p className="font-semibold text-slate-900 mt-1">
+                                  {appointment.technician}
+                                </p>
                               </div>
                             </div>
                             {appointment.status === "in-progress" && (
                               <div className="space-y-2 pt-3 border-t border-slate-200">
                                 <div className="flex justify-between text-sm">
-                                  <span className="text-slate-600">Progress</span>
-                                  <span className="text-blue-700 font-semibold">{appointment.progress}%</span>
+                                  <span className="text-slate-600">
+                                    Progress
+                                  </span>
+                                  <span className="text-blue-700 font-semibold">
+                                    {appointment.progress}%
+                                  </span>
                                 </div>
-                                <Progress value={appointment.progress} className="h-2 bg-blue-100" />
+                                <Progress
+                                  value={appointment.progress}
+                                  className="h-2 bg-blue-100"
+                                />
                                 <p className="text-sm text-slate-600">
-                                  Estimated completion: <span className="font-medium text-slate-900">{appointment.estimatedCompletion}</span>
+                                  Estimated completion:{" "}
+                                  <span className="font-medium text-slate-900">
+                                    {appointment.estimatedCompletion}
+                                  </span>
                                 </p>
                               </div>
                             )}
@@ -529,8 +978,12 @@ export default function CustomerDashboard() {
                       <div className="bg-cyan-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                         <Calendar className="h-8 w-8 text-cyan-600" />
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No upcoming appointments</h3>
-                      <p className="text-gray-600 mb-6">Schedule your next service appointment</p>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        No upcoming appointments
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        Schedule your next service appointment
+                      </p>
                       <Link to="/book">
                         <Button className="bg-cyan-600 hover:bg-cyan-700 shadow-md">
                           Book Service
@@ -545,17 +998,25 @@ export default function CustomerDashboard() {
             {/* Service History Tab */}
             {activeTab === "history" && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-slate-900">Service History</h2>
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Service History
+                </h2>
 
                 <div className="space-y-4">
                   {serviceHistory.map((service) => (
-                    <Card key={service.id} className="border-slate-200 hover:shadow-lg transition-shadow">
+                    <Card
+                      key={service.id}
+                      className="border-slate-200 hover:shadow-lg transition-shadow"
+                    >
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <div>
                             <CardTitle className="flex items-center space-x-2 text-slate-900">
                               <span>{service.vehicle}</span>
-                              <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
+                              <Badge
+                                variant="outline"
+                                className="text-green-700 border-green-300 bg-green-50"
+                              >
                                 <CheckCircle className="h-3 w-3 mr-1" />
                                 Completed
                               </Badge>
@@ -563,14 +1024,19 @@ export default function CustomerDashboard() {
                             <CardDescription>{service.date}</CardDescription>
                           </div>
                           <div className="text-right">
-                            <p className="text-2xl font-bold text-slate-900">{service.cost}</p>
+                            <p className="text-2xl font-bold text-slate-900">
+                              {service.cost}
+                            </p>
                           </div>
                         </div>
                       </CardHeader>
                       <CardContent>
                         <div className="flex flex-wrap gap-2">
                           {service.services.map((serviceType, index) => (
-                            <Badge key={index} className="bg-slate-100 text-slate-700 hover:bg-slate-200">
+                            <Badge
+                              key={index}
+                              className="bg-slate-100 text-slate-700 hover:bg-slate-200"
+                            >
                               {serviceType}
                             </Badge>
                           ))}
@@ -585,5 +1051,5 @@ export default function CustomerDashboard() {
         </main>
       </div>
     </div>
-  )
+  );
 }
