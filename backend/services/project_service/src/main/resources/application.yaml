@@ -1,0 +1,74 @@
+server.port: 8085
+
+spring:
+  application:
+    name: RevUp-Project-Service
+  datasource:
+    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?prepareThreshold=0
+    username: postgres.oyuwuxtdmvyzfngndplz
+    password: "05102002"
+    hikari:
+      maximum-pool-size: 2
+      minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 600000
+      pool-name: ProjectServiceHikariPool
+      leak-detection-threshold: 60000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+# Swagger/OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+    display-request-duration: true
+    doc-expansion: none
+  show-actuator: false
+
+
+user:
+  service:
+    url: http://localhost:8083
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+eureka:
+client:
+  serviceUrl:
+    defaultZone: "http://localhost:8761/eureka/"
+  initialInstanceInfoReplicationIntervalSeconds: 5
+  registryFetchIntervalSeconds: 5
+instance:
+  preferIpAddress: true
+  leaseRenewalIntervalInSeconds: 5
+  leaseExpirationDurationInSeconds: 5      
+
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: no_eureka
+
+eureka:
+  client:
+    enabled: false

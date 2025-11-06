@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/appointment-services")
+@RequestMapping("/api/v1/appointment-services")
 @RequiredArgsConstructor
 public class AppointmentServiceController {
 

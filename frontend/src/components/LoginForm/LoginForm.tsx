@@ -11,6 +11,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { logIn, logInWithGoogle, passwordReset } from "../../firebase/auth"
 import { getFirebaseErrorMessage } from "../../firebase/errorUtils"
 import { useAuth } from "../../contexts/authContext/authContext"
+import { getUserByFirebaseUID } from "../../services/userService"
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -22,7 +23,7 @@ export function LoginForm() {
     email: "",
     password: "",
   })
-  const { userLoggedIn } = useAuth()
+  const { userLoggedIn, setUserData, setAccessToken } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,9 +33,20 @@ export function LoginForm() {
     setSuccessMessage("")
 
     try {
-      await logIn(formData.email, formData.password)
+      const userCredential = await logIn(formData.email, formData.password)
+      const token = await userCredential.user.getIdToken()
+      
+      const dbUser = await getUserByFirebaseUID(userCredential.user.uid, token)
+      setUserData(dbUser)
+      setAccessToken(token)
+      
       console.log("Login successful!")
-      navigate('/dashboard')
+      
+      if (dbUser.role === 'TECHNICIAN') {
+        navigate('/technician-dashboard')
+      } else {
+        navigate('/overview')
+      }
     } catch (err: any) {
       setError(getFirebaseErrorMessage(err))
       console.error("Login error:", err)
@@ -49,9 +61,20 @@ export function LoginForm() {
     setSuccessMessage("")
 
     try {
-      await logInWithGoogle()
+      const result = await logInWithGoogle()
+      const token = await result.user.getIdToken()
+      
+      const dbUser = await getUserByFirebaseUID(result.user.uid, token)
+      setUserData(dbUser)
+      setAccessToken(token)
+      
       console.log("Google sign-in successful!")
-      navigate('/dashboard')
+      
+      if (dbUser.role === 'TECHNICIAN') {
+        navigate('/technician-dashboard')
+      } else {
+        navigate('/overview')
+      }
     } catch (err: any) {
       setError(getFirebaseErrorMessage(err))
       console.error("Google sign-in error:", err)

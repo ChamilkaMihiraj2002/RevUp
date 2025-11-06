@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: SQ1AI-EUREKA-SERVER
+    name: RevUp-EUREKA-SERVER
 
 ---
 spring:

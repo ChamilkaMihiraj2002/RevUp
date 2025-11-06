@@ -13,6 +13,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 
 @Slf4j
@@ -47,6 +50,20 @@ public class AppointmentServiceImpl implements AppointmentServiceInterface {
     @Override
     public Flux<AppointmentResponse> getAllAppointments() {
         return Flux.defer(() -> Flux.fromIterable(appointmentRepository.findAll()))
+                .map(appointmentMapper::toResponse)
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    public Flux<AppointmentResponse> getAppointmentsByCustomerId(Long customerId) {
+        return Flux.defer(() -> Flux.fromIterable(appointmentRepository.findByCustomerId(customerId)))
+                .map(appointmentMapper::toResponse)
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    public Flux<AppointmentResponse> getAppointmentsByVehicleId(Long vehicleId) {
+        return Flux.defer(() -> Flux.fromIterable(appointmentRepository.findByVehicleId(vehicleId)))
                 .map(appointmentMapper::toResponse)
                 .subscribeOn(Schedulers.boundedElastic());
     }
@@ -90,5 +107,40 @@ public class AppointmentServiceImpl implements AppointmentServiceInterface {
             }
             appointmentRepository.deleteById(id);
         }).subscribeOn(Schedulers.boundedElastic()).then();
+    }
+
+    @Override
+    public Mono<SlotAvailabilityResponse> checkSlotAvailability(LocalDate date, LocalTime time) {
+        return Mono.fromCallable(() -> {
+            // Maximum number of concurrent appointments (5 technicians)
+            final int MAX_CAPACITY = 5;
+            
+            // Calculate start and end time for the 2-hour slot
+            LocalDateTime slotStart = LocalDateTime.of(date, time);
+            LocalDateTime slotEnd = slotStart.plusHours(2);
+            
+            // Convert to OffsetDateTime for database query
+            var startOffset = slotStart.atOffset(ZoneOffset.UTC);
+            var endOffset = slotEnd.atOffset(ZoneOffset.UTC);
+            
+            // Count appointments in this time slot (excluding CANCELLED and COMPLETED)
+            long bookedCount = appointmentRepository.findByScheduledBetween(startOffset, endOffset)
+                    .stream()
+                    .filter(apt -> !apt.getStatus().name().equals("CANCELLED") && 
+                                   !apt.getStatus().name().equals("COMPLETED"))
+                    .count();
+            
+            boolean available = bookedCount < MAX_CAPACITY;
+            String message = available 
+                    ? String.format("%d slots available", MAX_CAPACITY - bookedCount)
+                    : "Slot is full";
+            
+            return SlotAvailabilityResponse.builder()
+                    .available(available)
+                    .bookedCount((int) bookedCount)
+                    .maxCapacity(MAX_CAPACITY)
+                    .message(message)
+                    .build();
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 }

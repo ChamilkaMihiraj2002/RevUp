@@ -11,6 +11,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { signUp, logInWithGoogle } from "../../firebase/auth"
 import { getFirebaseErrorMessage } from "../../firebase/errorUtils"
 import { useAuth } from "../../contexts/authContext/authContext"
+import { registerUser, getUserByFirebaseUID } from "../../services/userService"
 
 export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }) {
   const [showPassword, setShowPassword] = useState(false)
@@ -22,10 +23,11 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    mobile: "",
     password: "",
     confirmPassword: "",
   })
-  const { userLoggedIn } = useAuth()
+  const { userLoggedIn, setUserData, setAccessToken } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,13 +44,27 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
       return
     }
 
+    if (!/^\d{10}$/.test(formData.mobile)) {
+      setError("Mobile number must be exactly 10 digits.")
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      await signUp(formData.email, formData.password)
+      const userCredential = await signUp(formData.email, formData.password)
+      const firebaseUID = userCredential.user.uid
+      
+      await registerUser({
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.mobile,
+        role: "CUSTOMER",
+        firebaseUID: firebaseUID
+      })
+
       console.log("Sign-up successful!")
       setSuccessMessage("Account created successfully! Please log in.")
-      // Switch to login form after successful signup
       setTimeout(() => {
         onSwitchToLogin?.()
       }, 2000)
@@ -65,9 +81,24 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
     setError("")
 
     try {
-      await logInWithGoogle()
+      const result = await logInWithGoogle()
+      const user = result.user
+      const token = await user.getIdToken()
+      
+      await registerUser({
+        name: user.displayName || "Google User",
+        email: user.email || "",
+        phone: user.phoneNumber || "",
+        role: "CUSTOMER",
+        firebaseUID: user.uid
+      })
+      
+      const dbUser = await getUserByFirebaseUID(user.uid, token)
+      setUserData(dbUser)
+      setAccessToken(token)
+
       console.log("Google sign-in successful!")
-      navigate('/dashboard')
+      navigate('/overview')
     } catch (err: any) {
       setError(getFirebaseErrorMessage(err))
       console.error("Google sign-in error:", err)
@@ -136,6 +167,23 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
               required
+              className="h-11"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="mobile" className="text-sm font-medium">
+              Mobile Number
+            </Label>
+            <Input
+              id="mobile"
+              type="tel"
+              placeholder="Enter 10 digit mobile number"
+              value={formData.mobile}
+              onChange={(e) => handleInputChange("mobile", e.target.value)}
+              required
+              pattern="[0-9]{10}"
+              maxLength={10}
               className="h-11"
             />
           </div>

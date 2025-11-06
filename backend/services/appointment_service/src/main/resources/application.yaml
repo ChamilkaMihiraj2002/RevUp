@@ -1,16 +1,12 @@
-server.port: 8083
+server.port: 8086
 
 spring:
   application:
     name: RevUp-Appointment-Service
   datasource:
-#    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres
-#    username: postgres.oyuwuxtdmvyzfngndplz
-#    password: "05102002"
-
-    url: jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true
-    username: postgres.pomermxliroehfuuroqk
-    password: "ChamilkaM@2002"
+    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
+    username: postgres.oyuwuxtdmvyzfngndplz
+    password: "05102002"
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
@@ -26,12 +22,30 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+eureka:
+client:
+  serviceUrl:
+    defaultZone: "http://localhost:8761/eureka/"
+  initialInstanceInfoReplicationIntervalSeconds: 5
+  registryFetchIntervalSeconds: 5
+instance:
+  preferIpAddress: true
+  leaseRenewalIntervalInSeconds: 5
+  leaseExpirationDurationInSeconds: 5
+
 
 ---
 spring:
   config:
     activate:
-      on-profile: dev, no_eureka
+      on-profile: no_eureka
 
 eureka:
   client:
