@@ -7,7 +7,16 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+        // use the browser-friendly process shim
+       process: 'process/browser',
       "@": fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+    define: {
+        // ensure references to process.env don't blow up
+        'process.env': {},
+    },
+    optimizeDeps: {
+        include: ['process'],
+    },
 })

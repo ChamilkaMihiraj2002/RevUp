@@ -21,6 +21,7 @@
     "date-fns": "^4.1.0",
     "firebase": "^12.3.0",
     "lucide-react": "^0.454.0",
+    "next": "^16.0.1",
     "react": "^19.1.1",
     "react-day-picker": "^9.11.1",
     "react-dom": "^19.1.1",

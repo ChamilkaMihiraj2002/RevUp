@@ -4,10 +4,9 @@ import  Home  from "@/pages/Home/home"
 import { Dashboard } from "@/pages/Dashboard"
 import  Overview from "@/pages/Overview/overview"
 import  Book from "@/pages/Overview/book"
-
-
-
 import { useAuth } from "@/contexts/authContext/authContext"
+import AdminDashboard from "@/pages/admin/AdminDashboard.tsx"
+import TechnicianDashboard from "@/pages/technician/TechnicianDashboard.tsx";
 
 function App() {
   const { userLoggedIn, loading } = useAuth()
@@ -40,6 +39,14 @@ function App() {
           path="/book"
           element={userLoggedIn ? <Book /> : <Navigate to="/login" replace />}
         />
+          <Route
+              path="/admin-dashboard"
+              element={userLoggedIn ? <AdminDashboard /> : <Navigate to="/" replace />}
+              />
+          <Route
+              path="/technician-dashboard"
+              element={userLoggedIn ? <TechnicianDashboard /> : <Navigate to="/" replace />}
+          />
       </Routes>
     </Router>
   )
