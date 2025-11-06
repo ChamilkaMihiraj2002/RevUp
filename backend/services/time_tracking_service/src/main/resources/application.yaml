@@ -57,13 +57,13 @@ spring:
   application:
     name: RevUp-User-Service
   datasource:
-    # url: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true
-    # username: postgres.bpswqweiwbacnoxkzrbc
-    # password: "05102002"
+    url: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+    username: postgres.bpswqweiwbacnoxkzrbc
+    password: "05102002"
 
-    url: jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true
-    username: postgres.pomermxliroehfuuroqk
-    password: "ChamilkaM@2002"
+    # url: jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true
+    # username: postgres.pomermxliroehfuuroqk
+    # password: "ChamilkaM@2002"
 
     hikari:
       maximum-pool-size: 10
