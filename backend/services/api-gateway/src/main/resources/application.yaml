@@ -1,0 +1,115 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          # User Service Routes
+          - id: user-service
+            uri: lb://RevUp-User-Service
+            predicates:
+              - Path=/api/v1/users/**
+          
+          # Vehicle Service Routes
+          - id: vehicle-service
+            uri: lb://RevUp-Vehicle-Service
+            predicates:
+              - Path=/api/v1/vehicles/**
+
+          - id: project-service
+            uri: lb://RevUp-Project-Service
+            predicates:
+              - Path=/api/v1/projects/**  
+   
+
+          - id: appointment-service
+            uri: lb://RevUp-Appointment-Service
+            predicates:
+              - Path=/api/v1/appointment-services/**
+
+          - id: appointment
+            uri: lb://RevUp-Appointment-Service
+            predicates:
+              - Path=/api/v1/appointments/**
+
+          - id: appointment-service-type
+            uri: lb://RevUp-Appointment-Service
+            predicates:
+              - Path=/api/v1/service-types/**
+
+          # Eureka Server Routes (Optional - for monitoring)
+          - id: eureka-server
+            uri: http://localhost:8761
+            predicates:
+              - Path=/eureka/**
+      
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: false
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    registerWithEureka: true
+    fetchRegistry: true
+  instance:
+    preferIpAddress: true
+    instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.loadbalancer: DEBUG
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+# Development-specific logging
+logging:
+  level:
+    root: INFO
+    com.revup.api_gateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.loadbalancer: DEBUG
+    org.springframework.web: DEBUG
+
+# Development-specific gateway configuration
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+# Enable actuator endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
