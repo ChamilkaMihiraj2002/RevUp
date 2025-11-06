@@ -13,4 +13,6 @@ public interface ServiceTypeService {
     Mono<List<ServiceTypeResponse>> getAll();
     Mono<Void> deleteById(Long id);
     Mono<ServiceTypeResponse> update(Long id, UpdateServiceTypeRequest request);
+
+    Mono<List<ServiceTypeResponse>> findAll();
 }
