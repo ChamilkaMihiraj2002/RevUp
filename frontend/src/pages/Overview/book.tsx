@@ -1,125 +1,158 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axios from "axios"
 import { Button } from "@/components/UI/Button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/UI/Card"
 import { Badge } from "@/components/UI/Badge"
 import { Checkbox } from "@/components/UI/Checkbox"
 import { Textarea } from "@/components/UI/Textarea"
+import { Label } from "@/components/UI/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/UI/Select"
 import { Calendar } from "@/components/UI/Calendar"
 import { Car, Clock, ArrowLeft, CheckCircle, Wrench, Shield, Zap } from "lucide-react"
 import { Link } from "react-router-dom"
+import { useAuth } from "@/contexts/authContext/authContext"
+import { getVehiclesByUserId, type VehicleResponse } from "@/services/vehicleService"
+import { getAllServiceTypes, type ServiceTypeResponse } from "@/services/serviceTypeService"
+import { createAppointment, checkSlotAvailability, type SlotAvailabilityResponse } from "@/services/appointmentService"
 
 export default function BookServicePage() {
+  const { userData, accessToken } = useAuth()
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [selectedTime, setSelectedTime] = useState("")
   const [selectedVehicle, setSelectedVehicle] = useState("")
   const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [customServiceText, setCustomServiceText] = useState("")
   const [notes, setNotes] = useState("")
   const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  
+  // Real data from API
+  const [vehicles, setVehicles] = useState<VehicleResponse[]>([])
+  const [services, setServices] = useState<ServiceTypeResponse[]>([])
+  const [slotAvailability, setSlotAvailability] = useState<Record<string, SlotAvailabilityResponse>>({})
 
-  // Mock data
-  const vehicles = [
-    { id: "1", name: "2020 Toyota Corolla", plate: "ABC-123" },
-    { id: "2", name: "2019 Honda Civic", plate: "XYZ-789" },
-  ]
+  // Fetch vehicles and services on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!userData?.userId || !accessToken) return
+      
+      try {
+        setLoading(true)
+        
+        // Fetch vehicles
+        console.log('Fetching vehicles for user:', userData.userId)
+        const vehiclesData = await getVehiclesByUserId(userData.userId, accessToken)
+        console.log('Vehicles fetched:', vehiclesData)
+        setVehicles(vehiclesData || [])
+        
+        // Fetch services
+        console.log('Fetching services...')
+        const servicesData = await getAllServiceTypes(accessToken)
+        console.log('Services fetched:', servicesData)
+        setServices(servicesData || [])
+        
+      } catch (error) {
+        console.error('Error fetching data:', error)
+        // Only show error if it's a real network/server error, not empty data
+        if (axios.isAxiosError(error)) {
+          const errorMsg = error.response?.data?.message || error.message
+          console.error('API Error:', errorMsg, 'Status:', error.response?.status)
+          alert(`Failed to load data: ${errorMsg}. Please refresh the page.`)
+        } else {
+          alert('Failed to load data. Please refresh the page.')
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchData()
+  }, [userData, accessToken])
 
-  const services = [
-    {
-      id: "oil-change",
-      name: "Oil Change",
-      duration: "45 min",
-  price: "RS.45",
-      description: "Full synthetic oil change with filter replacement",
-      category: "maintenance",
-    },
-    {
-      id: "tire-rotation",
-      name: "Tire Rotation",
-      duration: "30 min",
-  price: "RS.25",
-      description: "Rotate tires for even wear and extended life",
-      category: "maintenance",
-    },
-    {
-      id: "brake-inspection",
-      name: "Brake Inspection",
-      duration: "60 min",
-  price: "RS.75",
-      description: "Complete brake system inspection and testing",
-      category: "safety",
-    },
-    {
-      id: "ac-service",
-      name: "AC Service",
-      duration: "90 min",
-  price: "RS.120",
-      description: "Air conditioning system check and refrigerant top-up",
-      category: "comfort",
-    },
-    {
-      id: "battery-test",
-      name: "Battery Test",
-      duration: "20 min",
-  price: "RS.15",
-      description: "Battery health check and terminal cleaning",
-      category: "electrical",
-    },
-    {
-      id: "diagnostic",
-      name: "Diagnostic Scan",
-      duration: "45 min",
-  price: "RS.85",
-      description: "Computer diagnostic scan for error codes",
-      category: "electrical",
-    },
-  ]
+  // Check slot availability when date changes
+  useEffect(() => {
+    const checkAvailability = async () => {
+      if (!selectedDate || !accessToken) return
+      
+      const dateStr = selectedDate.toISOString().split('T')[0]
+      const availability: Record<string, SlotAvailabilityResponse> = {}
+      
+      for (const timeSlot of timeSlots) {
+        try {
+          const timeStr = convertTo24Hour(timeSlot)
+          const result = await checkSlotAvailability(dateStr, timeStr, accessToken)
+          availability[timeSlot] = result
+        } catch (error) {
+          console.error(`Error checking availability for ${timeSlot}:`, error)
+        }
+      }
+      
+      setSlotAvailability(availability)
+    }
+    
+    checkAvailability()
+  }, [selectedDate, accessToken])
 
+  // 2-hour time slots
   const timeSlots = [
     "8:00 AM",
-    "8:30 AM",
-    "9:00 AM",
-    "9:30 AM",
     "10:00 AM",
-    "10:30 AM",
-    "11:00 AM",
-    "11:30 AM",
-    "1:00 PM",
-    "1:30 PM",
+    "12:00 PM",
     "2:00 PM",
-    "2:30 PM",
-    "3:00 PM",
-    "3:30 PM",
     "4:00 PM",
-    "4:30 PM",
   ]
+
+  // Helper function to convert 12-hour format to 24-hour format
+  const convertTo24Hour = (time12h: string): string => {
+    const [time, period] = time12h.split(' ')
+    let [hours, minutes] = time.split(':')
+    
+    if (period === 'PM' && hours !== '12') {
+      hours = String(Number.parseInt(hours) + 12)
+    }
+    if (period === 'AM' && hours === '12') {
+      hours = '00'
+    }
+    
+    return `${hours}:${minutes}:00`
+  }
 
   const handleServiceToggle = (serviceId: string) => {
     setSelectedServices((prev) =>
       prev.includes(serviceId) ? prev.filter((id) => id !== serviceId) : [...prev, serviceId],
     )
+    // Clear custom text if "other" is deselected
+    if (serviceId === "other" && selectedServices.includes("other")) {
+      setCustomServiceText("")
+    }
   }
 
   const getSelectedServicesDetails = () => {
-    return services.filter((service) => selectedServices.includes(service.id))
+    return services.filter((service) => selectedServices.includes(String(service.serviceTypeId)))
   }
 
   const getTotalDuration = () => {
     const selectedServicesDetails = getSelectedServicesDetails()
-    return selectedServicesDetails.reduce((total, service) => {
-      const duration = Number.parseInt(service.duration)
-      return total + duration
+    const total = selectedServicesDetails.reduce((total, service) => {
+      return total + service.baseDurationMinutes
     }, 0)
+    // "Other" service assumed to be 60 minutes
+    if (selectedServices.includes("other")) {
+      return total + 60
+    }
+    return total
   }
 
   const getTotalPrice = () => {
     const selectedServicesDetails = getSelectedServicesDetails()
-    return selectedServicesDetails.reduce((total, service) => {
-      // Strip non-numeric characters (handles formats like "RS.120" or "$120")
-      const numeric = Number.parseFloat(service.price.replace(/[^0-9.]/g, "")) || 0
-      return total + numeric
+    const total = selectedServicesDetails.reduce((total, service) => {
+      return total + service.basePrice
     }, 0)
+    // "Other" service has no fixed price
+    return total
   }
 
   const getCategoryIcon = (category: string) => {
@@ -148,16 +181,41 @@ export default function BookServicePage() {
     }
   }
 
-  const handleBooking = () => {
-    // Handle booking logic here
-    console.log({
-      vehicle: selectedVehicle,
-      date: selectedDate,
-      time: selectedTime,
-      services: selectedServices,
-      notes,
-    })
-    setStep(4) // Show confirmation
+  const handleBooking = async () => {
+    if (!userData?.userId || !accessToken || !selectedDate || !selectedTime || !selectedVehicle) {
+      alert("Missing required information")
+      return
+    }
+
+    try {
+      setSubmitting(true)
+      
+      // Convert selected date and time to ISO format
+      const timeStr = convertTo24Hour(selectedTime)
+      const [hours, minutes] = timeStr.split(':')
+      
+      const startDateTime = new Date(selectedDate)
+      startDateTime.setHours(Number.parseInt(hours), Number.parseInt(minutes), 0, 0)
+      
+      // End time is 2 hours later
+      const endDateTime = new Date(startDateTime)
+      endDateTime.setHours(startDateTime.getHours() + 2)
+      
+      const appointmentRequest = {
+        customerId: userData.userId,
+        vehicleId: Number.parseInt(selectedVehicle),
+        scheduledStart: startDateTime.toISOString(),
+        scheduledEnd: endDateTime.toISOString()
+      }
+      
+      await createAppointment(appointmentRequest, accessToken)
+      setStep(4) // Show confirmation
+    } catch (error) {
+      console.error("Error creating appointment:", error)
+      alert("Failed to book appointment. Please try again.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (step === 4) {
@@ -198,7 +256,7 @@ export default function BookServicePage() {
                   <div>
                     <span className="text-muted-foreground">Vehicle:</span>
                     <p className="font-medium">
-                      {vehicles.find((v) => v.id === selectedVehicle)?.name || "Selected Vehicle"}
+                      {vehicles.find((v) => String(v.vehicleId) === selectedVehicle)?.model || "Selected Vehicle"}
                     </p>
                   </div>
                   <div>
@@ -212,10 +270,13 @@ export default function BookServicePage() {
                   <span className="text-muted-foreground">Services:</span>
                   <div className="flex flex-wrap gap-2 mt-1">
                     {getSelectedServicesDetails().map((service) => (
-                      <Badge key={service.id} variant="secondary">
+                      <Badge key={service.serviceTypeId} variant="secondary">
                         {service.name}
                       </Badge>
                     ))}
+                    {selectedServices.includes("other") && (
+                      <Badge variant="secondary">Custom Service</Badge>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm pt-4 border-t">
@@ -276,6 +337,15 @@ export default function BookServicePage() {
           <p className="text-lg text-gray-600 mt-2">Schedule your vehicle service appointment</p>
         </div>
 
+        {loading ? (
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading...</p>
+            </div>
+          </div>
+        ) : (
+          <>
         {/* Progress Steps */}
         <div className="flex items-center justify-center mb-8">
           <div className="flex items-center space-x-4">
@@ -336,11 +406,11 @@ export default function BookServicePage() {
                       >
                         {vehicles.map((vehicle) => (
                           <SelectItem 
-                            key={vehicle.id} 
-                            value={vehicle.id} 
+                            key={vehicle.vehicleId} 
+                            value={String(vehicle.vehicleId)} 
                             className="text-gray-700 text-base py-3 px-4 data-[highlighted]:bg-cyan-50 data-[highlighted]:text-gray-700 cursor-pointer border-b border-gray-100 last:border-0"
                           >
-                            {vehicle.name} ({vehicle.plate})
+                            {vehicle.year} {vehicle.model} ({vehicle.registrationNo})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -348,7 +418,7 @@ export default function BookServicePage() {
                     {selectedVehicle && (
                       <div className="mt-2 px-1">
                         <p className="text-base text-cyan-600">
-                          Selected: {vehicles.find(v => v.id === selectedVehicle)?.name} ({vehicles.find(v => v.id === selectedVehicle)?.plate})
+                          Selected: {vehicles.find(v => String(v.vehicleId) === selectedVehicle)?.model} ({vehicles.find(v => String(v.vehicleId) === selectedVehicle)?.registrationNo})
                         </p>
                       </div>
                     )}
@@ -363,41 +433,98 @@ export default function BookServicePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid gap-4">
-                      {services.map((service) => (
-                        <div
-                          key={service.id}
-                          className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                            selectedServices.includes(service.id)
-                              ? "border-cyan-600 bg-cyan-50"
-                              : "border-gray-200 hover:border-cyan-300"
-                          }`}
-                          onClick={() => handleServiceToggle(service.id)}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <Checkbox
-                              checked={selectedServices.includes(service.id)}
-                              onChange={() => handleServiceToggle(service.id)}
-                              className="text-cyan-600"
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center space-x-2">
-                                  <h3 className="text-lg font-medium text-gray-900">{service.name}</h3>
-                                  <Badge variant="outline" className={`text-base px-3 py-1 ${getCategoryColor(service.category)}`}>
-                                    {getCategoryIcon(service.category)}
-                                    <span className="ml-2 capitalize">{service.category}</span>
-                                  </Badge>
+                      {services.map((service) => {
+                        const serviceId = String(service.serviceTypeId)
+                        const category = service.code?.toLowerCase().includes('oil') ? 'maintenance' :
+                                        service.code?.toLowerCase().includes('brake') ? 'safety' :
+                                        service.code?.toLowerCase().includes('battery') || service.code?.toLowerCase().includes('diagnostic') ? 'electrical' :
+                                        'maintenance'
+                        
+                        return (
+                          <div
+                            key={service.serviceTypeId}
+                            className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                              selectedServices.includes(serviceId)
+                                ? "border-cyan-600 bg-cyan-50"
+                                : "border-gray-200 hover:border-cyan-300"
+                            }`}
+                            onClick={() => handleServiceToggle(serviceId)}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <Checkbox
+                                checked={selectedServices.includes(serviceId)}
+                                onChange={() => handleServiceToggle(serviceId)}
+                                className="text-cyan-600"
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center space-x-2">
+                                    <h3 className="text-lg font-medium text-gray-900">{service.name}</h3>
+                                    <Badge variant="outline" className={`text-base px-3 py-1 ${getCategoryColor(category)}`}>
+                                      {getCategoryIcon(category)}
+                                      <span className="ml-2 capitalize">{category}</span>
+                                    </Badge>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-lg font-bold text-cyan-600">RS.{service.basePrice}</p>
+                                    <p className="text-base text-gray-600">{service.baseDurationMinutes} min</p>
+                                  </div>
                                 </div>
-                                <div className="text-right">
-                                  <p className="text-lg font-bold text-cyan-600">{service.price}</p>
-                                  <p className="text-base text-gray-600">{service.duration}</p>
-                                </div>
+                                <p className="text-base text-gray-600 mt-2">{service.description}</p>
                               </div>
-                              <p className="text-base text-gray-600 mt-2">{service.description}</p>
                             </div>
                           </div>
+                        )
+                      })}
+                      
+                      {/* Other Service Option */}
+                      <div
+                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                          selectedServices.includes("other")
+                            ? "border-cyan-600 bg-cyan-50"
+                            : "border-gray-200 hover:border-cyan-300"
+                        }`}
+                        onClick={() => handleServiceToggle("other")}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <Checkbox
+                            checked={selectedServices.includes("other")}
+                            onChange={() => handleServiceToggle("other")}
+                            className="text-cyan-600"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center space-x-2">
+                                <h3 className="text-lg font-medium text-gray-900">Other Service</h3>
+                                <Badge variant="outline" className="text-base px-3 py-1 bg-gray-500/10 text-gray-600 border-gray-200">
+                                  <Wrench className="h-4 w-4" />
+                                  <span className="ml-2">Custom</span>
+                                </Badge>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-lg font-bold text-cyan-600">Contact for Quote</p>
+                              </div>
+                            </div>
+                            <p className="text-base text-gray-600 mt-2">Custom service not listed above</p>
+                            
+                            {selectedServices.includes("other") && (
+                              <div className="mt-4" onClick={(e) => e.stopPropagation()}>
+                                <Label htmlFor="customService" className="text-gray-700 mb-2 block">
+                                  Describe the service you need:
+                                </Label>
+                                <Textarea
+                                  id="customService"
+                                  value={customServiceText}
+                                  onChange={(e) => setCustomServiceText(e.target.value)}
+                                  placeholder="Please describe the service you need..."
+                                  className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                                  rows={3}
+                                />
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      ))}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -440,21 +567,39 @@ export default function BookServicePage() {
                     <CardDescription className="text-base text-gray-600">Choose your preferred time slot</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-4 gap-3">
-                      {timeSlots.map((time) => (
-                        <Button
-                          key={time}
-                          variant={selectedTime === time ? "default" : "outline"}
-                          onClick={() => setSelectedTime(time)}
-                          className={`h-12 text-base font-medium ${
-                            selectedTime === time 
-                              ? "bg-cyan-600 hover:bg-cyan-700 text-white"
-                              : "bg-white border-gray-200 text-gray-700 hover:bg-cyan-50 hover:text-cyan-700"
-                          }`}
-                        >
-                          {time}
-                        </Button>
-                      ))}
+                    <div className="grid grid-cols-5 gap-3">
+                      {timeSlots.map((time) => {
+                        const availability = slotAvailability[time]
+                        const isAvailable = availability?.available !== false
+                        const isDisabled = !isAvailable
+                        
+                        return (
+                          <div key={time} className="relative">
+                            <Button
+                              variant={selectedTime === time ? "default" : "outline"}
+                              onClick={() => !isDisabled && setSelectedTime(time)}
+                              disabled={isDisabled}
+                              className={`h-16 text-base font-medium w-full flex flex-col items-center justify-center ${
+                                selectedTime === time 
+                                  ? "bg-cyan-600 hover:bg-cyan-700 text-white"
+                                  : isDisabled
+                                  ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
+                                  : "bg-white border-gray-200 text-gray-700 hover:bg-cyan-50 hover:text-cyan-700"
+                              }`}
+                            >
+                              <span>{time}</span>
+                              {availability && (
+                                <span className={`text-xs mt-1 ${
+                                  selectedTime === time ? "text-white" : 
+                                  isAvailable ? "text-green-600" : "text-red-600"
+                                }`}>
+                                  {isAvailable ? `${availability.maxCapacity - availability.bookedCount} available` : 'Full'}
+                                </span>
+                              )}
+                            </Button>
+                          </div>
+                        )
+                      })}
                     </div>
                   </CardContent>
                 </Card>
@@ -482,7 +627,9 @@ export default function BookServicePage() {
                     <div className="grid grid-cols-2 gap-6">
                       <div>
                         <h4 className="text-lg font-medium text-gray-900 mb-2">Vehicle</h4>
-                        <p className="text-base text-gray-600">{vehicles.find((v) => v.id === selectedVehicle)?.name}</p>
+                        <p className="text-base text-gray-600">
+                          {vehicles.find((v) => String(v.vehicleId) === selectedVehicle)?.model || "Selected Vehicle"}
+                        </p>
                       </div>
                       <div>
                         <h4 className="text-lg font-medium text-gray-900 mb-2">Date & Time</h4>
@@ -496,14 +643,22 @@ export default function BookServicePage() {
                       <h4 className="font-medium mb-2">Selected Services</h4>
                       <div className="space-y-2">
                         {getSelectedServicesDetails().map((service) => (
-                          <div key={service.id} className="flex justify-between items-center">
+                          <div key={service.serviceTypeId} className="flex justify-between items-center">
                             <span>{service.name}</span>
                             <div className="text-right">
-                              <span className="font-medium">{service.price}</span>
-                              <span className="text-sm text-muted-foreground ml-2">({service.duration})</span>
+                              <span className="font-medium">RS.{service.basePrice}</span>
+                              <span className="text-sm text-muted-foreground ml-2">({service.baseDurationMinutes} min)</span>
                             </div>
                           </div>
                         ))}
+                        {selectedServices.includes("other") && (
+                          <div className="flex justify-between items-center">
+                            <span>Custom Service</span>
+                            <div className="text-right">
+                              <span className="font-medium">Contact for Quote</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -519,10 +674,12 @@ export default function BookServicePage() {
                 </Card>
 
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setStep(2)}>
+                  <Button variant="outline" onClick={() => setStep(2)} disabled={submitting}>
                     Back
                   </Button>
-                  <Button onClick={handleBooking}>Confirm Booking</Button>
+                  <Button onClick={handleBooking} disabled={submitting}>
+                    {submitting ? "Booking..." : "Confirm Booking"}
+                  </Button>
                 </div>
               </div>
             )}
@@ -541,7 +698,9 @@ export default function BookServicePage() {
                 {selectedVehicle && (
                   <div>
                     <h4 className="font-medium text-base text-gray-600 mb-1">Vehicle</h4>
-                    <p className="text-lg font-medium text-gray-900">{vehicles.find((v) => v.id === selectedVehicle)?.name}</p>
+                    <p className="text-lg font-medium text-gray-900">
+                      {vehicles.find((v) => String(v.vehicleId) === selectedVehicle)?.model || "Selected Vehicle"}
+                    </p>
                   </div>
                 )}
 
@@ -550,11 +709,17 @@ export default function BookServicePage() {
                     <h4 className="font-medium text-sm text-muted-foreground mb-2">Services</h4>
                     <div className="space-y-1">
                       {getSelectedServicesDetails().map((service) => (
-                        <div key={service.id} className="flex justify-between text-sm">
+                        <div key={service.serviceTypeId} className="flex justify-between text-sm">
                           <span>{service.name}</span>
-                          <span>{service.price}</span>
+                          <span>RS.{service.basePrice}</span>
                         </div>
                       ))}
+                      {selectedServices.includes("other") && (
+                        <div className="flex justify-between text-sm">
+                          <span>Custom Service</span>
+                          <span className="text-xs">Quote</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -576,7 +741,9 @@ export default function BookServicePage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-medium">Total Cost</span>
-                      <span className="font-bold text-primary text-lg">RS.{getTotalPrice()}</span>
+                      <span className="font-bold text-primary text-lg">
+                        {selectedServices.includes("other") ? "Contact for Quote" : `RS.${getTotalPrice()}`}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -584,6 +751,8 @@ export default function BookServicePage() {
             </Card>
           </div>
         </div>
+          </>
+        )}
       </div>
     </div>
   )

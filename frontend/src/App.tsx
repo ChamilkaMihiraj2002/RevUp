@@ -9,7 +9,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard.tsx"
 import TechnicianDashboard from "@/pages/technician/TechnicianDashboard.tsx";
 
 function App() {
-  const { userLoggedIn, loading } = useAuth()
+  const { userLoggedIn, loading, role } = useAuth()
 
   if (loading) {
     return (
@@ -26,27 +26,54 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={userLoggedIn ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+        <Route 
+          path="/login" 
+          element={
+            userLoggedIn 
+              ? role === 'TECHNICIAN' 
+                ? <Navigate to="/technician-dashboard" replace /> 
+                : <Navigate to="/overview" replace />
+              : <LoginPage />
+          } 
+        />
         <Route
           path="/dashboard"
           element={userLoggedIn ? <Dashboard /> : <Navigate to="/login" replace />}
         />
         <Route
           path="/overview"
-          element={userLoggedIn ? <Overview /> : <Navigate to="/login" replace />}
+          element={
+            userLoggedIn 
+              ? role === 'CUSTOMER' 
+                ? <Overview /> 
+                : <Navigate to="/technician-dashboard" replace />
+              : <Navigate to="/login" replace />
+          }
         />
         <Route
           path="/book"
-          element={userLoggedIn ? <Book /> : <Navigate to="/login" replace />}
+          element={
+            userLoggedIn 
+              ? role === 'CUSTOMER' 
+                ? <Book /> 
+                : <Navigate to="/technician-dashboard" replace />
+              : <Navigate to="/login" replace />
+          }
         />
-          <Route
-              path="/admin-dashboard"
-              element={userLoggedIn ? <AdminDashboard /> : <Navigate to="/" replace />}
-              />
-          <Route
-              path="/technician-dashboard"
-              element={userLoggedIn ? <TechnicianDashboard /> : <Navigate to="/" replace />}
-          />
+        <Route
+          path="/admin-dashboard"
+          element={userLoggedIn ? <AdminDashboard /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/technician-dashboard"
+          element={
+            userLoggedIn 
+              ? role === 'TECHNICIAN' 
+                ? <TechnicianDashboard /> 
+                : <Navigate to="/overview" replace />
+              : <Navigate to="/login" replace />
+          }
+        />
       </Routes>
     </Router>
   )

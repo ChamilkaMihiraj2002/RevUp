@@ -57,6 +57,26 @@
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-loadbalancer</artifactId>
   </dependency>
+  
+  <!-- Firebase Admin SDK for JWT validation -->
+  <dependency>
+    <groupId>com.google.firebase</groupId>
+    <artifactId>firebase-admin</artifactId>
+    <version>9.3.0</version>
+  </dependency>
+  
+  <!-- WebFlux WebClient for calling User Service -->
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-webflux</artifactId>
+  </dependency>
+  
+  <!-- Lombok -->
+  <dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <optional>true</optional>
+  </dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>

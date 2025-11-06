@@ -6,6 +6,8 @@ import { Button } from "@/components/UI/Button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/UI/Card"
 import { Progress } from "@/components/UI/Progress"
 import { Textarea } from "@/components/UI/Textarea"
+import { useAuth } from "@/contexts/authContext/authContext"
+import { useNavigate } from "react-router-dom"
 import {
     Car,
     Clock,
@@ -20,14 +22,26 @@ import {
     LayoutList,
     CheckSquare,
     Calendar,
+    LogOut,
 } from "lucide-react"
 import Link from "next/link"
 
 export default function TechnicianDashboard() {
+    const { userData, logout } = useAuth()
+    const navigate = useNavigate()
     const [activeTab, setActiveTab] = useState("assignments")
     const [activeTimer, setActiveTimer] = useState<string | null>(null)
     const [timers, setTimers] = useState<Record<string, number>>({})
     const [notes, setNotes] = useState<Record<string, string>>({})
+
+    const handleLogout = async () => {
+        try {
+            await logout()
+            navigate("/login")
+        } catch (error) {
+            console.error("Logout error:", error)
+        }
+    }
 
     interface Service {
         id: string
@@ -47,11 +61,6 @@ export default function TechnicianDashboard() {
         estimatedCompletion: string
         priority: "high" | "normal" | "low" | string
         customerNotes?: string
-    }
-    const technician = {
-        name: "Nimal",
-        id: "tech-001",
-        shift: "8:00 AM - 5:00 PM",
     }
 
     const assignments = [
@@ -190,14 +199,22 @@ export default function TechnicianDashboard() {
                         </div>
                         <div className="flex items-center space-x-4">
                             <div className="text-right">
-                                <p className="text-sm font-medium">{technician.name}</p>
-                                <p className="text-xs text-muted-foreground">{technician.shift}</p>
+                                <p className="text-sm font-medium">{userData?.name || "Technician"}</p>
+                                <p className="text-xs text-muted-foreground">Technician Portal</p>
                             </div>
                             <Button variant="ghost" size="sm">
                                 <User className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="sm">
                                 <Settings className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={handleLogout}
+                                className="hover:bg-red-50 hover:text-red-800 text-red-600"
+                            >
+                                <LogOut className="h-4 w-4" />
                             </Button>
                         </div>
                     </div>

@@ -29,5 +29,9 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### Firebase ###
+service-account.json
+**/service-account.json
+
 ### VS Code ###
 .vscode/

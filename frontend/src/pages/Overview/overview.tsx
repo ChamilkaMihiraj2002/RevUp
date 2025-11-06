@@ -1,32 +1,37 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useState, useEffect, useMemo } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import { CommonNavbar } from "@/components/Layout/Navbar"
 import { CommonSidebar } from "@/components/Layout/Slidebar"
 import { Button } from "@/components/UI/Button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/UI/Card"
 import { Badge } from "@/components/UI/Badge"
-import { Progress } from "@/components/UI/Progress"
 import { Input } from "@/components/UI/Input"
 import { Label } from "@/components/UI/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/UI/Select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/UI/Dialog"
+import { useAuth } from "@/contexts/authContext/authContext"
+import { getAppointmentsByCustomerId, type AppointmentResponse } from "@/services/appointmentService"
+import { getVehiclesByUserId, type VehicleResponse, createVehicle } from "@/services/vehicleService"
 import {
   Car,
   Calendar,
   Clock,
   Wrench,
   Plus,
-  User,
   Settings,
   CheckCircle,
-  AlertCircle,
   LayoutDashboard,
   History,
 } from "lucide-react"
 
 export default function CustomerDashboard() {
+  const { userData, logout, accessToken } = useAuth()
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("overview")
   const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(false)
+  const [allAppointments, setAllAppointments] = useState<AppointmentResponse[]>([])
+  const [vehicles, setVehicles] = useState<VehicleResponse[]>([])
+  const [loading, setLoading] = useState(true)
   const [newVehicle, setNewVehicle] = useState({
     make: "",
     model: "",
@@ -36,20 +41,105 @@ export default function CustomerDashboard() {
     type: ""
   })
 
-  const handleAddVehicle = (e: React.FormEvent) => {
+  // Fetch data on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!userData?.userId || !accessToken) return
+      
+      try {
+        setLoading(true)
+        
+        // Fetch appointments and vehicles in parallel
+        const [appointmentsData, vehiclesData] = await Promise.all([
+          getAppointmentsByCustomerId(userData.userId, accessToken),
+          getVehiclesByUserId(userData.userId, accessToken)
+        ])
+        
+        setAllAppointments(appointmentsData)
+        setVehicles(vehiclesData)
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchData()
+  }, [userData, accessToken])
+
+  // Filter appointments by status using useMemo for performance
+  const ongoingAppointments = useMemo(() => 
+    allAppointments.filter(apt => apt.status === 'ONGOING'),
+    [allAppointments]
+  )
+
+  const scheduledAppointments = useMemo(() => 
+    allAppointments.filter(apt => apt.status === 'SCHEDULED'),
+    [allAppointments]
+  )
+
+  const completedAppointments = useMemo(() => 
+    allAppointments.filter(apt => apt.status === 'COMPLETED'),
+    [allAppointments]
+  )
+
+  // Get next scheduled appointment
+  const nextScheduledAppointment = useMemo(() => {
+    if (scheduledAppointments.length === 0) return null
+    return scheduledAppointments
+      .sort((a, b) => new Date(a.scheduledStart).getTime() - new Date(b.scheduledStart).getTime())[0]
+  }, [scheduledAppointments])
+
+  const handleAddVehicle = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would typically make an API call to save the vehicle
-    console.log("Adding vehicle:", newVehicle)
-    setIsAddVehicleOpen(false)
-    // Reset form
-    setNewVehicle({
-      make: "",
-      model: "",
-      year: "",
-      plate: "",
-      mileage: "",
-      type: ""
-    })
+    
+    if (!userData?.userId || !accessToken) {
+      alert("User not authenticated")
+      return
+    }
+
+    try {
+      const vehicleData = {
+        model: newVehicle.model,
+        registrationNo: newVehicle.plate,
+        year: parseInt(newVehicle.year),
+        color: "", // You can add a color field to the form if needed
+        vehicleType: newVehicle.type,
+        userId: userData.userId
+      }
+
+      await createVehicle(vehicleData, accessToken)
+      
+      // Refresh vehicles list
+      const updatedVehicles = await getVehiclesByUserId(userData.userId, accessToken)
+      setVehicles(updatedVehicles)
+      
+      setIsAddVehicleOpen(false)
+      
+      // Reset form
+      setNewVehicle({
+        make: "",
+        model: "",
+        year: "",
+        plate: "",
+        mileage: "",
+        type: ""
+      })
+      
+      alert("Vehicle added successfully!")
+    } catch (error) {
+      console.error("Error adding vehicle:", error)
+      alert("Failed to add vehicle. Please try again.")
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      navigate('/login')
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
   }
 
   // Navigation items for Customer Dashboard
@@ -60,69 +150,15 @@ export default function CustomerDashboard() {
     { id: "history", label: "Service History", icon: History },
   ]
 
-  // Mock data
-  const vehicles = [
-    {
-      id: 1,
-      make: "Toyota",
-      model: "Corolla",
-      year: 2020,
-      plate: "ABC-123",
-      nextService: "2025-02-15",
-      mileage: 45000,
-    },
-    {
-      id: 2,
-      make: "Honda",
-      model: "Civic",
-      year: 2019,
-      plate: "XYZ-789",
-      nextService: "2025-03-20",
-      mileage: 52000,
-    },
-  ]
-
-  const currentAppointments = [
-    {
-      id: 1,
-      vehicleId: 1,
-      date: "2025-01-15",
-      time: "09:00 AM",
-      services: ["Oil Change", "Tire Rotation"],
-      status: "in-progress",
-      technician: "Nimal",
-      progress: 65,
-      estimatedCompletion: "11:30 AM",
-    },
-  ]
-
-  const serviceHistory = [
-    {
-      id: 1,
-      date: "2024-12-10",
-      vehicle: "Toyota Corolla",
-      services: ["Oil Change", "Brake Inspection"],
-  cost: "RS.120",
-      status: "completed",
-    },
-    {
-      id: 2,
-      date: "2024-11-05",
-      vehicle: "Honda Civic",
-      services: ["Tire Replacement"],
-  cost: "RS.280",
-      status: "completed",
-    },
-  ]
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100">
       {/* IMPORTED COMMON NAVBAR */}
       <CommonNavbar 
-        userName="Ravi"
+        userName={userData?.name || "User"}
         onNotificationClick={() => console.log("Notifications")}
         onProfileClick={() => console.log("Profile")}
         onSettingsClick={() => console.log("Settings")}
+        onLogoutClick={handleLogout}
       />
 
       <div className="flex">
@@ -134,17 +170,25 @@ export default function CustomerDashboard() {
         />
 
         {/* Main Content */}
-        {/* Main Content */}
         <main className="flex-1 min-h-[calc(100vh-64px)]">
           <div className="h-full max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12 py-8">
-            {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900">Welcome back, Ravi</h1>
-              <p className="text-lg text-gray-600 mt-2">Manage your vehicles and track service appointments</p>
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center h-96">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading your data...</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Header */}
+                <div className="mb-8">
+                  <h1 className="text-4xl font-bold text-gray-900">Welcome back, {userData?.name || "User"}</h1>
+                  <p className="text-lg text-gray-600 mt-2">Manage your vehicles and track service appointments</p>
+                </div>
 
             {/* Active Service Alert */}
-            {currentAppointments.length > 0 && (
+            {ongoingAppointments.length > 0 && (
               <Card className="mb-6 border-cyan-200 bg-white shadow-md">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -154,7 +198,9 @@ export default function CustomerDashboard() {
                       </div>
                       <div>
                         <CardTitle className="text-gray-900">Service in Progress</CardTitle>
-                        <CardDescription className="text-cyan-700">Your Toyota Corolla is currently being serviced</CardDescription>
+                        <CardDescription className="text-cyan-700">
+                          {vehicles.find(v => v.vehicleId === ongoingAppointments[0]?.vehicleId)?.model || "Your vehicle"} is currently being serviced
+                        </CardDescription>
                       </div>
                     </div>
                     <Badge className="bg-cyan-100 text-cyan-700 border-cyan-200 hover:bg-cyan-200">
@@ -164,29 +210,14 @@ export default function CustomerDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Progress</span>
-                      <span className="text-cyan-700 font-semibold">65% Complete</span>
-                    </div>
-                    <Progress value={65} className="h-2 bg-cyan-100" />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
-                        <User className="h-4 w-4 text-slate-500" />
-                        <span className="text-slate-700">Technician: <span className="font-medium">Nimal</span></span>
+                        <Calendar className="h-4 w-4 text-slate-500" />
+                        <span className="text-slate-700">Start: <span className="font-medium">{new Date(ongoingAppointments[0].scheduledStart).toLocaleString()}</span></span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4 text-slate-500" />
-                        <span className="text-slate-700">Est. completion: <span className="font-medium">11:30 AM</span></span>
-                      </div>
-                    </div>
-                    <div className="space-y-2 pt-2 border-t border-blue-100">
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <span className="text-sm text-slate-700">Oil Change Completed</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <AlertCircle className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm text-slate-700">Tire Rotation in Progress</span>
+                        <span className="text-slate-700">Est. end: <span className="font-medium">{new Date(ongoingAppointments[0].scheduledEnd).toLocaleString()}</span></span>
                       </div>
                     </div>
                   </div>
@@ -214,14 +245,14 @@ export default function CustomerDashboard() {
 
                   <Card className="hover:shadow-lg transition-shadow border-slate-200">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-slate-700">Active Services</CardTitle>
+                      <CardTitle className="text-sm font-medium text-slate-700">Scheduled Services</CardTitle>
                       <div className="bg-green-100 rounded-lg p-2">
                         <Wrench className="h-4 w-4 text-green-600" />
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold text-slate-900">{currentAppointments.length}</div>
-                      <p className="text-xs text-slate-500 mt-1">In progress</p>
+                      <div className="text-3xl font-bold text-slate-900">{scheduledAppointments.length}</div>
+                      <p className="text-xs text-slate-500 mt-1">Upcoming appointments</p>
                     </CardContent>
                   </Card>
 
@@ -233,8 +264,21 @@ export default function CustomerDashboard() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold text-slate-900">Feb 15</div>
-                      <p className="text-xs text-slate-500 mt-1">Toyota Corolla</p>
+                      {nextScheduledAppointment ? (
+                        <>
+                          <div className="text-3xl font-bold text-slate-900">
+                            {new Date(nextScheduledAppointment.scheduledStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </div>
+                          <p className="text-xs text-slate-500 mt-1">
+                            {vehicles.find(v => v.vehicleId === nextScheduledAppointment.vehicleId)?.model || "Vehicle"}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-2xl font-bold text-slate-900">None</div>
+                          <p className="text-xs text-slate-500 mt-1">No upcoming services</p>
+                        </>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
@@ -302,23 +346,23 @@ export default function CustomerDashboard() {
                       <form onSubmit={handleAddVehicle} className="space-y-4 py-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="make" className="text-gray-700">Make</Label>
-                            <Input
-                              id="make"
-                              value={newVehicle.make}
-                              onChange={(e) => setNewVehicle({...newVehicle, make: e.target.value})}
-                              placeholder="e.g., Toyota"
-                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
                             <Label htmlFor="model" className="text-gray-700">Model</Label>
                             <Input
                               id="model"
                               value={newVehicle.model}
                               onChange={(e) => setNewVehicle({...newVehicle, model: e.target.value})}
-                              placeholder="e.g., Corolla"
+                              placeholder="e.g., Toyota Corolla"
+                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="plate" className="text-gray-700">Registration Number</Label>
+                            <Input
+                              id="plate"
+                              value={newVehicle.plate}
+                              onChange={(e) => setNewVehicle({...newVehicle, plate: e.target.value})}
+                              placeholder="e.g., ABC-123"
                               className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
                               required
                             />
@@ -335,25 +379,11 @@ export default function CustomerDashboard() {
                               onChange={(e) => setNewVehicle({...newVehicle, year: e.target.value})}
                               placeholder="e.g., 2020"
                               min="1900"
-                              max="2025"
+                              max="2026"
                               className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
                               required
                             />
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="plate" className="text-gray-700">License Plate</Label>
-                            <Input
-                              id="plate"
-                              value={newVehicle.plate}
-                              onChange={(e) => setNewVehicle({...newVehicle, plate: e.target.value})}
-                              placeholder="e.g., ABC-123"
-                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="type" className="text-gray-700">Vehicle Type</Label>
                             <Select
@@ -371,19 +401,6 @@ export default function CustomerDashboard() {
                                 <SelectItem value="van">Van</SelectItem>
                               </SelectContent>
                             </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="mileage" className="text-gray-700">Current Mileage</Label>
-                            <Input
-                              id="mileage"
-                              type="number"
-                              value={newVehicle.mileage}
-                              onChange={(e) => setNewVehicle({...newVehicle, mileage: e.target.value})}
-                              placeholder="e.g., 45000"
-                              min="0"
-                              className="border-gray-200 focus:border-cyan-500 focus:ring-cyan-500"
-                              required
-                            />
                           </div>
                         </div>
 
@@ -409,45 +426,69 @@ export default function CustomerDashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {vehicles.map((vehicle) => (
-                    <Card key={vehicle.id} className="hover:shadow-md transition-all border-gray-200 bg-white">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <CardTitle className="text-slate-900">
-                              {vehicle.year} {vehicle.make} {vehicle.model}
-                            </CardTitle>
-                            <CardDescription>License: {vehicle.plate}</CardDescription>
+                  {vehicles.length > 0 ? (
+                    vehicles.map((vehicle) => {
+                      const vehicleAppointments = allAppointments.filter(apt => apt.vehicleId === vehicle.vehicleId)
+                      return (
+                        <Card key={vehicle.vehicleId} className="hover:shadow-md transition-all border-gray-200 bg-white">
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle className="text-slate-900">
+                                  {vehicle.year} {vehicle.model}
+                                </CardTitle>
+                                <CardDescription>License: {vehicle.registrationNo}</CardDescription>
+                              </div>
+                              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3">
+                                <Car className="h-6 w-6 text-blue-600" />
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              <div className="flex justify-between text-sm p-2 bg-slate-50 rounded-lg">
+                                <span className="text-slate-600">Total Appointments</span>
+                                <span className="font-semibold text-slate-900">{vehicleAppointments.length}</span>
+                              </div>
+                              <div className="flex justify-between text-sm p-2 bg-slate-50 rounded-lg">
+                                <span className="text-slate-600">Vehicle Type</span>
+                                <span className="font-semibold text-slate-900">{vehicle.vehicleType}</span>
+                              </div>
+                              <div className="flex space-x-2 pt-2">
+                                <Link to="/book" className="flex-1">
+                                  <Button variant="outline" size="sm" className="w-full border-cyan-200 text-cyan-700 hover:bg-cyan-50 hover:text-cyan-800">
+                                    Book Service
+                                  </Button>
+                                </Link>
+                                <Button variant="ghost" size="sm" className="hover:bg-cyan-50 hover:text-gray-900">
+                                  <Settings className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )
+                    })
+                  ) : (
+                    <div className="col-span-full">
+                      <Card className="border-gray-200 bg-white">
+                        <CardContent className="text-center py-12">
+                          <div className="bg-blue-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <Car className="h-8 w-8 text-blue-600" />
                           </div>
-                          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3">
-                            <Car className="h-6 w-6 text-blue-600" />
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          <div className="flex justify-between text-sm p-2 bg-slate-50 rounded-lg">
-                            <span className="text-slate-600">Mileage</span>
-                            <span className="font-semibold text-slate-900">{vehicle.mileage.toLocaleString()} miles</span>
-                          </div>
-                          <div className="flex justify-between text-sm p-2 bg-slate-50 rounded-lg">
-                            <span className="text-slate-600">Next Service</span>
-                            <span className="font-semibold text-slate-900">{vehicle.nextService}</span>
-                          </div>
-                          <div className="flex space-x-2 pt-2">
-                            <Link to="/book" className="flex-1">
-                              <Button variant="outline" size="sm" className="w-full border-cyan-200 text-cyan-700 hover:bg-cyan-50 hover:text-cyan-800">
-                                Book Service
-                              </Button>
-                            </Link>
-                            <Button variant="ghost" size="sm" className="hover:bg-cyan-50 hover:text-gray-900">
-                              <Settings className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">No vehicles registered</h3>
+                          <p className="text-gray-600 mb-6">Add your first vehicle to start booking services</p>
+                          <Button 
+                            onClick={() => setIsAddVehicleOpen(true)}
+                            className="bg-cyan-600 hover:bg-cyan-700 shadow-md"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Your First Vehicle
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -465,63 +506,56 @@ export default function CustomerDashboard() {
                   </Link>
                 </div>
 
-                {currentAppointments.length > 0 ? (
+                {allAppointments.length > 0 ? (
                   <div className="space-y-4">
-                    {currentAppointments.map((appointment) => (
-                      <Card key={appointment.id} className="border-gray-200 shadow-md bg-white">
-                        <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <CardTitle className="flex items-center space-x-2 text-slate-900">
-                                <span>Service Appointment</span>
-                                <Badge className={
-                                  appointment.status === "in-progress" 
-                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" 
-                                    : "bg-slate-200 text-slate-700"
-                                }>
-                                  {appointment.status === "in-progress" ? "In Progress" : appointment.status}
-                                </Badge>
-                              </CardTitle>
-                              <CardDescription>
-                                {appointment.date} at {appointment.time}
-                              </CardDescription>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    {allAppointments.map((appointment) => {
+                      const vehicle = vehicles.find(v => v.vehicleId === appointment.vehicleId)
+                      return (
+                        <Card key={appointment.appointmentId} className="border-gray-200 shadow-md bg-white">
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
                               <div>
-                                <span className="text-slate-600 font-medium">Services:</span>
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                  {appointment.services.map((service, index) => (
-                                    <Badge key={index} variant="outline" className="border-blue-200 text-blue-700">
-                                      {service}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                              <div>
-                                <span className="text-slate-600 font-medium">Technician:</span>
-                                <p className="font-semibold text-slate-900 mt-1">{appointment.technician}</p>
+                                <CardTitle className="flex items-center space-x-2 text-slate-900">
+                                  <span>Service Appointment</span>
+                                  <Badge className={
+                                    appointment.status === "ONGOING" 
+                                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" 
+                                      : appointment.status === "COMPLETED"
+                                      ? "bg-green-600 text-white"
+                                      : appointment.status === "CANCELLED"
+                                      ? "bg-red-600 text-white"
+                                      : "bg-purple-600 text-white"
+                                  }>
+                                    {appointment.status}
+                                  </Badge>
+                                </CardTitle>
+                                <CardDescription>
+                                  {new Date(appointment.scheduledStart).toLocaleString()}
+                                </CardDescription>
                               </div>
                             </div>
-                            {appointment.status === "in-progress" && (
-                              <div className="space-y-2 pt-3 border-t border-slate-200">
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-slate-600">Progress</span>
-                                  <span className="text-blue-700 font-semibold">{appointment.progress}%</span>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="text-slate-600 font-medium">Vehicle:</span>
+                                  <p className="font-semibold text-slate-900 mt-1">
+                                    {vehicle ? `${vehicle.year} ${vehicle.model}` : 'Unknown'}
+                                  </p>
                                 </div>
-                                <Progress value={appointment.progress} className="h-2 bg-blue-100" />
-                                <p className="text-sm text-slate-600">
-                                  Estimated completion: <span className="font-medium text-slate-900">{appointment.estimatedCompletion}</span>
-                                </p>
+                                <div>
+                                  <span className="text-slate-600 font-medium">Scheduled End:</span>
+                                  <p className="font-semibold text-slate-900 mt-1">
+                                    {new Date(appointment.scheduledEnd).toLocaleString()}
+                                  </p>
+                                </div>
                               </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )
+                    })}
                   </div>
                 ) : (
                   <Card className="border-gray-200 bg-white">
@@ -547,39 +581,61 @@ export default function CustomerDashboard() {
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-slate-900">Service History</h2>
 
-                <div className="space-y-4">
-                  {serviceHistory.map((service) => (
-                    <Card key={service.id} className="border-slate-200 hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <CardTitle className="flex items-center space-x-2 text-slate-900">
-                              <span>{service.vehicle}</span>
-                              <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Completed
-                              </Badge>
-                            </CardTitle>
-                            <CardDescription>{service.date}</CardDescription>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-slate-900">{service.cost}</p>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                          {service.services.map((serviceType, index) => (
-                            <Badge key={index} className="bg-slate-100 text-slate-700 hover:bg-slate-200">
-                              {serviceType}
-                            </Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                {completedAppointments.length > 0 ? (
+                  <div className="space-y-4">
+                    {completedAppointments.map((appointment) => {
+                      const vehicle = vehicles.find(v => v.vehicleId === appointment.vehicleId)
+                      return (
+                        <Card key={appointment.appointmentId} className="border-slate-200 hover:shadow-lg transition-shadow">
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle className="flex items-center space-x-2 text-slate-900">
+                                  <span>{vehicle ? `${vehicle.year} ${vehicle.model}` : 'Unknown Vehicle'}</span>
+                                  <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Completed
+                                  </Badge>
+                                </CardTitle>
+                                <CardDescription>
+                                  {new Date(appointment.scheduledStart).toLocaleDateString()}
+                                </CardDescription>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-medium text-slate-600">Appointment #{appointment.appointmentId}</p>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-slate-600">Started:</span>
+                                <span className="font-medium text-slate-900">{new Date(appointment.scheduledStart).toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-slate-600">Completed:</span>
+                                <span className="font-medium text-slate-900">{new Date(appointment.scheduledEnd).toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <Card className="border-slate-200">
+                    <CardContent className="text-center py-12">
+                      <div className="bg-slate-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <History className="h-8 w-8 text-slate-600" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">No service history</h3>
+                      <p className="text-slate-600">Your completed appointments will appear here</p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
+            )}
+              </>
             )}
           </div>
         </main>
