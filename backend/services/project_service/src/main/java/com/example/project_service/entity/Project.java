@@ -18,6 +18,12 @@ public class Project {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "vehicle_id")
+    private Long vehicleId;
+
+    @Column(name = "technician_id")
+    private Long technicianId;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
@@ -27,6 +33,9 @@ public class Project {
 
     @Column(name = "estimate_time")
     private Integer estimateTime; // in hours
+
+    @Column(name = "estimated_amount", precision = 10, scale = 2)
+    private java.math.BigDecimal estimatedAmount;
 
     @Column(name = "start_time")
     private LocalDateTime startTime;
@@ -71,6 +80,22 @@ public class Project {
         this.userId = userId;
     }
 
+    public Long getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(Long vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    public Long getTechnicianId() {
+        return technicianId;
+    }
+
+    public void setTechnicianId(Long technicianId) {
+        this.technicianId = technicianId;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -93,6 +118,14 @@ public class Project {
 
     public void setEstimateTime(Integer estimateTime) {
         this.estimateTime = estimateTime;
+    }
+
+    public java.math.BigDecimal getEstimatedAmount() {
+        return estimatedAmount;
+    }
+
+    public void setEstimatedAmount(java.math.BigDecimal estimatedAmount) {
+        this.estimatedAmount = estimatedAmount;
     }
 
     public LocalDateTime getStartTime() {

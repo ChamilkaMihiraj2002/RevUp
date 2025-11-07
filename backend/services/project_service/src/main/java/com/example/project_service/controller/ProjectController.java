@@ -2,6 +2,7 @@ package com.example.project_service.controller;
 
 import com.example.project_service.dto.request.CreateProjectRequest;
 import com.example.project_service.dto.request.UpdateProjectRequest;
+import com.example.project_service.dto.request.AcceptProjectRequest;
 import com.example.project_service.dto.ProjectDto;
 import com.example.project_service.Enum.ProjectStatus;
 import com.example.project_service.service.ProjectService;
@@ -44,8 +45,8 @@ public class ProjectController {
             @Valid @RequestBody CreateProjectRequest request) {
         log.info("Creating new project for user: {}", request.getUserId());
         return projectService.createProject(request)
-                .map(project -> new ResponseEntity<>(project, HttpStatus.CREATED))
-                .doOnSuccess(project -> log.info("Project created successfully with id: {}", project.getBody().getProjectId()));
+                .doOnSuccess(project -> log.info("Project created successfully with id: {}", project.getProjectId()))
+                .map(project -> new ResponseEntity<>(project, HttpStatus.CREATED));
     }
 
     @GetMapping("/{id}")
@@ -174,5 +175,73 @@ public class ProjectController {
         log.info("Checking if project exists with id: {}", projectId);
         return projectService.projectExists(projectId)
                 .map(ResponseEntity::ok);
+    }
+
+    @GetMapping("/pending")
+    @Operation(summary = "Get all pending unassigned projects", 
+            description = "Retrieves all projects with PENDING status that have no technician assigned")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Projects retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Flux<ProjectDto> getPendingUnassignedProjects() {
+        log.info("Fetching all pending unassigned projects");
+        return projectService.getPendingUnassignedProjects();
+    }
+
+    @GetMapping("/technician/{technicianId}")
+    @Operation(summary = "Get projects by technician ID", 
+            description = "Retrieves all projects assigned to a specific technician")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Projects retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Flux<ProjectDto> getProjectsByTechnicianId(
+            @Parameter(description = "Technician ID", required = true, example = "1")
+            @PathVariable Long technicianId) {
+        log.info("Fetching projects for technician: {}", technicianId);
+        return projectService.getProjectsByTechnicianId(technicianId);
+    }
+
+    @GetMapping("/technician/{technicianId}/status/{status}")
+    @Operation(summary = "Get projects by technician ID and status", 
+            description = "Retrieves all projects for a specific technician with a specific status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Projects retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid status provided"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Flux<ProjectDto> getProjectsByTechnicianIdAndStatus(
+            @Parameter(description = "Technician ID", required = true, example = "1")
+            @PathVariable Long technicianId,
+            @Parameter(description = "Project status", required = true, 
+                    example = "IN_PROGRESS",
+                    schema = @Schema(allowableValues = {"PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED", "ON_HOLD"}))
+            @PathVariable String status) {
+        log.info("Fetching projects for technician: {} with status: {}", technicianId, status);
+        ProjectStatus projectStatus = ProjectStatus.valueOf(status.toUpperCase());
+        return projectService.getProjectsByTechnicianIdAndStatus(technicianId, projectStatus);
+    }
+
+    @PostMapping("/{id}/accept")
+    @Operation(summary = "Accept a project", 
+            description = "Technician accepts a pending project with estimated amount and time")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Project accepted successfully",
+                    content = @Content(schema = @Schema(implementation = ProjectDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request or project already assigned"),
+            @ApiResponse(responseCode = "404", description = "Project not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Mono<ResponseEntity<ProjectDto>> acceptProject(
+            @Parameter(description = "Project ID", required = true, example = "1")
+            @PathVariable Long id,
+            @Parameter(description = "Project acceptance request", required = true)
+            @Valid @RequestBody AcceptProjectRequest request) {
+        log.info("Technician {} accepting project: {}", request.getTechnicianId(), id);
+        return projectService.acceptProject(id, request)
+                .map(ResponseEntity::ok)
+                .doOnSuccess(project -> log.info("Project {} accepted successfully by technician {}", 
+                        id, request.getTechnicianId()));
     }
 }
