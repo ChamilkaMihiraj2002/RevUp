@@ -187,7 +187,7 @@ export default function CustomerDashboard() {
     e.preventDefault();
 
     if (!userData?.userId || !accessToken) {
-      alert("User not authenticated");
+      toast.error("User not authenticated");
       return;
     }
 
@@ -1560,7 +1560,7 @@ export default function CustomerDashboard() {
                 </div>
               )}
             </>
-           )}   
+            )}    
           </div>
         </main>
       </div>
