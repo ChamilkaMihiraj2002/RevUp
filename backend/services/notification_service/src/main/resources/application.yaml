@@ -1,0 +1,58 @@
+server.port: 8083
+
+spring:
+  application:
+    name: RevUp-User-Service
+  datasource:
+    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
+    username: postgres.oyuwuxtdmvyzfngndplz
+    password: "05102002"
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: UserServiceHikariPool
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+
+vehicle:
+  service:
+    url: http://localhost:8082
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+
+eureka:
+client:
+  serviceUrl:
+    defaultZone: "http://localhost:8761/eureka/"
+  initialInstanceInfoReplicationIntervalSeconds: 5
+  registryFetchIntervalSeconds: 5
+instance:
+  preferIpAddress: true
+  leaseRenewalIntervalInSeconds: 5
+  leaseExpirationDurationInSeconds: 5
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: no_eureka
+
+eureka:
+  client:
+    enabled: false
