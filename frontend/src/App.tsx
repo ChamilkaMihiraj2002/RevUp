@@ -50,6 +50,7 @@ function App() {
               : <Navigate to="/login" replace />
           }
         />
+        {/* <Route path="/overview" element={<Overview />} /> */}
         
         <Route
           path="/book"
@@ -75,6 +76,12 @@ function App() {
               : <Navigate to="/login" replace />
           }
         />
+
+         {/* <Route path="/technician-dashboard" element={<TechnicianDashboard />} /> */}
+         {/* <Route path="/book" element={<Book/>} /> */}
+
+         
+
       </Routes>
     </Router>
   )
