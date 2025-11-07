@@ -11,7 +11,6 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 @Service
 public class EmailService {
@@ -26,31 +25,29 @@ public class EmailService {
         logger.info("EmailService initialized with sender email: {}", fromEmail);
     }
 
-    public Mono<String> sendEmail(EmailRequest request) {
-        return Mono.fromCallable(() -> {
-            logger.info("Attempting to send email to: {}", request.getTo());
-            try {
-                MimeMessage message = mailSender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    public String sendEmail(EmailRequest request) {
+        logger.info("Attempting to send email to: {}", request.getTo());
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-                helper.setFrom(fromEmail);
-                helper.setTo(request.getTo());
-                helper.setSubject(request.getSubject());
-                helper.setText(request.getDescription(), true); // true indicates HTML content
+            helper.setFrom(fromEmail);
+            helper.setTo(request.getTo());
+            helper.setSubject(request.getSubject());
+            helper.setText(request.getDescription(), true); // true indicates HTML content
 
-                mailSender.send(message);
-                logger.info("Email sent successfully to: {}", request.getTo());
-                return "Email sent successfully to: " + request.getTo();
-            } catch (MailAuthenticationException e) {
-                logger.error("Gmail authentication failed. Please check your credentials and ensure you're using an App Password", e);
-                throw new RuntimeException("Email authentication failed. Please ensure you're using a valid Gmail App Password");
-            } catch (MessagingException e) {
-                logger.error("Failed to prepare email message: {}", e.getMessage(), e);
-                throw new RuntimeException("Failed to prepare email: " + e.getMessage());
-            } catch (MailException e) {
-                logger.error("Failed to send email: {}", e.getMessage(), e);
-                throw new RuntimeException("Failed to send email: " + e.getMessage());
-            }
-        });
+            mailSender.send(message);
+            logger.info("Email sent successfully to: {}", request.getTo());
+            return "Email sent successfully to: " + request.getTo();
+        } catch (MailAuthenticationException e) {
+            logger.error("Gmail authentication failed. Please check your credentials and ensure you're using an App Password", e);
+            throw new RuntimeException("Email authentication failed. Please ensure you're using a valid Gmail App Password");
+        } catch (MessagingException e) {
+            logger.error("Failed to prepare email message: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to prepare email: " + e.getMessage());
+        } catch (MailException e) {
+            logger.error("Failed to send email: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to send email: " + e.getMessage());
+        }
     }
 }

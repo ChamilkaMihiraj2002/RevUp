@@ -15,6 +15,8 @@ export default defineConfig({
     define: {
         // ensure references to process.env don't blow up
         'process.env': {},
+        // Add global polyfill for sockjs-client
+        'global': 'globalThis',
     },
     optimizeDeps: {
         include: ['process'],
