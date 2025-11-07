@@ -1,32 +1,72 @@
-server.port: 8083
+server:
+  port: 8083
 
 spring:
   application:
     name: RevUp-User-Service
+  # Database Configuration
   datasource:
-    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
-    username: postgres.oyuwuxtdmvyzfngndplz
+    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+    username: postgres.cksrfhnqmjbrtzutnlim
     password: "05102002"
+    driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
+      maximum-pool-size: 20
       minimum-idle: 5
-      connection-timeout: 30000
+      connection-timeout: 3000
       idle-timeout: 600000
       max-lifetime: 1800000
-      pool-name: UserServiceHikariPool
+      leak-detection-threshold: 60000
+      pool-name: NotificationServiceHikariCP
+      connection-test-query: SELECT 1
+      register-mbeans: true
+
+  # Gmail SMTP Configuration
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "revupautomobile@gmail.com"    # Replace with your actual Gmail
+    password: "pvtn qqwf ajlr pdwh"    # Your Gmail App Password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+        transport:
+          protocol: smtp
+
+  # JPA Configuration
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+        format_sql: false
+        jdbc:
+          batch_size: 5
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
 
+  security:
+    csrf:
+      enabled: false
 
-vehicle:
-  service:
-    url: http://localhost:8082
+# Eureka Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    initial-instance-info-replication-interval-seconds: 5
+    registry-fetch-interval-seconds: 5
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 5
 
 ---
 spring:
