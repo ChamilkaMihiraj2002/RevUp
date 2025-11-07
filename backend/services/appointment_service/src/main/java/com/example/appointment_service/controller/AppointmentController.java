@@ -46,6 +46,21 @@ public class AppointmentController {
         return appointmentService.getAppointmentsByVehicleId(vehicleId);
     }
 
+    @GetMapping("/technician/{technicianId}")
+    public Flux<AppointmentResponse> getByTechnicianId(@PathVariable Long technicianId) {
+        return appointmentService.getAppointmentsByTechnicianId(technicianId);
+    }
+
+    @GetMapping("/status/{status}")
+    public Flux<AppointmentResponse> getByStatus(@PathVariable String status) {
+        return appointmentService.getAppointmentsByStatus(status);
+    }
+
+    @GetMapping("/unassigned")
+    public Flux<AppointmentResponse> getUnassigned() {
+        return appointmentService.getUnassignedAppointments();
+    }
+
     @PutMapping("/{id}")
     public Mono<AppointmentResponse> update(@PathVariable Long id, @Valid @RequestBody UpdateAppointmentRequest request) {
         return appointmentService.updateAppointment(id, request);

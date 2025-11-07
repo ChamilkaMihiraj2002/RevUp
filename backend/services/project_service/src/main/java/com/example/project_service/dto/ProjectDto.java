@@ -42,12 +42,6 @@ public class ProjectDto {
     @Schema(description = "Estimated amount for the project in USD", example = "250.00")
     private java.math.BigDecimal estimatedAmount;
     
-    @Schema(description = "Start time of the project", example = "2025-11-06T10:00:00")
-    private LocalDateTime startTime;
-    
-    @Schema(description = "End time of the project", example = "2025-11-06T15:00:00")
-    private LocalDateTime endTime;
-    
     @Schema(description = "Timestamp when the project was created", accessMode = Schema.AccessMode.READ_ONLY)
     private LocalDateTime createdAt;
     

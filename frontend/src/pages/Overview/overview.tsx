@@ -31,6 +31,7 @@ import {
 import { useAuth } from "@/contexts/authContext/authContext";
 import {
   getAppointmentsByCustomerId,
+  updateAppointment,
   type AppointmentResponse,
 } from "@/services/appointmentService";
 import {
@@ -38,6 +39,11 @@ import {
   type VehicleResponse,
   createVehicle,
 } from "@/services/vehicleService";
+import {
+  createProject,
+  getProjectsByUserId,
+  type ProjectResponse,
+} from "@/services/projectService";
 import { updateUser } from "@/services/userService";
 import { passwordReset } from "@/firebase/auth";
 import {
@@ -81,7 +87,9 @@ export default function CustomerDashboard() {
     phone: userData?.phone || "",
   });
   const [modificationRequest, setModificationRequest] = useState("");
-  const [isSubmittingRequest] = useState(false);
+  const [selectedVehicleForProject, setSelectedVehicleForProject] = useState("");
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
+  const [projects, setProjects] = useState<ProjectResponse[]>([]);
 
   // Update profile data when userData changes
   useEffect(() => {
@@ -102,14 +110,16 @@ export default function CustomerDashboard() {
       try {
         setLoading(true);
 
-        // Fetch appointments and vehicles in parallel
-        const [appointmentsData, vehiclesData] = await Promise.all([
+        // Fetch appointments, vehicles, and projects in parallel
+        const [appointmentsData, vehiclesData, projectsData] = await Promise.all([
           getAppointmentsByCustomerId(userData.userId, accessToken),
           getVehiclesByUserId(userData.userId, accessToken),
+          getProjectsByUserId(userData.userId, accessToken),
         ]);
 
         setAllAppointments(appointmentsData);
         setVehicles(vehiclesData);
+        setProjects(projectsData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -120,9 +130,34 @@ export default function CustomerDashboard() {
     fetchData();
   }, [userData, accessToken]);
 
+  // Polling for real-time updates (every 10 seconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (userData?.userId && accessToken) {
+        // Silently refresh data without showing loading state
+        Promise.all([
+          getAppointmentsByCustomerId(userData.userId, accessToken),
+          getProjectsByUserId(userData.userId, accessToken),
+        ]).then(([appointmentsData, projectsData]) => {
+          setAllAppointments(appointmentsData);
+          setProjects(projectsData);
+        }).catch(error => {
+          console.error("Error polling data:", error);
+        });
+      }
+    }, 10000); // 10 seconds
+
+    return () => clearInterval(interval);
+  }, [userData, accessToken]);
+
   // Filter appointments by status using useMemo for performance
   const ongoingAppointments = useMemo(
     () => allAppointments.filter((apt) => apt.status === "ONGOING"),
+    [allAppointments]
+  );
+
+  const servicedAppointments = useMemo(
+    () => allAppointments.filter((apt) => apt.status === "SERVICED"),
     [allAppointments]
   );
 
@@ -267,6 +302,69 @@ export default function CustomerDashboard() {
     setIsEditingProfile(false);
   };
 
+  const handleSubmitProjectRequest = async () => {
+    if (!userData?.userId || !accessToken) {
+      alert("User not authenticated");
+      return;
+    }
+
+    if (!modificationRequest.trim()) {
+      alert("Please provide project details");
+      return;
+    }
+
+    try {
+      setIsSubmittingRequest(true);
+
+      const projectData = {
+        userId: userData.userId,
+        vehicleId: selectedVehicleForProject ? parseInt(selectedVehicleForProject) : undefined,
+        description: modificationRequest,
+      };
+
+      await createProject(projectData, accessToken);
+
+      // Refresh projects list
+      const updatedProjects = await getProjectsByUserId(userData.userId, accessToken);
+      setProjects(updatedProjects);
+
+      // Clear form
+      setModificationRequest("");
+      setSelectedVehicleForProject("");
+
+      alert("Project request submitted successfully! Our team will review it soon.");
+    } catch (error) {
+      console.error("Error submitting project request:", error);
+      alert("Failed to submit project request. Please try again.");
+    } finally {
+      setIsSubmittingRequest(false);
+    }
+  };
+
+  const handleConfirmService = async (appointmentId: number) => {
+    if (!userData?.userId || !accessToken) {
+      alert("User not authenticated");
+      return;
+    }
+
+    try {
+      await updateAppointment(
+        appointmentId,
+        { status: "COMPLETED" },
+        accessToken
+      );
+
+      // Refresh appointments
+      const updatedAppointments = await getAppointmentsByCustomerId(userData.userId, accessToken);
+      setAllAppointments(updatedAppointments);
+
+      alert("Service confirmed! Thank you for your business.");
+    } catch (error) {
+      console.error("Error confirming service:", error);
+      alert("Failed to confirm service. Please try again.");
+    }
+  };
+
   // Navigation items for Customer Dashboard
   const navItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -371,6 +469,74 @@ export default function CustomerDashboard() {
                             </span>
                           </span>
                         </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Serviced Appointment Alert - Waiting for Customer Confirmation */}
+              {servicedAppointments.length > 0 && (
+                <Card className="mb-6 border-emerald-200 bg-white shadow-md">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-emerald-600 rounded-lg p-2.5">
+                          <CheckCircle className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-gray-900">
+                            Service Completed - Action Required
+                          </CardTitle>
+                          <CardDescription className="text-emerald-700">
+                            Your {vehicles.find(
+                              (v) =>
+                                v.vehicleId ===
+                                servicedAppointments[0]?.vehicleId
+                            )?.model || "vehicle"} service is complete. Please confirm to finalize.
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200">
+                        Serviced
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="h-4 w-4 text-slate-500" />
+                          <span className="text-slate-700">
+                            Started:{" "}
+                            <span className="font-medium">
+                              {new Date(
+                                servicedAppointments[0].scheduledStart
+                              ).toLocaleString()}
+                            </span>
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-slate-500" />
+                          <span className="text-slate-700">
+                            Completed:{" "}
+                            <span className="font-medium">
+                              {new Date(
+                                servicedAppointments[0].scheduledEnd
+                              ).toLocaleString()}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-4 border-t border-slate-200">
+                        <Button
+                          onClick={() => handleConfirmService(servicedAppointments[0].appointmentId)}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Confirm Service Completion
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -821,11 +987,15 @@ export default function CustomerDashboard() {
                                       className={
                                         appointment.status === "ONGOING"
                                           ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
+                                          : appointment.status === "SERVICED"
+                                          ? "bg-emerald-600 text-white shadow-lg shadow-emerald-500/30"
                                           : appointment.status === "COMPLETED"
                                           ? "bg-green-600 text-white"
                                           : appointment.status === "CANCELLED"
                                           ? "bg-red-600 text-white"
-                                          : "bg-purple-600 text-white"
+                                          : appointment.status === "CONFIRMED"
+                                          ? "bg-purple-600 text-white"
+                                          : "bg-yellow-600 text-white"
                                       }
                                     >
                                       {appointment.status}
@@ -863,6 +1033,18 @@ export default function CustomerDashboard() {
                                     </p>
                                   </div>
                                 </div>
+                                
+                                {appointment.status === "SERVICED" && (
+                                  <div className="flex justify-end pt-4 border-t border-slate-200">
+                                    <Button
+                                      onClick={() => handleConfirmService(appointment.appointmentId)}
+                                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                    >
+                                      <CheckCircle className="h-4 w-4 mr-2" />
+                                      Confirm Service Completion
+                                    </Button>
+                                  </div>
+                                )}
                               </div>
                             </CardContent>
                           </Card>
@@ -1009,7 +1191,34 @@ export default function CustomerDashboard() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <form className="space-y-6">
+                      <form className="space-y-6" onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSubmitProjectRequest();
+                      }}>
+                        <div className="space-y-3">
+                          <Label htmlFor="vehicle-select">
+                            Select Vehicle (Optional)
+                          </Label>
+                          <Select
+                            value={selectedVehicleForProject}
+                            onValueChange={setSelectedVehicleForProject}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choose a vehicle or leave blank for general project" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {vehicles.map((vehicle) => (
+                                <SelectItem
+                                  key={vehicle.vehicleId}
+                                  value={vehicle.vehicleId.toString()}
+                                >
+                                  {vehicle.model} - {vehicle.registrationNo}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
                         <div className="space-y-3">
                           
                           <textarea
@@ -1035,7 +1244,10 @@ export default function CustomerDashboard() {
                           <Button
                             type="button"
                             variant="outline"
-                            onClick={() => setModificationRequest("")}
+                            onClick={() => {
+                              setModificationRequest("");
+                              setSelectedVehicleForProject("");
+                            }}
                             className="border-gray-300 text-gray-700 hover:bg-gray-50"
                           >
                             Clear
@@ -1090,6 +1302,75 @@ export default function CustomerDashboard() {
                           </ul>
                         </div>
                       </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* My Project Requests */}
+                  <Card className="border-gray-200 bg-white shadow-md mt-6">
+                    <CardHeader>
+                      <CardTitle className="text-slate-900">
+                        My Project Requests
+                      </CardTitle>
+                      <CardDescription className="text-cyan-700">
+                        Track your submitted modification and project requests
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {projects.length === 0 ? (
+                        <div className="text-center py-8">
+                          <div className="bg-slate-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <Wrench className="h-8 w-8 text-slate-600" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                            No project requests yet
+                          </h3>
+                          <p className="text-slate-600">
+                            Submit a request above to get started
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {projects.map((project) => (
+                            <Card key={project.projectId} className="border-slate-200">
+                              <CardContent className="py-4">
+                                <div className="flex justify-between items-start mb-3">
+                                  <div>
+                                    <h4 className="font-semibold text-slate-900">
+                                      Project #{project.projectId}
+                                    </h4>
+                                    <p className="text-sm text-slate-600">
+                                      Submitted: {new Date(project.createdAt).toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                  <Badge
+                                    variant="outline"
+                                    className={
+                                      project.status === 'PENDING'
+                                        ? 'bg-yellow-500/10 text-yellow-600 border-yellow-200'
+                                        : project.status === 'IN_PROGRESS'
+                                        ? 'bg-blue-500/10 text-blue-600 border-blue-200'
+                                        : project.status === 'COMPLETED'
+                                        ? 'bg-green-500/10 text-green-600 border-green-200'
+                                        : 'bg-gray-500/10 text-gray-600 border-gray-200'
+                                    }
+                                  >
+                                    {project.status}
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-slate-700 mb-3 whitespace-pre-wrap">
+                                  {project.description}
+                                </p>
+                                {project.estimatedAmount && (
+                                  <div className="flex gap-4 text-sm text-slate-600">
+                                    <span>💰 Estimate: ${project.estimatedAmount.toFixed(2)}</span>
+                                    <span>⏱️ Time: {project.estimateTime} hours</span>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>

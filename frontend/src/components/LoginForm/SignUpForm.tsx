@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import { Button } from "../UI/Button"
 import { Input } from "../UI/Input"
 import { Label } from "../UI/Label"
@@ -11,7 +10,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { signUp, logInWithGoogle } from "../../firebase/auth"
 import { getFirebaseErrorMessage } from "../../firebase/errorUtils"
 import { useAuth } from "../../contexts/authContext/authContext"
-import { registerUser, getUserByFirebaseUID } from "../../services/userService"
+import { registerUser } from "../../services/userService"
 
 export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }) {
   const [showPassword, setShowPassword] = useState(false)
@@ -27,8 +26,7 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
     password: "",
     confirmPassword: "",
   })
-  const { userLoggedIn, setUserData, setAccessToken } = useAuth()
-  const navigate = useNavigate()
+  const { userLoggedIn } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,7 +62,7 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
       })
 
       console.log("Sign-up successful!")
-      setSuccessMessage("Account created successfully! Please log in.")
+      setSuccessMessage("Signup successful! Redirecting to login...")
       setTimeout(() => {
         onSwitchToLogin?.()
       }, 2000)
@@ -83,7 +81,6 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
     try {
       const result = await logInWithGoogle()
       const user = result.user
-      const token = await user.getIdToken()
       
       await registerUser({
         name: user.displayName || "Google User",
@@ -92,13 +89,12 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
         role: "CUSTOMER",
         firebaseUID: user.uid
       })
-      
-      const dbUser = await getUserByFirebaseUID(user.uid, token)
-      setUserData(dbUser)
-      setAccessToken(token)
 
-      console.log("Google sign-in successful!")
-      navigate('/overview')
+      console.log("Google sign-up successful!")
+      setSuccessMessage("Signup successful! Please login to the system. Redirecting...")
+      setTimeout(() => {
+        onSwitchToLogin?.()
+      }, 2000)
     } catch (err: any) {
       setError(getFirebaseErrorMessage(err))
       console.error("Google sign-in error:", err)

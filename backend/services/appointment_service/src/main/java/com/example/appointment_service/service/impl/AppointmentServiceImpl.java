@@ -69,6 +69,40 @@ public class AppointmentServiceImpl implements AppointmentServiceInterface {
     }
 
     @Override
+    public Flux<AppointmentResponse> getAppointmentsByTechnicianId(Long technicianId) {
+        return Flux.defer(() -> Flux.fromIterable(appointmentRepository.findByTechnicianId(technicianId)))
+                .map(appointmentMapper::toResponse)
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    public Flux<AppointmentResponse> getAppointmentsByStatus(String status) {
+        return Flux.defer(() -> {
+            try {
+                com.example.appointment_service.enums.AppointmentStatus appointmentStatus = 
+                    com.example.appointment_service.enums.AppointmentStatus.valueOf(status.toUpperCase());
+                return Flux.fromIterable(appointmentRepository.findByStatus(appointmentStatus));
+            } catch (IllegalArgumentException e) {
+                log.error("Invalid status: {}", status);
+                return Flux.empty();
+            }
+        })
+        .map(appointmentMapper::toResponse)
+        .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    public Flux<AppointmentResponse> getUnassignedAppointments() {
+        return Flux.defer(() -> 
+            Flux.fromIterable(appointmentRepository.findByTechnicianIdIsNullAndStatus(
+                com.example.appointment_service.enums.AppointmentStatus.SCHEDULED
+            ))
+        )
+        .map(appointmentMapper::toResponse)
+        .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
     public Mono<AppointmentResponse> updateAppointment(Long id, UpdateAppointmentRequest request) {
         return Mono.fromCallable(() -> {
             Appointment existing = appointmentRepository.findById(id)

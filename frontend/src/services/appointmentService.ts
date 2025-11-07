@@ -7,7 +7,7 @@ export interface AppointmentResponse {
   customerId: number;
   vehicleId: number;
   technicianId?: number;
-  status: 'SCHEDULED' | 'ONGOING' | 'COMPLETED' | 'CANCELLED';
+  status: 'SCHEDULED' | 'CONFIRMED' | 'ONGOING' | 'SERVICED' | 'COMPLETED' | 'CANCELLED';
   scheduledStart: string;
   scheduledEnd: string;
   createdAt: string;
@@ -79,7 +79,7 @@ export const checkSlotAvailability = async (date: string, time: string, token: s
 };
 
 export interface UpdateAppointmentRequest {
-  status?: 'SCHEDULED' | 'ONGOING' | 'COMPLETED' | 'CANCELLED';
+  status?: 'SCHEDULED' | 'CONFIRMED' | 'ONGOING' | 'SERVICED' | 'COMPLETED' | 'CANCELLED';
   technicianId?: number;
 }
 
@@ -88,6 +88,33 @@ export const updateAppointment = async (appointmentId: number, request: UpdateAp
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+};
+
+export const getAllAppointments = async (token: string): Promise<AppointmentResponse[]> => {
+  const response = await axios.get(`${API_BASE}/appointments`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  return response.data;
+};
+
+export const getUnassignedAppointments = async (token: string): Promise<AppointmentResponse[]> => {
+  const response = await axios.get(`${API_BASE}/appointments/unassigned`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  return response.data;
+};
+
+export const getAppointmentsByTechnicianId = async (technicianId: number, token: string): Promise<AppointmentResponse[]> => {
+  const response = await axios.get(`${API_BASE}/appointments/technician/${technicianId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
     }
   });
   return response.data;

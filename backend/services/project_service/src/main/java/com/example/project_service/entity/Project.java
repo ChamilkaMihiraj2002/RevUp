@@ -37,12 +37,6 @@ public class Project {
     @Column(name = "estimated_amount", precision = 10, scale = 2)
     private java.math.BigDecimal estimatedAmount;
 
-    @Column(name = "start_time")
-    private LocalDateTime startTime;
-
-    @Column(name = "end_time")
-    private LocalDateTime endTime;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -126,22 +120,6 @@ public class Project {
 
     public void setEstimatedAmount(java.math.BigDecimal estimatedAmount) {
         this.estimatedAmount = estimatedAmount;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
     }
 
     public LocalDateTime getCreatedAt() {

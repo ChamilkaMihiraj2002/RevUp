@@ -31,10 +31,4 @@ public class UpdateProjectRequest {
     @Positive(message = "Estimate time must be positive")
     @Schema(description = "Updated estimated time in hours", example = "6")
     private Integer estimateTime; // in hours
-
-    @Schema(description = "Updated start time of the project", example = "2025-11-10T10:00:00")
-    private LocalDateTime startTime;
-
-    @Schema(description = "Updated end time of the project", example = "2025-11-10T16:00:00")
-    private LocalDateTime endTime;
 }
