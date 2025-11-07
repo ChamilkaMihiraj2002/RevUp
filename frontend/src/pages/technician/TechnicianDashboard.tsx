@@ -30,17 +30,19 @@ import {
   type ProjectResponse,
 } from "@/services/projectService";
 import {
-  Car,
-  CheckCircle,
-  User,
-  LayoutList,
-  CheckSquare,
-  Calendar,
-  LogOut,
-  Bell,
-  Inbox,
-  FilePlus,
+    Car,
+    CheckCircle,
+    User,
+    LayoutList,
+    CheckSquare,
+    Calendar,
+    LogOut,
+    Bell,
+    Inbox,
+    FilePlus,
+    Play,
 } from "lucide-react";
+import { toast } from "sonner";
 import { CommonSidebar } from "@/components/Layout/Slidebar.tsx";
 
 export default function TechnicianDashboard() {
@@ -67,6 +69,7 @@ export default function TechnicianDashboard() {
       navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
+      toast.error("Failed to logout. Please try again.");
     }
   };
 
@@ -95,6 +98,7 @@ export default function TechnicianDashboard() {
           return vehicle ? { [vehicleId]: vehicle } : {};
         } catch (err) {
           console.error(`Error fetching vehicle ${vehicleId}:`, err);
+          toast.error("Error fetching vehicle:");
           return {};
         }
       });
@@ -114,6 +118,7 @@ export default function TechnicianDashboard() {
       }
     } catch (error) {
       console.error("Error fetching data:", error);
+      toast.error("Error fetching data:");
       // Set empty arrays on error to prevent undefined issues
       setTechnicianAppointments([]);
       setAppointments([]);
@@ -139,7 +144,6 @@ export default function TechnicianDashboard() {
 
   const handleStartService = async (appointmentId: number) => {
     if (!accessToken) return;
-
     try {
       await updateAppointment(
         appointmentId,
@@ -150,10 +154,11 @@ export default function TechnicianDashboard() {
       );
       // Refresh data to show updated status
       await fetchData();
-      alert("Service started!");
+      //alert("Service started!");
+      toast.success("Service started!");
     } catch (error) {
       console.error("Error starting service:", error);
-      alert("Failed to start service");
+      toast.error("Error starting service:");
     }
   };
 
@@ -170,10 +175,12 @@ export default function TechnicianDashboard() {
       );
       // Refresh data to show updated status
       await fetchData();
-      alert("Service marked as complete! Waiting for customer confirmation.");
+      //alert("Service marked as complete! Waiting for customer confirmation.");
+        toast.success("Service marked as complete! Waiting for customer confirmation.");
     } catch (error) {
       console.error("Error completing service:", error);
-      alert("Failed to complete service");
+        toast.error("Error completing service:");
+      //alert("Failed to complete service");
     }
   };
 
@@ -184,7 +191,8 @@ export default function TechnicianDashboard() {
     const estimatedAmount = projectEstimatedAmount[projectId];
 
     if (!estimateTime || !estimatedAmount) {
-      alert("Please fill in estimate hours and budget before accepting the project.");
+      //alert("Please fill in estimate hours and budget before accepting the project.");
+      toast.error("Please fill in estimate hours and budget before accepting the project.");
       return;
     }
 
@@ -199,7 +207,8 @@ export default function TechnicianDashboard() {
         accessToken
       );
       await fetchData();
-      alert("Project accepted successfully!");
+      //alert("Project accepted successfully!");
+        toast.success("Project accepted successfully!");
       // Clear the input fields
       setProjectEstimateTime((prev) => {
         const newState = { ...prev };
@@ -213,7 +222,8 @@ export default function TechnicianDashboard() {
       });
     } catch (error) {
       console.error("Error accepting project:", error);
-      alert("Failed to accept project. Please try again.");
+        toast.error("Error accepting project:");
+      //alert("Failed to accept project. Please try again.");
     }
   };
 
@@ -228,7 +238,8 @@ export default function TechnicianDashboard() {
       );
 
       if (!appointmentToAccept) {
-        alert("Appointment not found.");
+        //alert("Appointment not found.");
+        toast.error("Appointment not found.");
         return;
       }
 
@@ -249,9 +260,8 @@ export default function TechnicianDashboard() {
       });
 
       if (hasConflict) {
-        alert(
-          "You already have an appointment scheduled during this time slot. Please choose a different appointment."
-        );
+        //alert("You already have an appointment scheduled during this time slot. Please choose a different appointment.");
+        toast.error("You already have an appointment scheduled during this time slot. Please choose a different appointment.");
         return;
       }
 
@@ -264,14 +274,14 @@ export default function TechnicianDashboard() {
         },
         accessToken
       );
-
-      alert("Appointment accepted successfully! It will appear in your schedule.");
-
+      //alert("Appointment accepted successfully! It will appear in your schedule.");
+      toast.success("Appointment accepted successfully! It will appear in your schedule.");
       // Refresh data to move appointment from queue to schedule
       await fetchData();
     } catch (error) {
       console.error("Error accepting appointment:", error);
-      alert("Failed to accept appointment. Please try again.");
+        toast.error("Error accepting appointment:");
+      //alert("Failed to accept appointment. Please try again.");
     }
   };
 
