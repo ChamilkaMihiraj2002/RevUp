@@ -4,6 +4,7 @@ import { Chatbot } from "@/components/Chat/ChatBot";
 import { CommonNavbar } from "@/components/Layout/Navbar";
 import { CommonSidebar } from "@/components/Layout/Slidebar";
 import { Button } from "@/components/UI/Button";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -222,10 +223,10 @@ export default function CustomerDashboard() {
         type: "",
       });
 
-      alert("Vehicle added successfully!");
+      toast.success("Vehicle added successfully!");
     } catch (error) {
       console.error("Error adding vehicle:", error);
-      alert("Failed to add vehicle. Please try again.");
+      toast.error("Failed to add vehicle. Please try again.");
     }
   };
 
@@ -242,7 +243,7 @@ export default function CustomerDashboard() {
     e.preventDefault();
 
     if (!userData?.userId || !accessToken) {
-      alert("User not authenticated");
+      toast.error("User not authenticated");
       return;
     }
 
@@ -252,7 +253,7 @@ export default function CustomerDashboard() {
       profileData.phone.length !== 10 ||
       !/^\d+$/.test(profileData.phone)
     ) {
-      alert("Phone number must be exactly 10 digits");
+      toast.warning("Phone number must be exactly 10 digits");
       return;
     }
 
@@ -272,25 +273,25 @@ export default function CustomerDashboard() {
       setUserData(updatedUser);
 
       setIsEditingProfile(false);
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("Failed to update profile. Please try again.");
+      toast.error("Failed to update profile. Please try again.");
     }
   };
 
   const handleForgotPassword = async () => {
     if (!userData?.email) {
-      alert("No email found");
+      toast.error("No email found");
       return;
     }
 
     try {
       await passwordReset(userData.email);
-      alert("Password reset email sent! Please check your inbox.");
+      toast.success("Password reset email sent! Please check your inbox.");
     } catch (error) {
       console.error("Error sending password reset email:", error);
-      alert("Failed to send password reset email. Please try again.");
+      toast.error("Failed to send password reset email. Please try again.");
     }
   };
 
@@ -305,12 +306,12 @@ export default function CustomerDashboard() {
 
   const handleSubmitProjectRequest = async () => {
     if (!userData?.userId || !accessToken) {
-      alert("User not authenticated");
+      toast.error("User not authenticated");
       return;
     }
 
     if (!modificationRequest.trim()) {
-      alert("Please provide project details");
+      toast.warning("Please provide project details");
       return;
     }
 
@@ -333,10 +334,10 @@ export default function CustomerDashboard() {
       setModificationRequest("");
       setSelectedVehicleForProject("");
 
-      alert("Project request submitted successfully! Our team will review it soon.");
+      toast.success("Project request submitted successfully! Our team will review it soon.");
     } catch (error) {
       console.error("Error submitting project request:", error);
-      alert("Failed to submit project request. Please try again.");
+      toast.error("Failed to submit project request. Please try again.");
     } finally {
       setIsSubmittingRequest(false);
     }
@@ -344,7 +345,7 @@ export default function CustomerDashboard() {
 
   const handleConfirmService = async (appointmentId: number) => {
     if (!userData?.userId || !accessToken) {
-      alert("User not authenticated");
+      toast.error("User not authenticated");
       return;
     }
 
@@ -359,10 +360,10 @@ export default function CustomerDashboard() {
       const updatedAppointments = await getAppointmentsByCustomerId(userData.userId, accessToken);
       setAllAppointments(updatedAppointments);
 
-      alert("Service confirmed! Thank you for your business.");
+      toast.success("Service confirmed! Thank you for your business.");
     } catch (error) {
       console.error("Error confirming service:", error);
-      alert("Failed to confirm service. Please try again.");
+      toast.error("Failed to confirm service. Please try again.");
     }
   };
 
@@ -1559,7 +1560,7 @@ export default function CustomerDashboard() {
                 </div>
               )}
             </>
-            )}  
+           )}   
           </div>
         </main>
       </div>
