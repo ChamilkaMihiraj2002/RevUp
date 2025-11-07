@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Chatbot } from "@/components/Chat/ChatBot"; 
 import { CommonNavbar } from "@/components/Layout/Navbar";
 import { CommonSidebar } from "@/components/Layout/Slidebar";
 import { Button } from "@/components/UI/Button";
@@ -1558,10 +1559,11 @@ export default function CustomerDashboard() {
                 </div>
               )}
             </>
-           )} 
+            )}  
           </div>
         </main>
       </div>
+       <Chatbot />
     </div>
   );
 }
