@@ -1,0 +1,29 @@
+{
+  "services": [
+    "Full vehicle inspection.",
+    "Engine oil change and filter replacement.",
+    "Brake inspection and replacement.",
+    "Battery health check and replacement.",
+    "Tire inspection, pressure check, rotation, and balancing.",
+    "Air filter and cabin filter replacement.",
+    "Fluid top-ups (coolant, brake fluid, power steering, windshield wash).",
+    "Suspension and steering system check.",
+    "Engine tune-up and spark plug replacement.",
+    "AC system inspection and gas refill.",
+    "Diagnostic scanning for error codes.",
+    "Exhaust system inspection.",
+    "Wheel alignment.",
+    "Car wash and detailing."
+  ],
+
+  "website_usage": [
+    "To use the chatbot, simply type your question in the chat window and press Enter.",
+    "For assistance at any time, click the help icon or type 'help' in the chat.",
+    "You can ask about our automobile services, pricing, appointment booking, or technical support.",
+    "Browse through the service categories to learn more about what we offer.",
+    "Use the appointment form to schedule a vehicle service at your preferred date and time.",
+    "Check your appointment status through the chatbot or the dashboard.",
+    "Navigate through the menu to access service types, customer details, and reports.",
+    "If you experience any issues, contact support through the chatbot or the support page."
+  ]
+}

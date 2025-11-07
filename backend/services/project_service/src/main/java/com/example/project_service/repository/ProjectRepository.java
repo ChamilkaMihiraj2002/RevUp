@@ -12,4 +12,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findByUserId(Long userId);
     List<Project> findByStatus(ProjectStatus status);
     List<Project> findByUserIdAndStatus(Long userId, ProjectStatus status);
+    List<Project> findByTechnicianId(Long technicianId);
+    List<Project> findByTechnicianIdAndStatus(Long technicianId, ProjectStatus status);
+    List<Project> findByStatusAndTechnicianIdIsNull(ProjectStatus status);
 }

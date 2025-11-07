@@ -2,6 +2,7 @@ package com.example.project_service.service.Impl;
 
 import com.example.project_service.dto.request.CreateProjectRequest;
 import com.example.project_service.dto.request.UpdateProjectRequest;
+import com.example.project_service.dto.request.AcceptProjectRequest;
 import com.example.project_service.dto.ProjectDto;
 import com.example.project_service.entity.Project;
 import com.example.project_service.Enum.ProjectStatus;
@@ -77,6 +78,58 @@ public class ProjectServiceImpl implements ProjectService {
                 .subscribeOn(jdbcScheduler)
                 .flatMapMany(Flux::fromIterable)
                 .map(projectMapper::toDto);
+    }
+
+    @Override
+    public Flux<ProjectDto> getProjectsByTechnicianId(Long technicianId) {
+        return Mono.fromCallable(() -> projectRepository.findByTechnicianId(technicianId))
+                .subscribeOn(jdbcScheduler)
+                .flatMapMany(Flux::fromIterable)
+                .map(projectMapper::toDto);
+    }
+
+    @Override
+    public Flux<ProjectDto> getProjectsByTechnicianIdAndStatus(Long technicianId, ProjectStatus status) {
+        return Mono.fromCallable(() -> projectRepository.findByTechnicianIdAndStatus(technicianId, status))
+                .subscribeOn(jdbcScheduler)
+                .flatMapMany(Flux::fromIterable)
+                .map(projectMapper::toDto);
+    }
+
+    @Override
+    public Flux<ProjectDto> getPendingUnassignedProjects() {
+        return Mono.fromCallable(() -> projectRepository.findByStatusAndTechnicianIdIsNull(ProjectStatus.PENDING))
+                .subscribeOn(jdbcScheduler)
+                .flatMapMany(Flux::fromIterable)
+                .map(projectMapper::toDto);
+    }
+
+    @Override
+    public Mono<ProjectDto> acceptProject(Long projectId, AcceptProjectRequest request) {
+        return Mono.fromCallable(() -> {
+                    Project project = projectRepository.findById(projectId)
+                            .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + projectId));
+                    
+                    // Validate project is in PENDING status
+                    if (project.getStatus() != ProjectStatus.PENDING) {
+                        throw new IllegalStateException("Project is not in PENDING status. Current status: " + project.getStatus());
+                    }
+                    
+                    // Validate project is not already assigned
+                    if (project.getTechnicianId() != null) {
+                        throw new IllegalStateException("Project is already assigned to technician: " + project.getTechnicianId());
+                    }
+                    
+                    // Accept the project
+                    project.setTechnicianId(request.getTechnicianId());
+                    project.setEstimatedAmount(request.getEstimatedAmount());
+                    project.setEstimateTime(request.getEstimateTime());
+                    project.setStatus(ProjectStatus.IN_PROGRESS);
+                    
+                    Project updatedProject = projectRepository.save(project);
+                    return projectMapper.toDto(updatedProject);
+                })
+                .subscribeOn(jdbcScheduler);
     }
 
     @Override

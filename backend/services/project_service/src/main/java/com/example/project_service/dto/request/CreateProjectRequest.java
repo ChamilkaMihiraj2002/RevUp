@@ -26,6 +26,10 @@ public class CreateProjectRequest {
     @Schema(description = "ID of the user who owns this project", example = "123", required = true)
     private Long userId;
 
+    @Positive(message = "Vehicle ID must be positive")
+    @Schema(description = "ID of the vehicle associated with this project", example = "456")
+    private Long vehicleId;
+
     @NotBlank(message = "Description is required")
     @Schema(description = "Detailed description of the project", 
             example = "Full vehicle inspection and brake system repair", 

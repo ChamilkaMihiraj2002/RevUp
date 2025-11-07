@@ -31,8 +31,8 @@ public class ServiceTypeController {
     }
 
     @GetMapping
-    public Mono<ResponseEntity<List<ServiceTypeResponse>>> getAll() {
-        return serviceTypeService.getAll()
+    public Mono<ResponseEntity<List<ServiceTypeResponse>>> findAll() {
+        return serviceTypeService.findAll()
                 .map(ResponseEntity::ok);
     }
 

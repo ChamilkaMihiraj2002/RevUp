@@ -14,9 +14,12 @@ public class ProjectMapper {
         ProjectDto dto = new ProjectDto();
         dto.setProjectId(project.getProjectId());
         dto.setUserId(project.getUserId());
+        dto.setVehicleId(project.getVehicleId());
+        dto.setTechnicianId(project.getTechnicianId());
         dto.setDescription(project.getDescription());
         dto.setStatus(project.getStatus());
         dto.setEstimateTime(project.getEstimateTime());
+        dto.setEstimatedAmount(project.getEstimatedAmount());
         dto.setStartTime(project.getStartTime());
         dto.setEndTime(project.getEndTime());
         dto.setCreatedAt(project.getCreatedAt());
@@ -27,6 +30,7 @@ public class ProjectMapper {
     public Project toEntity(CreateProjectRequest request) {
         Project project = new Project();
         project.setUserId(request.getUserId());
+        project.setVehicleId(request.getVehicleId());
         project.setDescription(request.getDescription());
         
         if (request.getStatus() != null && !request.getStatus().isEmpty()) {
