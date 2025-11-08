@@ -8,7 +8,9 @@ spring:
   ai:
     google:
       genai:
-        api-key: "YOUR GEMINI API-KEY"
+        api-key: ${SPRING_AI_GOOGLE_GENAI_API_KEY:AIzaSyDblfdFB83HjWrgPRtK6DhEvgpVH6qokxM}
+        project-id: ${SPRING_AI_GOOGLE_GENAI_PROJECT_ID}
+        location: ${SPRING_AI_GOOGLE_GENAI_LOCATION:us-central1}
         chat:
           options:
             model: "gemini-2.0-flash-lite"

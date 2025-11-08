@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: anjed11/frontend:v1.5
+        image: anjed11/frontend:v1.7
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
@@ -58,7 +58,7 @@ metadata:
     app: frontend
     tier: frontend
 spec:
-  type: LoadBalancer  # Change to ClusterIP if using Ingress
+  type: LoadBalancer
   ports:
   - port: 80
     targetPort: 80

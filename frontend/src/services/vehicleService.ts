@@ -38,3 +38,21 @@ export const createVehicle = async (vehicleData: Omit<VehicleResponse, 'vehicleI
   });
   return response.data;
 };
+
+export const updateVehicle = async (vehicleId: number, vehicleData: Omit<VehicleResponse, 'vehicleId'>, token: string): Promise<VehicleResponse> => {
+  const response = await axios.put(`${API_BASE_URL}/vehicles/${vehicleId}`, vehicleData, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+};
+
+export const deleteVehicle = async (vehicleId: number, token: string): Promise<void> => {
+  await axios.delete(`${API_BASE_URL}/vehicles/${vehicleId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+};

@@ -24,10 +24,10 @@ export default function HomePage() {
               <Link to="/contact">
                 <button className="text-gray-700 hover:text-cyan-700 transition-colors text-sm font-medium">Contact Us</button>
               </Link>
-              <Link to="/dashboard">
+              <Link to="/login">
                 <button className="text-gray-700 hover:text-cyan-700 transition-colors text-sm font-medium">Sign In</button>
               </Link>
-              <Link to="/dashboard">
+              <Link to="/login">
                 <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2 rounded-md text-sm font-medium shadow-sm transform transition-all hover:shadow-md hover:-translate-y-0.5">
                   Get Started
                 </button>
@@ -50,7 +50,7 @@ export default function HomePage() {
                 customer communication. Join the automotive service revolution.
               </p>
               <div className="flex items-center space-x-4 mt-8">
-                <Link to="/dashboard">
+                <Link to="/login">
                   <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-3 rounded-md text-base font-semibold shadow-md transform transition-all hover:shadow-lg hover:-translate-y-1">
                     Get Started
                   </button>
@@ -229,7 +229,7 @@ export default function HomePage() {
             Join hundreds of service centers already using RevUp to streamline operations and delight customers.
           </p>
           <div className="mt-8">
-            <Link to="/dashboard">
+            <Link to="/login">
               <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-4 rounded-lg text-lg font-semibold shadow-md transform transition-all hover:shadow-lg hover:-translate-y-1">
                 Get Started Now
               </button>

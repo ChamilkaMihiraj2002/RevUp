@@ -41,8 +41,11 @@ spring:
             predicates:
               - Path=/api/v1/service-types/**
 
-
-
+          # Chatbot Service Routes
+          - id: chatbot-service
+            uri: lb://chatboat_service
+            predicates:
+              - Path=/api/v1/chat/**
         
           # Eureka Server Routes (Optional - for monitoring)
           - id: eureka-server

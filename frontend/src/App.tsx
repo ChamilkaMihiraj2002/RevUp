@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { LoginPage } from "@/pages/login/LoginPage"
 import  Home  from "@/pages/Home/home"
-import { Dashboard } from "@/pages/Dashboard"
 import  Overview from "@/pages/Overview/overview"
 import  Book from "@/pages/Overview/book"
 import { useAuth } from "@/contexts/authContext/authContext"
@@ -42,7 +41,13 @@ function App() {
         />
         <Route
           path="/dashboard"
-          element={userLoggedIn ? <Dashboard /> : <Navigate to="/login" replace />}
+          element={
+            userLoggedIn 
+              ? role === 'TECHNICIAN' 
+                ? <Navigate to="/technician-dashboard" replace /> 
+                : <Navigate to="/overview" replace />
+              : <Navigate to="/login" replace />
+          }
         />
         <Route
           path="/overview"

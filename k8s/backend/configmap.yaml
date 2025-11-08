@@ -35,7 +35,7 @@ data:
   HIKARI_MAX_LIFETIME: "1800000"
   
   # JPA/Hibernate configuration
-  JPA_DDL_AUTO: "update"  # Change to 'validate' in production
+  JPA_DDL_AUTO: "update"
   JPA_SHOW_SQL: "false"
   HIBERNATE_DIALECT: "org.hibernate.dialect.PostgreSQLDialect"
   HIBERNATE_FORMAT_SQL: "true"

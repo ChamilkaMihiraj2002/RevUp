@@ -40,6 +40,8 @@ import {
   getVehiclesByUserId,
   type VehicleResponse,
   createVehicle,
+  updateVehicle,
+  deleteVehicle,
 } from "@/services/vehicleService";
 import {
   createProject,
@@ -261,6 +263,67 @@ export default function CustomerDashboard() {
     } catch (error) {
       console.error("Error adding vehicle:", error);
       toast.error("Failed to add vehicle. Please try again.");
+    }
+  };
+
+  const handleUpdateVehicle = async () => {
+    if (!selectedVehicle || !userData?.userId || !accessToken) {
+      toast.error("Unable to update vehicle");
+      return;
+    }
+
+    try {
+      const vehicleData = {
+        model: editVehicleData.model,
+        registrationNo: editVehicleData.plate,
+        year: parseInt(editVehicleData.year),
+        color: editVehicleData.color,
+        vehicleType: editVehicleData.type,
+        userId: userData.userId,
+      };
+
+      await updateVehicle(selectedVehicle.vehicleId, vehicleData, accessToken);
+
+      // Refresh vehicles list
+      const updatedVehicles = await getVehiclesByUserId(
+        userData.userId,
+        accessToken
+      );
+      setVehicles(updatedVehicles);
+
+      setIsEditVehicleOpen(false);
+      setSelectedVehicle(null);
+
+      toast.success("Vehicle updated successfully!");
+    } catch (error) {
+      console.error("Error updating vehicle:", error);
+      toast.error("Failed to update vehicle. Please try again.");
+    }
+  };
+
+  const handleDeleteVehicle = async () => {
+    if (!selectedVehicle || !userData?.userId || !accessToken) {
+      toast.error("Unable to delete vehicle");
+      return;
+    }
+
+    try {
+      await deleteVehicle(selectedVehicle.vehicleId, accessToken);
+
+      // Refresh vehicles list
+      const updatedVehicles = await getVehiclesByUserId(
+        userData.userId,
+        accessToken
+      );
+      setVehicles(updatedVehicles);
+
+      setIsDeleteVehicleOpen(false);
+      setSelectedVehicle(null);
+
+      toast.success("Vehicle deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting vehicle:", error);
+      toast.error("Failed to delete vehicle. Please try again.");
     }
   };
 
@@ -1801,11 +1864,7 @@ export default function CustomerDashboard() {
                 </Button>
                 <Button
                   type="button"
-                  onClick={() => {
-                    setIsEditVehicleOpen(false);
-                    setSelectedVehicle(null);
-                    toast.success("Vehicle details updated!");
-                  }}
+                  onClick={handleUpdateVehicle}
                   className="bg-cyan-600 hover:bg-cyan-700 text-white"
                 >
                   Update Vehicle
@@ -1865,11 +1924,7 @@ export default function CustomerDashboard() {
               </Button>
               <Button
                 type="button"
-                onClick={() => {
-                  setIsDeleteVehicleOpen(false);
-                  setSelectedVehicle(null);
-                  toast.success("Vehicle deleted successfully!");
-                }}
+                onClick={handleDeleteVehicle}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
                 Delete Vehicle

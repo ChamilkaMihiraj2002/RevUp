@@ -98,7 +98,6 @@ export default function TechnicianDashboard() {
           return vehicle ? { [vehicleId]: vehicle } : {};
         } catch (err) {
           console.error(`Error fetching vehicle ${vehicleId}:`, err);
-          toast.error("Error fetching vehicle:");
           return {};
         }
       });
@@ -116,9 +115,8 @@ export default function TechnicianDashboard() {
         const accepted = await getProjectsByTechnicianId(userData.userId, accessToken);
         setAcceptedProjects(accepted || []);
       }
-    } catch (error) {
+     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error("Error fetching data:");
       // Set empty arrays on error to prevent undefined issues
       setTechnicianAppointments([]);
       setAppointments([]);
@@ -672,7 +670,7 @@ export default function TechnicianDashboard() {
 
                           {/* Info message - service will start at scheduled time */}
                           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
-                            📅 This appointment will move to "My Assignments" at the scheduled time
+                            This appointment  will move to "My Assignments" at the scheduled time
                           </div>
                         </CardContent>
                       </Card>
@@ -959,9 +957,9 @@ export default function TechnicianDashboard() {
                                       {project.description}
                                   </p>
                                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                      <span>⏱️ {project.estimateTime} hours</span>
-                                      <span>💰 ${project.estimatedAmount?.toFixed(2)}</span>
-                                      <span>📅 Started: {new Date(project.updatedAt).toLocaleDateString()}</span>
+                                      <span>${project.estimateTime} hours</span>
+                                      <span>${project.estimatedAmount?.toFixed(2)}</span>
+                                      <span>Started: {new Date(project.updatedAt).toLocaleDateString()}</span>
                                   </div>
                               </div>
                             </div>

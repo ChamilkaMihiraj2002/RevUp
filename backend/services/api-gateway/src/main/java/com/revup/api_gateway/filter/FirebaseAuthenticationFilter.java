@@ -50,8 +50,8 @@ public class FirebaseAuthenticationFilter implements Filter {
         "/api/v1/appointments/unassigned",           // Get unassigned appointments
         "/api/v1/appointments/technician/",          // Get technician's appointments
         "/api/v1/projects/pending",                  // Get pending projects
-        "/api/v1/projects/technician/",              // Get technician's projects
-        "/api/v1/service-types"                 // Manage service types
+        "/api/v1/projects/technician/"              // Get technician's projects
+                       // Manage service types
 
     );
 
