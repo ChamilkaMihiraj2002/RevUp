@@ -8,7 +8,7 @@ metadata:
     tier: database
 spec:
   type: ClusterIP
-  clusterIP: None  # Headless service for StatefulSet
+  clusterIP: None
   ports:
   - port: 5432
     targetPort: 5432

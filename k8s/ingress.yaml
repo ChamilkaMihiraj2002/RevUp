@@ -8,9 +8,9 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     # Add more annotations as needed for your ingress controller
 spec:
-  ingressClassName: nginx  # Change to your ingress controller class
+  ingressClassName: nginx
   rules:
-  - host: revup.example.com  # UPDATE THIS to your domain
+  - host: revup.example.com
     http:
       paths:
       # Frontend

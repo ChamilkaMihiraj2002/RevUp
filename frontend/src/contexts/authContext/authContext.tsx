@@ -50,6 +50,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try {
                 const token = await user.getIdToken();
                 
+                // Log the access token for Postman testing
+                console.log('🔐 Firebase Access Token obtained:', token);
+                console.log('📋 Copy this Bearer token for Postman:', `Bearer ${token}`);
+                console.log('🔗 API Gateway URL for testing:', 'http://localhost:8080/api/v1');
+                
                 const cachedUserData = Cookies.get('userData');
                 const cachedToken = Cookies.get('accessToken');
                 
@@ -59,6 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     setRole(parsedUserData.role);
                     setAccessTokenState(token);
                     setUserLoggedIn(true);
+                    
+                    console.log('✅ Using cached user data and token');
                 } else {
                     const dbUser = await getUserByFirebaseUID(user.uid, token);
                     setUserDataState(dbUser);
@@ -68,7 +75,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     
                     Cookies.set('userData', JSON.stringify(dbUser), { expires: 0.25 });
                     Cookies.set('accessToken', token, { expires: 0.25 });
+                    
+                    console.log('✅ Fresh user data loaded from database');
                 }
+                
+                console.log('🎯 Token ready for API calls:', `Bearer ${token}`);
             } catch (error) {
                 console.error("Error fetching user data:", error);
                 setUserLoggedIn(false);

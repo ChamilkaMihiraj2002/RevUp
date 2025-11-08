@@ -2,42 +2,84 @@ import { useState } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 import { Button } from "@/components/UI/Button";
 import { Input } from "@/components/UI/Input";
+import { sendChatMessage } from "@/services/chatbotService";
+import { toast } from "sonner";
+
+interface Message {
+  id: number;
+  text: string;
+  sender: "user" | "bot";
+  timestamp: Date;
+  isLoading?: boolean;
+}
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello! How can I help you today?",
+      text: "Hello! I'm your vehicle service assistant. How can I help you today? You can ask me about services, pricing, appointment scheduling, or vehicle maintenance.",
       sender: "bot",
       timestamp: new Date(),
     },
   ]);
   const [inputMessage, setInputMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() || isLoading) return;
 
-    const newMessage = {
+    const userMessage: Message = {
       id: messages.length + 1,
       text: inputMessage,
       sender: "user",
       timestamp: new Date(),
     };
 
-    setMessages([...messages, newMessage]);
-    setInputMessage("");
+    const loadingMessage: Message = {
+      id: messages.length + 2,
+      text: "Thinking...",
+      sender: "bot",
+      timestamp: new Date(),
+      isLoading: true,
+    };
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponse = {
-        id: messages.length + 2,
-        text: "Thank you for your message. Our team will assist you shortly.",
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botResponse]);
-    }, 1000);
+    setMessages((prev) => [...prev, userMessage, loadingMessage]);
+    setInputMessage("");
+    setIsLoading(true);
+
+    try {
+      const response = await sendChatMessage(inputMessage);
+      
+      setMessages((prev) => {
+        const messagesWithoutLoading = prev.filter((msg) => !msg.isLoading);
+        return [
+          ...messagesWithoutLoading,
+          {
+            id: prev.length + 1,
+            text: response,
+            sender: "bot",
+            timestamp: new Date(),
+          },
+        ];
+      });
+    } catch (error) {
+      toast.error("Failed to get response from chatbot");
+      setMessages((prev) => {
+        const messagesWithoutLoading = prev.filter((msg) => !msg.isLoading);
+        return [
+          ...messagesWithoutLoading,
+          {
+            id: prev.length + 1,
+            text: "I'm sorry, I'm having trouble connecting right now. Please try again later.",
+            sender: "bot",
+            timestamp: new Date(),
+          },
+        ];
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -59,6 +101,7 @@ export function Chatbot() {
             <button
               onClick={() => setIsOpen(false)}
               className="text-white hover:bg-white/20 rounded-full p-1.5 transition-colors"
+              aria-label="Close chat"
             >
               <X className="h-5 w-5" />
             </button>
@@ -80,19 +123,31 @@ export function Chatbot() {
                       : "bg-white text-slate-900 border border-slate-200 shadow-sm"
                   }`}
                 >
-                  <p className="text-sm">{message.text}</p>
-                  <p
-                    className={`text-xs mt-1 ${
-                      message.sender === "user"
-                        ? "text-white/70"
-                        : "text-slate-500"
-                    }`}
-                  >
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
+                  {message.isLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-cyan-600 rounded-full animate-bounce [animation-delay:0ms]"></div>
+                        <div className="w-2 h-2 bg-cyan-600 rounded-full animate-bounce [animation-delay:150ms]"></div>
+                        <div className="w-2 h-2 bg-cyan-600 rounded-full animate-bounce [animation-delay:300ms]"></div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          message.sender === "user"
+                            ? "text-white/70"
+                            : "text-slate-500"
+                        }`}
+                      >
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
@@ -116,7 +171,9 @@ export function Chatbot() {
               <Button
                 onClick={handleSendMessage}
                 size="sm"
-                className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-md rounded-xl px-4"
+                disabled={isLoading}
+                className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-md rounded-xl px-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Send message"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -129,6 +186,7 @@ export function Chatbot() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 w-16 h-16 bg-cyan-600 hover:bg-cyan-700 text-white rounded-full shadow-2xl flex items-center justify-center z-50 transition-all duration-300 hover:scale-110"
+        aria-label={isOpen ? "Close chat" : "Open chat"}
       >
         {isOpen ? (
           <X className="h-6 w-6" />
