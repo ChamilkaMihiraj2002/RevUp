@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/authContext/authContext"
 import AdminDashboard from "@/pages/admin/AdminDashboard.tsx"
 import TechnicianDashboard from "@/pages/technician/TechnicianDashboard.tsx";
 import TechnicianSignUpPage from "@/pages/technician/TechnicianSignUpPage.tsx";
+import { Toaster  } from "sonner";
 
 function App() {
   const { userLoggedIn, loading, role } = useAuth()
@@ -24,6 +25,7 @@ function App() {
   }
 
   return (
+      <>
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
@@ -81,11 +83,15 @@ function App() {
 
          {/* <Route path="/technician-dashboard" element={<TechnicianDashboard />} /> */}
          {/* <Route path="/book" element={<Book/>} /> */}
-
+        
+        
          
 
       </Routes>
     </Router>
+    <Toaster richColors position="top-right" />
+
+    </> 
   )
 }
 

@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/authContext/authContext"
 import { getVehiclesByUserId, type VehicleResponse } from "@/services/vehicleService"
 import { getAllServiceTypes, type ServiceTypeResponse } from "@/services/serviceTypeService"
 import { createAppointment, checkSlotAvailability, type SlotAvailabilityResponse } from "@/services/appointmentService"
+import { toast } from "sonner"
 
 export default function BookServicePage() {
   const { userData, accessToken } = useAuth()
@@ -60,9 +61,9 @@ export default function BookServicePage() {
         if (axios.isAxiosError(error)) {
           const errorMsg = error.response?.data?.message || error.message
           console.error('API Error:', errorMsg, 'Status:', error.response?.status)
-          alert(`Failed to load data: ${errorMsg}. Please refresh the page.`)
+          toast.error(`Failed to load data: ${errorMsg}. Please refresh the page.`)
         } else {
-          alert('Failed to load data. Please refresh the page.')
+          toast.error('Failed to load data. Please refresh the page.')
         }
       } finally {
         setLoading(false)
@@ -187,7 +188,7 @@ export default function BookServicePage() {
 
   const handleBooking = async () => {
     if (!userData?.userId || !accessToken || !selectedDate || !selectedTime || !selectedVehicle) {
-      alert("Missing required information")
+      toast.error("Missing required information")
       return
     }
 
@@ -216,7 +217,7 @@ export default function BookServicePage() {
       setStep(4) // Show confirmation
     } catch (error) {
       console.error("Error creating appointment:", error)
-      alert("Failed to book appointment. Please try again.")
+      toast.error("Failed to book appointment. Please try again.")
     } finally {
       setSubmitting(false)
     }
@@ -756,7 +757,7 @@ export default function BookServicePage() {
           </div>
         </div>
           </>
-        )}
+         )} 
       </div>
     </div>
   )

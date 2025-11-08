@@ -11,6 +11,8 @@ import { signUp, logInWithGoogle } from "../../firebase/auth"
 import { getFirebaseErrorMessage } from "../../firebase/errorUtils"
 import { useAuth } from "../../contexts/authContext/authContext"
 import { registerUser } from "../../services/userService"
+import { toast } from "sonner";
+
 
 export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }) {
   const [showPassword, setShowPassword] = useState(false)
@@ -33,17 +35,17 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
     setError("")
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match!")
+      toast.error("Passwords do not match!")
       return
     }
 
     if (formData.password.length < 6) {
-      setError("Password should be at least 6 characters long.")
+      toast.warning("Password should be at least 6 characters long.")
       return
     }
 
     if (!/^\d{10}$/.test(formData.mobile)) {
-      setError("Mobile number must be exactly 10 digits.")
+      toast.warning("Mobile number must be exactly 10 digits.")
       return
     }
 
@@ -62,12 +64,13 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
       })
 
       console.log("Sign-up successful!")
-      setSuccessMessage("Signup successful! Redirecting to login...")
+      toast.success("Signup successful! Redirecting to login...")
       setTimeout(() => {
         onSwitchToLogin?.()
       }, 2000)
     } catch (err: any) {
-      setError(getFirebaseErrorMessage(err))
+       const message = getFirebaseErrorMessage(err);
+       toast.error(message);
       console.error("Sign-up error:", err)
     } finally {
       setIsLoading(false)
@@ -91,12 +94,12 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
       })
 
       console.log("Google sign-up successful!")
-      setSuccessMessage("Signup successful! Please login to the system. Redirecting...")
+      toast.success("Signup successful! Please login to the system. Redirecting...")
       setTimeout(() => {
         onSwitchToLogin?.()
       }, 2000)
     } catch (err: any) {
-      setError(getFirebaseErrorMessage(err))
+      toast.error(getFirebaseErrorMessage(err))
       console.error("Google sign-in error:", err)
     } finally {
       setIsGoogleLoading(false)

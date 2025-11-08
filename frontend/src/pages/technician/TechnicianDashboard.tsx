@@ -1,3 +1,4 @@
+// typescript
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,7 +12,7 @@ import {
   CardDescription,
 } from "@/components/UI/Card";
 import { useAuth } from "@/contexts/authContext/authContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   getUnassignedAppointments,
   getAppointmentsByTechnicianId,
@@ -29,16 +30,20 @@ import {
   type ProjectResponse,
 } from "@/services/projectService";
 import {
-  Car,
-  CheckCircle,
-  User,
-  LayoutList,
-  CheckSquare,
-  Calendar,
-  LogOut,
-  Play,
+    Car,
+    CheckCircle,
+    User,
+    LayoutList,
+    CheckSquare,
+    Calendar,
+    LogOut,
+    Bell,
+    Inbox,
+    FilePlus,
+    Play,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import { CommonSidebar } from "@/components/Layout/Slidebar.tsx";
 
 export default function TechnicianDashboard() {
   const { userData, logout, accessToken } = useAuth();
@@ -47,13 +52,13 @@ export default function TechnicianDashboard() {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [vehicles, setVehicles] = useState<Record<number, VehicleResponse>>({});
   const [loading, setLoading] = useState(true);
-  
+
   // Project requests state
   const [pendingProjects, setPendingProjects] = useState<ProjectResponse[]>([]);
   const [acceptedProjects, setAcceptedProjects] = useState<ProjectResponse[]>([]);
   const [projectEstimateTime, setProjectEstimateTime] = useState<Record<number, string>>({});
   const [projectEstimatedAmount, setProjectEstimatedAmount] = useState<Record<number, string>>({});
-  
+
   // Appointment queue state
   const [queuedAppointments, setQueuedAppointments] = useState<AppointmentResponse[]>([]);
   const [technicianAppointments, setTechnicianAppointments] = useState<AppointmentResponse[]>([]);
@@ -64,6 +69,7 @@ export default function TechnicianDashboard() {
       navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
+      toast.error("Failed to logout. Please try again.");
     }
   };
 
@@ -76,7 +82,7 @@ export default function TechnicianDashboard() {
       const techAppointments = await getAppointmentsByTechnicianId(userData.userId, accessToken);
       setTechnicianAppointments(techAppointments || []);
       setAppointments(techAppointments || []); // For backward compatibility with existing tabs
-      
+
       // Fetch unassigned appointments for the queue
       const unassigned = await getUnassignedAppointments(accessToken);
       setQueuedAppointments(unassigned || []);
@@ -92,6 +98,7 @@ export default function TechnicianDashboard() {
           return vehicle ? { [vehicleId]: vehicle } : {};
         } catch (err) {
           console.error(`Error fetching vehicle ${vehicleId}:`, err);
+          toast.error("Error fetching vehicle:");
           return {};
         }
       });
@@ -99,11 +106,11 @@ export default function TechnicianDashboard() {
       const vehicleResults = await Promise.all(vehiclePromises);
       const vehiclesMap = Object.assign({}, ...vehicleResults);
       setVehicles(vehiclesMap);
-      
+
       // Fetch pending projects (unassigned)
       const pending = await getPendingProjects(accessToken);
       setPendingProjects(pending || []);
-      
+
       // Fetch accepted projects for this technician
       if (userData.userId) {
         const accepted = await getProjectsByTechnicianId(userData.userId, accessToken);
@@ -111,13 +118,14 @@ export default function TechnicianDashboard() {
       }
     } catch (error) {
       console.error("Error fetching data:", error);
+      toast.error("Error fetching data:");
       // Set empty arrays on error to prevent undefined issues
       setTechnicianAppointments([]);
       setAppointments([]);
       setQueuedAppointments([]);
-    } finally {
-      setLoading(false);
-    }
+     } finally {
+       setLoading(false);
+     }
   };
 
   // Initial data fetch
@@ -136,21 +144,21 @@ export default function TechnicianDashboard() {
 
   const handleStartService = async (appointmentId: number) => {
     if (!accessToken) return;
-
     try {
       await updateAppointment(
         appointmentId,
-        { 
+        {
           status: "ONGOING"
         },
         accessToken
       );
       // Refresh data to show updated status
       await fetchData();
-      alert("Service started!");
+      //alert("Service started!");
+      toast.success("Service started!");
     } catch (error) {
       console.error("Error starting service:", error);
-      alert("Failed to start service");
+      toast.error("Error starting service:");
     }
   };
 
@@ -160,17 +168,19 @@ export default function TechnicianDashboard() {
     try {
       await updateAppointment(
         appointmentId,
-        { 
+        {
           status: "SERVICED"
         },
         accessToken
       );
       // Refresh data to show updated status
       await fetchData();
-      alert("Service marked as complete! Waiting for customer confirmation.");
+      //alert("Service marked as complete! Waiting for customer confirmation.");
+        toast.success("Service marked as complete! Waiting for customer confirmation.");
     } catch (error) {
       console.error("Error completing service:", error);
-      alert("Failed to complete service");
+        toast.error("Error completing service:");
+      //alert("Failed to complete service");
     }
   };
 
@@ -181,7 +191,8 @@ export default function TechnicianDashboard() {
     const estimatedAmount = projectEstimatedAmount[projectId];
 
     if (!estimateTime || !estimatedAmount) {
-      alert("Please fill in estimate hours and budget before accepting the project.");
+      //alert("Please fill in estimate hours and budget before accepting the project.");
+      toast.error("Please fill in estimate hours and budget before accepting the project.");
       return;
     }
 
@@ -196,7 +207,8 @@ export default function TechnicianDashboard() {
         accessToken
       );
       await fetchData();
-      alert("Project accepted successfully!");
+      //alert("Project accepted successfully!");
+        toast.success("Project accepted successfully!");
       // Clear the input fields
       setProjectEstimateTime((prev) => {
         const newState = { ...prev };
@@ -210,7 +222,8 @@ export default function TechnicianDashboard() {
       });
     } catch (error) {
       console.error("Error accepting project:", error);
-      alert("Failed to accept project. Please try again.");
+        toast.error("Error accepting project:");
+      //alert("Failed to accept project. Please try again.");
     }
   };
 
@@ -223,9 +236,10 @@ export default function TechnicianDashboard() {
       const appointmentToAccept = queuedAppointments.find(
         (apt) => apt.appointmentId === appointmentId
       );
-      
+
       if (!appointmentToAccept) {
-        alert("Appointment not found.");
+        //alert("Appointment not found.");
+        toast.error("Appointment not found.");
         return;
       }
 
@@ -246,29 +260,28 @@ export default function TechnicianDashboard() {
       });
 
       if (hasConflict) {
-        alert(
-          "You already have an appointment scheduled during this time slot. Please choose a different appointment."
-        );
+        //alert("You already have an appointment scheduled during this time slot. Please choose a different appointment.");
+        toast.error("You already have an appointment scheduled during this time slot. Please choose a different appointment.");
         return;
       }
 
       // Accept the appointment by setting the technician ID and changing status to CONFIRMED
       await updateAppointment(
         appointmentId,
-        { 
+        {
           technicianId: userData.userId,
           status: "CONFIRMED"
         },
         accessToken
       );
-
-      alert("Appointment accepted successfully! It will appear in your schedule.");
-      
+      //alert("Appointment accepted successfully! It will appear in your schedule.");
+      toast.success("Appointment accepted successfully! It will appear in your schedule.");
       // Refresh data to move appointment from queue to schedule
       await fetchData();
     } catch (error) {
       console.error("Error accepting appointment:", error);
-      alert("Failed to accept appointment. Please try again.");
+        toast.error("Error accepting appointment:");
+      //alert("Failed to accept appointment. Please try again.");
     }
   };
 
@@ -301,7 +314,7 @@ export default function TechnicianDashboard() {
     }
     return false;
   });
-  
+
   // Schedule: CONFIRMED appointments where time hasn't arrived yet
   const scheduledAppointments = appointments.filter((apt) => {
     if (apt.status === "CONFIRMED") {
@@ -310,136 +323,93 @@ export default function TechnicianDashboard() {
     }
     return false;
   });
-  
+
   // Completed Today
   const completedAppointments = appointments.filter(
     (apt) => apt.status === "COMPLETED"
   );
 
-  if (loading) {
-      return (
-          <div className="min-h-screen bg-background flex items-center justify-center">
-              <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                  <p className="mt-4 text-muted-foreground">Loading appointments...</p>
-              </div>
-          </div>
-      )
-  }
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4 text-muted-foreground">Loading appointments...</p>
+                </div>
+            </div>
+        )
+    }
+
+  // Navigation items for Technician Dashboard (used by CommonSidebar)
+  const navItems = [
+    { id: "assignments", label: "My Assignments", icon: LayoutList },
+    { id: "completed", label: "Completed Today", icon: CheckSquare },
+    { id: "schedule", label: "Schedule", icon: Calendar },
+    { id: "appointmentQueue", label: "Appointment Queue", icon: Inbox },
+    { id: "projectRequests", label: "Project Requests", icon: FilePlus },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="border-b border-border/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      <nav className="relative z-10 border-b border-cyan-200/80 bg-gradient-to-r from-blue-50 via-cyan-50 to-blue-100 shadow-sm">
+        <div className="max-w-72xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-16">
             <div className="flex items-center space-x-3">
               <Link to="/" className="flex items-center space-x-3">
-                <div className="bg-primary rounded-lg p-2">
-                  <Car className="h-6 w-6 text-primary-foreground" />
+                <div className="bg-cyan-600 rounded-lg p-2">
+                  <Car className="h-6 w-6 text-white" />
                 </div>
-                <span className="text-xl font-bold">RevUp</span>
+                <span className="text-xl font-bold text-gray-900">RevUp</span>
               </Link>
-              <Badge variant="secondary" className="ml-4">
+              <Badge variant="secondary" className="ml-4 bg-white/10 text-cyan-700">
                 Technician Portal
               </Badge>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium">
-                  {userData?.name || "Technician"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Updates every 15 seconds
-                </p>
+          </div>
+        </div>
+          <div className="absolute right-4 top-0 h-16 flex items-center space-x-4">
+              <Button variant="ghost" size="sm" className="text-gray-700 hover:text-cyan-700">
+                  <Bell className="h-4 w-4" />
+              </Button>
+
+              <div className="text-right hidden sm:block">
+                  <p className="text-sm font-medium text-gray-900">{userData?.name || "Technician"}</p>
+                  <p className="text-xs text-gray-600">Updates every 15 seconds</p>
               </div>
-              <Button variant="ghost" size="sm">
-                <User className="h-4 w-4" />
+
+              <Button variant="ghost" size="sm" className="text-gray-700 hover:text-cyan-700">
+                  <User className="h-4 w-4" />
               </Button>
               <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="hover:bg-red-50 hover:text-red-800 text-red-600"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="text-red-600 hover:text-red-800"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
-          </div>
-        </div>
       </nav>
 
       <div className="flex">
-        <aside className="w-64 border-r border-border/50 bg-muted/30 min-h-screen">
-          <div className="p-6 space-y-2">
-            <h2 className="text-lg font-semibold mb-4">Dashboard</h2>
-            <button
-              onClick={() => setActiveTab("assignments")}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                activeTab === "assignments"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <LayoutList className="h-5 w-5" />
-              <span>My Assignments</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("completed")}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                activeTab === "completed"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <CheckSquare className="h-5 w-5" />
-              <span>Completed Today</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("schedule")}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                activeTab === "schedule"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <Calendar className="h-5 w-5" />
-              <span>Schedule</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("appointmentQueue")}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                activeTab === "appointmentQueue"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <LayoutList className="h-5 w-5" />
-              <span>Appointment Queue</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("projectRequests")}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                activeTab === "projectRequests"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground hover:bg-muted"
-              }`}
-            >
-              <LayoutList className="h-5 w-5" />
-              <span>Project Requests</span>
-            </button>
-          </div>
-        </aside>
+        {/* Sidebar replaced by CommonSidebar */}
+        <CommonSidebar
+          navItems={navItems}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          dashboardName="Technician"
+        />
 
         {/* Main Content */}
         <main className="flex-1">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-balance">
+              <h1 className="text-3xl font-bold text-gray-900">
                 Service Dashboard
               </h1>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-gray-600 mt-2">
                 Manage your assigned appointments
               </p>
             </div>
@@ -473,26 +443,26 @@ export default function TechnicianDashboard() {
                           <div className="flex items-center justify-between">
                             <div>
                               <CardTitle className="flex items-center space-x-3">
-                                <span>
+                                 <span>
                                   {vehicle
-                                    ? `${vehicle.model} (${vehicle.year})`
-                                    : "Loading..."}
+                                      ? `${vehicle.model} (${vehicle.year})`
+                                      : "Loading..."}
                                 </span>
-                                <Badge
-                                  variant="outline"
-                                  className={getStatusColor(appointment.status)}
-                                >
-                                  {appointment.status}
-                                </Badge>
+                                  <Badge
+                                      variant="outline"
+                                      className={getStatusColor(appointment.status)}
+                                  >
+                                      {appointment.status}
+                                  </Badge>
                               </CardTitle>
                               <CardDescription>
-                                {vehicle &&
-                                  `Registration: ${vehicle.registrationNo} • Color: ${vehicle.color}`}
-                                <br />
-                                Scheduled:{" "}
-                                {new Date(
-                                  appointment.scheduledStart
-                                ).toLocaleString()}
+                                  {vehicle &&
+                                      `Registration: ${vehicle.registrationNo} • Color: ${vehicle.color}`}
+                                  <br />
+                                  Scheduled:{" "}
+                                  {new Date(
+                                      appointment.scheduledStart
+                                  ).toLocaleString()}
                               </CardDescription>
                             </div>
                           </div>
@@ -503,28 +473,28 @@ export default function TechnicianDashboard() {
                           <div className="flex justify-end pt-4 border-t">
                             {appointment.status === "CONFIRMED" && (
                               <Button
-                                onClick={() =>
-                                  handleStartService(appointment.appointmentId)
-                                }
-                                className="bg-blue-600 hover:bg-blue-700"
+                                  onClick={() =>
+                                      handleStartService(appointment.appointmentId)
+                                  }
+                                  className="bg-blue-600 hover:bg-blue-700"
                               >
-                                <Play className="h-4 w-4 mr-2" />
-                                Start Service
+                                  <Play className="h-4 w-4 mr-2" />
+                                  Start Service
                               </Button>
                             )}
-                            {appointment.status === "ONGOING" && (
-                              <Button
-                                onClick={() =>
-                                  handleCompleteService(
-                                    appointment.appointmentId
-                                  )
-                                }
-                                className="bg-green-600 hover:bg-green-700"
-                              >
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                                Complete Service
-                              </Button>
-                            )}
+                              {appointment.status === "ONGOING" && (
+                                  <Button
+                                      onClick={() =>
+                                          handleCompleteService(
+                                              appointment.appointmentId
+                                          )
+                                      }
+                                      className="bg-green-600 hover:bg-green-700"
+                                  >
+                                      <CheckCircle className="h-4 w-4 mr-2" />
+                                      Complete Service
+                                  </Button>
+                                  )}
                           </div>
                         </CardContent>
                       </Card>
@@ -564,28 +534,28 @@ export default function TechnicianDashboard() {
                           >
                             <div className="flex items-center justify-between">
                               <div>
-                                <p className="font-medium">
-                                  {vehicle
-                                    ? `${vehicle.model} (${vehicle.year})`
-                                    : "Loading..."}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {vehicle &&
-                                    `Registration: ${vehicle.registrationNo}`}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  Completed:{" "}
-                                  {new Date(
-                                    appointment.scheduledEnd
-                                  ).toLocaleString()}
-                                </p>
+                                  <p className="font-medium">
+                                      {vehicle
+                                          ? `${vehicle.model} (${vehicle.year})`
+                                          : "Loading..."}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                      {vehicle &&
+                                          `Registration: ${vehicle.registrationNo}`}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                      Completed:{" "}
+                                      {new Date(
+                                          appointment.scheduledEnd
+                                      ).toLocaleString()}
+                                  </p>
                               </div>
                               <Badge
-                                variant="outline"
-                                className={getStatusColor(appointment.status)}
+                                  variant="outline"
+                                  className={getStatusColor(appointment.status)}
                               >
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                {appointment.status}
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  {appointment.status}
                               </Badge>
                             </div>
                           </div>
@@ -607,7 +577,7 @@ export default function TechnicianDashboard() {
                     Upcoming confirmed appointments (not yet started)
                   </p>
                 </div>
-                
+
                 {scheduledAppointments.length === 0 ? (
                   <Card>
                     <CardContent className="py-12 text-center">
@@ -623,7 +593,7 @@ export default function TechnicianDashboard() {
                 ) : (
                   scheduledAppointments.map((appointment) => {
                     const vehicle = vehicles[appointment.vehicleId];
-                    
+
                     return (
                       <Card
                         key={appointment.appointmentId}
@@ -632,9 +602,7 @@ export default function TechnicianDashboard() {
                         <CardHeader>
                           <CardTitle className="flex items-center justify-between">
                             <span>
-                              {vehicle
-                                ? `${vehicle.model} (${vehicle.year})`
-                                : "Loading..."}
+
                             </span>
                             <Badge
                               variant="outline"
@@ -656,15 +624,15 @@ export default function TechnicianDashboard() {
                                 Start Time
                               </p>
                               <p className="text-sm text-gray-600">
-                                {new Date(appointment.scheduledStart).toLocaleString()}
+                                  {new Date(appointment.scheduledStart).toLocaleString()}
                               </p>
                             </div>
                             <div className="space-y-1">
                               <p className="text-sm font-medium text-gray-700">
-                                End Time
+                                  End Time
                               </p>
                               <p className="text-sm text-gray-600">
-                                {new Date(appointment.scheduledEnd).toLocaleString()}
+                                  {new Date(appointment.scheduledEnd).toLocaleString()}
                               </p>
                             </div>
                           </div>
@@ -683,21 +651,21 @@ export default function TechnicianDashboard() {
                           {vehicle && (
                             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
                               <p className="font-semibold text-blue-800 mb-2">
-                                Vehicle Details
+                                  Vehicle Details
                               </p>
                               <div className="grid grid-cols-2 gap-2 text-sm">
-                                <p className="text-gray-700">
-                                  <span className="font-medium">Model:</span> {vehicle.model}
-                                </p>
-                                <p className="text-gray-700">
-                                  <span className="font-medium">Year:</span> {vehicle.year}
-                                </p>
-                                <p className="text-gray-700">
-                                  <span className="font-medium">Type:</span> {vehicle.vehicleType}
-                                </p>
-                                <p className="text-gray-700">
-                                  <span className="font-medium">Registration:</span> {vehicle.registrationNo}
-                                </p>
+                                  <p className="text-gray-700">
+                                      <span className="font-medium">Model:</span> {vehicle.model}
+                                  </p>
+                                  <p className="text-gray-700">
+                                      <span className="font-medium">Year:</span> {vehicle.year}
+                                  </p>
+                                  <p className="text-gray-700">
+                                      <span className="font-medium">Type:</span> {vehicle.vehicleType}
+                                  </p>
+                                  <p className="text-gray-700">
+                                      <span className="font-medium">Registration:</span> {vehicle.registrationNo}
+                                  </p>
                               </div>
                             </div>
                           )}
@@ -723,11 +691,11 @@ export default function TechnicianDashboard() {
                     View unassigned appointments and accept them for your schedule
                   </p>
                 </div>
-                
+
                 {queuedAppointments.length === 0 ? (
                   <Card>
                     <CardContent className="py-12 text-center">
-                      <LayoutList className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <Inbox className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-medium mb-2">
                         No Appointments Available
                       </h3>
@@ -739,7 +707,7 @@ export default function TechnicianDashboard() {
                 ) : (
                   queuedAppointments.map((appointment) => {
                     const vehicle = vehicles[appointment.vehicleId];
-                    
+
                     return (
                       <Card
                         key={appointment.appointmentId}
@@ -749,10 +717,10 @@ export default function TechnicianDashboard() {
                           <CardTitle className="flex items-center justify-between">
                             <span>Appointment #{appointment.appointmentId}</span>
                             <Badge
-                              variant="outline"
-                              className={getStatusColor(appointment.status)}
+                                variant="outline"
+                                className={getStatusColor(appointment.status)}
                             >
-                              {appointment.status}
+                                {appointment.status}
                             </Badge>
                           </CardTitle>
                           <CardDescription>
@@ -764,67 +732,67 @@ export default function TechnicianDashboard() {
                           {/* Appointment Details */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1">
-                              <p className="text-sm font-medium text-gray-700">
-                                Start Time
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {new Date(appointment.scheduledStart).toLocaleString()}
-                              </p>
+                                <p className="text-sm font-medium text-gray-700">
+                                    Start Time
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                    {new Date(appointment.scheduledStart).toLocaleString()}
+                                </p>
                             </div>
                             <div className="space-y-1">
-                              <p className="text-sm font-medium text-gray-700">
-                                End Time
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {new Date(appointment.scheduledEnd).toLocaleString()}
-                              </p>
+                                <p className="text-sm font-medium text-gray-700">
+                                    End Time
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                    {new Date(appointment.scheduledEnd).toLocaleString()}
+                                </p>
                             </div>
                           </div>
 
                           {/* Duration */}
                           <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
                             <p className="text-sm font-medium text-gray-700">
-                              Appointment Duration
+                                Appointment Duration
                             </p>
                             <p className="text-sm text-gray-600 mt-1">
-                              {Math.round((new Date(appointment.scheduledEnd).getTime() - new Date(appointment.scheduledStart).getTime()) / (1000 * 60))} minutes
+                                {Math.round((new Date(appointment.scheduledEnd).getTime() - new Date(appointment.scheduledStart).getTime()) / (1000 * 60))} minutes
                             </p>
                           </div>
 
                           {/* Vehicle Information */}
                           {vehicle && (
                             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                              <p className="font-semibold text-blue-800 mb-2">
-                                Vehicle Details
-                              </p>
-                              <div className="grid grid-cols-2 gap-2 text-sm">
-                                <p className="text-gray-700">
-                                  <span className="font-medium">Model:</span> {vehicle.model}
+                                <p className="font-semibold text-blue-800 mb-2">
+                                    Vehicle Details
                                 </p>
-                                <p className="text-gray-700">
-                                  <span className="font-medium">Year:</span> {vehicle.year}
-                                </p>
-                                <p className="text-gray-700">
-                                  <span className="font-medium">Type:</span> {vehicle.vehicleType}
-                                </p>
-                                <p className="text-gray-700">
-                                  <span className="font-medium">Registration:</span> {vehicle.registrationNo}
-                                </p>
-                                <p className="text-gray-700 col-span-2">
-                                  <span className="font-medium">Color:</span> {vehicle.color}
-                                </p>
-                              </div>
+                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                    <p className="text-gray-700">
+                                        <span className="font-medium">Model:</span> {vehicle.model}
+                                    </p>
+                                    <p className="text-gray-700">
+                                        <span className="font-medium">Year:</span> {vehicle.year}
+                                    </p>
+                                    <p className="text-gray-700">
+                                        <span className="font-medium">Type:</span> {vehicle.vehicleType}
+                                    </p>
+                                    <p className="text-gray-700">
+                                        <span className="font-medium">Registration:</span> {vehicle.registrationNo}
+                                    </p>
+                                    <p className="text-gray-700 col-span-2">
+                                        <span className="font-medium">Color:</span> {vehicle.color}
+                                    </p>
+                                </div>
                             </div>
                           )}
 
                           {/* Accept Appointment Button */}
                           <div className="flex justify-end pt-4 border-t">
                             <Button
-                              className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg"
-                              onClick={() => handleAcceptAppointment(appointment.appointmentId)}
+                                className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg"
+                                onClick={() => handleAcceptAppointment(appointment.appointmentId)}
                             >
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              Accept Appointment
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Accept Appointment
                             </Button>
                           </div>
                         </CardContent>
@@ -844,11 +812,11 @@ export default function TechnicianDashboard() {
                     Review customer requests and provide estimates to accept projects
                   </p>
                 </div>
-                
+
                 {pendingProjects.length === 0 ? (
                   <Card>
                     <CardContent className="py-12 text-center">
-                      <LayoutList className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <FilePlus className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-medium mb-2">
                         No Pending Requests
                       </h3>
@@ -889,7 +857,7 @@ export default function TechnicianDashboard() {
                           </p>
                           {project.vehicleId && (
                             <p className="text-sm text-muted-foreground">
-                              Vehicle ID: {project.vehicleId}
+                                Vehicle ID: {project.vehicleId}
                             </p>
                           )}
                         </div>
@@ -898,20 +866,20 @@ export default function TechnicianDashboard() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="text-sm font-medium text-gray-700">
-                              Estimate Hours *
+                                Estimate Hours *
                             </label>
                             <input
-                              type="number"
-                              placeholder="Enter hours"
-                              min="1"
-                              value={projectEstimateTime[project.projectId] || ""}
-                              onChange={(e) =>
-                                setProjectEstimateTime((prev) => ({
-                                  ...prev,
-                                  [project.projectId]: e.target.value,
-                                }))
-                              }
-                              className="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-primary"
+                                type="number"
+                                placeholder="Enter hours"
+                                min="1"
+                                value={projectEstimateTime[project.projectId] || ""}
+                                onChange={(e) =>
+                                    setProjectEstimateTime((prev) => ({
+                                        ...prev,
+                                        [project.projectId]: e.target.value,
+                                    }))
+                                }
+                                className="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                           </div>
                           <div>
@@ -925,10 +893,10 @@ export default function TechnicianDashboard() {
                               step="0.01"
                               value={projectEstimatedAmount[project.projectId] || ""}
                               onChange={(e) =>
-                                setProjectEstimatedAmount((prev) => ({
-                                  ...prev,
-                                  [project.projectId]: e.target.value,
-                                }))
+                                  setProjectEstimatedAmount((prev) => ({
+                                      ...prev,
+                                      [project.projectId]: e.target.value,
+                                  }))
                               }
                               className="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-primary"
                             />
@@ -978,23 +946,23 @@ export default function TechnicianDashboard() {
                           <CardContent className="py-4">
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
-                                <div className="flex items-center space-x-3 mb-2">
-                                  <h3 className="font-semibold">Project #{project.projectId}</h3>
-                                  <Badge
-                                    variant="outline"
-                                    className={getStatusColor(project.status)}
-                                  >
-                                    {project.status}
-                                  </Badge>
-                                </div>
-                                <p className="text-sm text-gray-700 mb-2">
-                                  {project.description}
-                                </p>
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                  <span>⏱️ {project.estimateTime} hours</span>
-                                  <span>💰 ${project.estimatedAmount?.toFixed(2)}</span>
-                                  <span>📅 Started: {new Date(project.updatedAt).toLocaleDateString()}</span>
-                                </div>
+                                  <div className="flex items-center space-x-3 mb-2">
+                                      <h3 className="font-semibold">Project #{project.projectId}</h3>
+                                      <Badge
+                                          variant="outline"
+                                          className={getStatusColor(project.status)}
+                                      >
+                                          {project.status}
+                                      </Badge>
+                                  </div>
+                                  <p className="text-sm text-gray-700 mb-2">
+                                      {project.description}
+                                  </p>
+                                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                      <span>⏱️ {project.estimateTime} hours</span>
+                                      <span>💰 ${project.estimatedAmount?.toFixed(2)}</span>
+                                      <span>📅 Started: {new Date(project.updatedAt).toLocaleDateString()}</span>
+                                  </div>
                               </div>
                             </div>
                           </CardContent>
