@@ -1,0 +1,63 @@
+server:
+  port: ${CHATBOT_SERVICE_PORT:8081}
+
+spring:
+  application:
+    name: chatboat_service
+
+  ai:
+    google:
+      genai:
+        api-key: "YOUR GEMINI API-KEY"
+        chat:
+          options:
+            model: "gemini-2.0-flash-lite"
+
+external:
+  api:
+    base-url: "lb://RevUp-User-Service"
+    path: "api/service-types"
+    timeout-seconds: 10
+
+# Default Eureka configuration
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server-service.revup-backend:8761/eureka/}
+    registerWithEureka: true
+    fetchRegistry: true
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    preferIpAddress: true
+    instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+---
+spring:
+  config:
+    activate:
+      on-profile: no_eureka
+
+eureka:
+  client:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: k8s
+
+# Kubernetes configuration
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server-service.revup-backend:8761/eureka/}
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
