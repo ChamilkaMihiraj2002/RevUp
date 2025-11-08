@@ -27,7 +27,7 @@ public class FirebaseAuthenticationFilter implements Filter {
 
     private final WebClient.Builder webClientBuilder;
     
-    @Value("${user.service.url:http://localhost:8083}")
+    @Value("${user.service.url:lb://RevUp-User-Service}")
     private String userServiceUrl;
 
     public FirebaseAuthenticationFilter(WebClient.Builder webClientBuilder) {
@@ -41,17 +41,18 @@ public class FirebaseAuthenticationFilter implements Filter {
         "/gateway/services",
         "/actuator/health",
         "/actuator/info",
-        "/api/v1/users",
-        "/api/v1/service-types",
-        "/api/v1/appointment-services",
-        "/api/v1/appointments"
+        "/api/v1/users"
+
     );
 
     // Endpoints that require TECHNICIAN role
     private static final List<String> TECHNICIAN_ONLY_ENDPOINTS = Arrays.asList(
-        // "/api/v1/service-types",
-        // "/api/v1/appointment-services"
-        // Add more technician-only endpoints here
+        "/api/v1/appointments/unassigned",           // Get unassigned appointments
+        "/api/v1/appointments/technician/",          // Get technician's appointments
+        "/api/v1/projects/pending",                  // Get pending projects
+        "/api/v1/projects/technician/",              // Get technician's projects
+        "/api/v1/service-types"                 // Manage service types
+
     );
 
     @Override

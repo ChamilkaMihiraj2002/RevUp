@@ -1,101 +1,57 @@
-# server.port: 8083
-
-# spring:
-#   application:
-#     name: SQ1AI-INSTRUCTOR-SERVICE
-#   datasource:
-#     driver-class-name: org.postgresql.Driver
-#     hikari:
-#       maximum-pool-size: 10
-#       minimum-idle: 5
-#       connection-timeout: 3000
-#       idle-timeout: 600000
-#       max-lifetime: 1800000
-#       leak-detection-threshold: 60000
-#       pool-name: Sq1AIInstructorServiceHikariCP
-#       connection-test-query: SELECT 1
-#       register-mbeans: true
-
-
-#   jpa:
-#     database-platform: org.hibernate.dialect.PostgreSQLDialect
-#     hibernate:
-#       ddl-auto: validate
-#     show-sql: false
-#     properties:
-#       hibernate:
-#         format_sql: false
-#         jdbc:
-#           batch_size: 5
-#         order_inserts: true
-#         order_updates: true
-#     open-in-view: false
-
-# ---
-# # Development Profile
-# spring:
-#   config:
-#     activate:
-#       on-profile: dev
-#   # Commenting out the default datasource to use the custom one defined below so that database config would not crash
-#   #  datasource:
-#   #    url: jdbc:postgresql://crossover.proxy.rlwy.net:35550/sq1ai_instructor_service
-#   #    username: root
-#   #    password: zIpMqdsAgiKkmJPObCZxRDkKalJdRVQk
-#   ds-dev:
-#     jdbc-url: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true
-#     username: postgres.bpswqweiwbacnoxkzrbc
-#     password: "05102002"
-#   jpa:
-#     hibernate:
-#       ddl-auto: update
-#     show-sql: true
-
-server.port: 8083
+server.port: ${TIME_TRACKING_SERVICE_PORT:8085}
 
 spring:
   application:
-    name: RevUp-User-Service
+    name: RevUp-TimeTracking-Service
   datasource:
-    url: jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true
-    username: postgres.bpswqweiwbacnoxkzrbc
-    password: "05102002"
-
-    # url: jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true
-    # username: postgres.pomermxliroehfuuroqk
-    # password: "ChamilkaM@2002"
-
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/time_tracking_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.postgresql.Driver}
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      pool-name: UserServiceHikariPool
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:10}
+      minimum-idle: ${HIKARI_MINIMUM_IDLE:5}
+      connection-timeout: ${HIKARI_CONNECTION_TIMEOUT:30000}
+      idle-timeout: ${HIKARI_IDLE_TIMEOUT:600000}
+      max-lifetime: ${HIKARI_MAX_LIFETIME:1800000}
+      pool-name: TimeTrackingServiceHikariPool
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: false
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        # Ensure Hibernate uses UTC when writing/reading TIMESTAMP WITH TIME ZONE
+        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+        format_sql: ${HIBERNATE_FORMAT_SQL:true}
         jdbc:
           time_zone: UTC
 
-  # Jackson and JVM timezone settings: prefer UTC and ISO date-times
   jackson:
     time-zone: UTC
     serialization:
       write-dates-as-timestamps: false
 
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server-service.revup-backend:8761/eureka/}
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+    registerWithEureka: true
+    fetchRegistry: true
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
 ---
 spring:
   config:
     activate:
-      on-profile: dev, no_eureka
+      on-profile: k8s
 
+# Kubernetes profile configuration
 eureka:
   client:
-    enabled: false
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server-service.revup-backend:8761/eureka/}

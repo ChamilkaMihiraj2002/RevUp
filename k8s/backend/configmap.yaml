@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: revup-backend
+data:
+  # Eureka configuration
+  EUREKA_SERVER_URL: "http://eureka-server-service.revup-backend:8761/eureka/"
+  
+  # Service ports
+  API_GATEWAY_PORT: "8080"
+  USER_SERVICE_PORT: "8083"
+  VEHICLE_SERVICE_PORT: "8082"
+  APPOINTMENT_SERVICE_PORT: "8086"
+  PROJECT_SERVICE_PORT: "8084"
+  CHATBOT_SERVICE_PORT: "8081"
+  TIME_TRACKING_SERVICE_PORT: "8085"
+
+  # Database URLs - Each service gets its own database
+  USER_SERVICE_DB_URL: "jdbc:postgresql://postgres-service.revup-database:5432/user_db"
+  VEHICLE_SERVICE_DB_URL: "jdbc:postgresql://postgres-service.revup-database:5432/vehicle_db"
+  APPOINTMENT_SERVICE_DB_URL: "jdbc:postgresql://postgres-service.revup-database:5432/appointment_db"
+  PROJECT_SERVICE_DB_URL: "jdbc:postgresql://postgres-service.revup-database:5432/project_db"
+  CHATBOT_SERVICE_DB_URL: "jdbc:postgresql://postgres-service.revup-database:5432/chatbot_db"
+  TIME_TRACKING_SERVICE_DB_URL: "jdbc:postgresql://postgres-service.revup-database:5432/time_tracking_db"
+  
+  # Database common configuration
+  DB_DRIVER_CLASS_NAME: "org.postgresql.Driver"
+  
+  # Database pool configuration
+  HIKARI_MAXIMUM_POOL_SIZE: "10"
+  HIKARI_MINIMUM_IDLE: "5"
+  HIKARI_CONNECTION_TIMEOUT: "30000"
+  HIKARI_IDLE_TIMEOUT: "600000"
+  HIKARI_MAX_LIFETIME: "1800000"
+  
+  # JPA/Hibernate configuration
+  JPA_DDL_AUTO: "update"  # Change to 'validate' in production
+  JPA_SHOW_SQL: "false"
+  HIBERNATE_DIALECT: "org.hibernate.dialect.PostgreSQLDialect"
+  HIBERNATE_FORMAT_SQL: "true"
+  
+  # Spring profiles
+  SPRING_PROFILES_ACTIVE: "k8s"

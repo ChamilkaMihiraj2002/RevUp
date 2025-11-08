@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_BASE = 'http://localhost:8080/api/v1';
+import API_BASE_URL from '../config/api.config';
 
 export interface RegisterUserData {
   name: string;
@@ -22,12 +21,12 @@ export interface UserData {
 }
 
 export const registerUser = async (userData: RegisterUserData) => {
-  const response = await axios.post(`${API_BASE}/users`, userData);
+  const response = await axios.post(`${API_BASE_URL}/users`, userData);
   return response.data;
 };
 
 export const getUserByFirebaseUID = async (firebaseUID: string, token: string): Promise<UserData> => {
-  const response = await axios.get(`${API_BASE}/users/firebase/${firebaseUID}`, {
+  const response = await axios.get(`${API_BASE_URL}/users/firebase/${firebaseUID}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -43,7 +42,7 @@ export interface UpdateUserData {
 }
 
 export const updateUser = async (userId: number, userData: UpdateUserData, token: string): Promise<UserData> => {
-  const response = await axios.put(`${API_BASE}/users/${userId}`, userData, {
+  const response = await axios.put(`${API_BASE_URL}/users/${userId}`, userData, {
     headers: {
       'Authorization': `Bearer ${token}`
     }

@@ -7,6 +7,7 @@ import  Book from "@/pages/Overview/book"
 import { useAuth } from "@/contexts/authContext/authContext"
 import AdminDashboard from "@/pages/admin/AdminDashboard.tsx"
 import TechnicianDashboard from "@/pages/technician/TechnicianDashboard.tsx";
+import TechnicianSignUpPage from "@/pages/technician/TechnicianSignUpPage.tsx";
 
 function App() {
   const { userLoggedIn, loading, role } = useAuth()
@@ -26,6 +27,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/technician-signup" element={<TechnicianSignUpPage />} />
         <Route 
           path="/login" 
           element={

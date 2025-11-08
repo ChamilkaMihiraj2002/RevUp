@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_BASE = 'http://localhost:8080/api/v1';
+import API_BASE_URL from '../config/api.config';
 
 export interface AppointmentResponse {
   appointmentId: number;
@@ -29,7 +28,7 @@ export interface SlotAvailabilityResponse {
 }
 
 export const getAppointmentsByCustomerId = async (customerId: number, token: string): Promise<AppointmentResponse[]> => {
-  const response = await axios.get(`${API_BASE}/appointments/customer/${customerId}`, {
+  const response = await axios.get(`${API_BASE_URL}/appointments/customer/${customerId}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -38,7 +37,7 @@ export const getAppointmentsByCustomerId = async (customerId: number, token: str
 };
 
 export const getAppointmentsByVehicleId = async (vehicleId: number, token: string): Promise<AppointmentResponse[]> => {
-  const response = await axios.get(`${API_BASE}/appointments/vehicle/${vehicleId}`, {
+  const response = await axios.get(`${API_BASE_URL}/appointments/vehicle/${vehicleId}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -47,7 +46,7 @@ export const getAppointmentsByVehicleId = async (vehicleId: number, token: strin
 };
 
 export const getAppointmentById = async (appointmentId: number, token: string): Promise<AppointmentResponse> => {
-  const response = await axios.get(`${API_BASE}/appointments/${appointmentId}`, {
+  const response = await axios.get(`${API_BASE_URL}/appointments/${appointmentId}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -56,7 +55,7 @@ export const getAppointmentById = async (appointmentId: number, token: string): 
 };
 
 export const createAppointment = async (request: CreateAppointmentRequest, token: string): Promise<AppointmentResponse> => {
-  const response = await axios.post(`${API_BASE}/appointments`, request, {
+  const response = await axios.post(`${API_BASE_URL}/appointments`, request, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -66,7 +65,7 @@ export const createAppointment = async (request: CreateAppointmentRequest, token
 };
 
 export const checkSlotAvailability = async (date: string, time: string, token: string): Promise<SlotAvailabilityResponse> => {
-  const response = await axios.get(`${API_BASE}/appointments/slots/availability`, {
+  const response = await axios.get(`${API_BASE_URL}/appointments/slots/availability`, {
     params: {
       date,
       time
@@ -84,7 +83,7 @@ export interface UpdateAppointmentRequest {
 }
 
 export const updateAppointment = async (appointmentId: number, request: UpdateAppointmentRequest, token: string): Promise<AppointmentResponse> => {
-  const response = await axios.put(`${API_BASE}/appointments/${appointmentId}`, request, {
+  const response = await axios.put(`${API_BASE_URL}/appointments/${appointmentId}`, request, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -94,7 +93,7 @@ export const updateAppointment = async (appointmentId: number, request: UpdateAp
 };
 
 export const getAllAppointments = async (token: string): Promise<AppointmentResponse[]> => {
-  const response = await axios.get(`${API_BASE}/appointments`, {
+  const response = await axios.get(`${API_BASE_URL}/appointments`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -103,7 +102,7 @@ export const getAllAppointments = async (token: string): Promise<AppointmentResp
 };
 
 export const getUnassignedAppointments = async (token: string): Promise<AppointmentResponse[]> => {
-  const response = await axios.get(`${API_BASE}/appointments/unassigned`, {
+  const response = await axios.get(`${API_BASE_URL}/appointments/unassigned`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -112,7 +111,7 @@ export const getUnassignedAppointments = async (token: string): Promise<Appointm
 };
 
 export const getAppointmentsByTechnicianId = async (technicianId: number, token: string): Promise<AppointmentResponse[]> => {
-  const response = await axios.get(`${API_BASE}/appointments/technician/${technicianId}`, {
+  const response = await axios.get(`${API_BASE_URL}/appointments/technician/${technicianId}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }

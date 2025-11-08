@@ -42,10 +42,8 @@ spring:
               - Path=/api/v1/service-types/**
 
 
-          - id: vehicle-service
-            uri: lb://RevUp-Vehicle-Service
-            predicates:
-              - Path=/api/v1/vehicles/**
+
+        
           # Eureka Server Routes (Optional - for monitoring)
           - id: eureka-server
             uri: http://localhost:8761
@@ -116,3 +114,22 @@ management:
   endpoint:
     health:
       show-details: always
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: k8s
+
+# Kubernetes configuration
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server-service.revup-backend:8761/eureka/}
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5

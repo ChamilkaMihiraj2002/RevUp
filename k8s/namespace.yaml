@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: revup-backend
+  labels:
+    name: revup-backend
+    app: revup
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: revup-frontend
+  labels:
+    name: revup-frontend
+    app: revup
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: revup-database
+  labels:
+    name: revup-database
+    app: revup
