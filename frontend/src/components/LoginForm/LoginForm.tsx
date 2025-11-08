@@ -12,6 +12,7 @@ import { logIn, logInWithGoogle, passwordReset } from "../../firebase/auth"
 import { getFirebaseErrorMessage } from "../../firebase/errorUtils"
 import { useAuth } from "../../contexts/authContext/authContext"
 import { getUserByFirebaseUID } from "../../services/userService"
+import { toast } from "sonner";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -40,7 +41,7 @@ export function LoginForm() {
       setUserData(dbUser)
       setAccessToken(token)
       
-      console.log("Login successful!")
+      toast.success("Login successful! ");
       
       if (dbUser.role === 'TECHNICIAN') {
         navigate('/technician-dashboard')
@@ -48,7 +49,8 @@ export function LoginForm() {
         navigate('/overview')
       }
     } catch (err: any) {
-      setError(getFirebaseErrorMessage(err))
+     const message=  getFirebaseErrorMessage(err);
+      toast.error(message);
       console.error("Login error:", err)
     } finally {
       setIsLoading(false)
@@ -68,7 +70,7 @@ export function LoginForm() {
       setUserData(dbUser)
       setAccessToken(token)
       
-      console.log("Google sign-in successful!")
+      toast.success("Signed in with Google successfully! ");
       
       if (dbUser.role === 'TECHNICIAN') {
         navigate('/technician-dashboard')
@@ -76,7 +78,7 @@ export function LoginForm() {
         navigate('/overview')
       }
     } catch (err: any) {
-      setError(getFirebaseErrorMessage(err))
+      toast.error(getFirebaseErrorMessage(err))
       console.error("Google sign-in error:", err)
     } finally {
       setIsGoogleLoading(false)
@@ -85,7 +87,7 @@ export function LoginForm() {
 
   const handleForgotPassword = async () => {
     if (!formData.email) {
-      setError("Please enter your email address first.")
+      toast.warning("Please enter your email address first.")
       return
     }
 
@@ -94,9 +96,9 @@ export function LoginForm() {
 
     try {
       await passwordReset(formData.email)
-      setSuccessMessage("Password reset email sent! Check your inbox.")
+      toast.success("Password reset email sent! Check your inbox.")
     } catch (err: any) {
-      setError(getFirebaseErrorMessage(err))
+      toast.error(getFirebaseErrorMessage(err));
       console.error("Password reset error:", err)
     }
   }

@@ -14,7 +14,7 @@ public class VehicleServiceClient {
     private final WebClient vehicleServiceWebClient;
 
     public VehicleServiceClient(WebClient.Builder webClientBuilder,
-                                @Value("${vehicle.service.url:http://localhost:8082}") String vehicleServiceUrl) {
+                                @Value("${vehicle.service.url:lb://RevUp-Vehicle-Service}") String vehicleServiceUrl) {
         this.vehicleServiceWebClient = webClientBuilder
                 .baseUrl(vehicleServiceUrl)
                 .build();

@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatbot-service
+  namespace: revup-backend
+  labels:
+    app: chatbot-service
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatbot-service
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: chatbot-service
+        tier: backend
+    spec:
+      containers:
+      - name: chatbot-service
+        image: anjed11/chatbot-service:v1.2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+          name: http
+        env:
+        - name: CHATBOT_SERVICE_PORT
+          value: "8081"
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: EUREKA_SERVER_URL
+        - name: SPRING_AI_GOOGLE_GENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: gemini-secret
+              key: GEMINI_API_KEY
+        - name: EXTERNAL_API_BASE_URL
+          value: "http://user-service:8083/"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chatbot-service
+  namespace: revup-backend
+  labels:
+    app: chatbot-service
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8081
+    targetPort: 8081
+    protocol: TCP
+    name: http
+  selector:
+    app: chatbot-service
+    tier: backend

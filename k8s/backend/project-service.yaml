@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: project-service
+  namespace: revup-backend
+  labels:
+    app: project-service
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: project-service
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: project-service
+        tier: backend
+    spec:
+      containers:
+      - name: project-service
+        image: anjed11/project-service:v1.2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8084
+          name: http
+        env:
+        - name: PROJECT_SERVICE_PORT
+          value: "8084"
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-credentials
+              key: PROJECT_SERVICE_JDBC_URL
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: database-credentials
+              key: DB_USERNAME
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database-credentials
+              key: DB_PASSWORD
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: EUREKA_SERVER_URL
+        - name: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: HIKARI_MAXIMUM_POOL_SIZE
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: JPA_DDL_AUTO
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8084
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8084
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: project-service
+  namespace: revup-backend
+  labels:
+    app: project-service
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8084
+    targetPort: 8084
+    protocol: TCP
+    name: http
+  selector:
+    app: project-service
+    tier: backend

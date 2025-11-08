@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-script
+  namespace: revup-database
+  labels:
+    app: postgres
+    tier: database
+data:
+  init.sql: |
+    -- RevUp Database Initialization Script
+    -- Creates separate databases for each microservice
+    
+    -- Create databases for each service
+    CREATE DATABASE user_db;
+    CREATE DATABASE vehicle_db;
+    CREATE DATABASE appointment_db;
+    CREATE DATABASE project_db;
+    CREATE DATABASE chatbot_db;
+    CREATE DATABASE time_tracking_db;
+    
+    -- Create service-specific users (optional - for better security)
+    CREATE USER user_service WITH PASSWORD 'user_pass_change_me';
+    CREATE USER vehicle_service WITH PASSWORD 'vehicle_pass_change_me';
+    CREATE USER appointment_service WITH PASSWORD 'appointment_pass_change_me';
+    CREATE USER project_service WITH PASSWORD 'project_pass_change_me';
+    CREATE USER chatbot_service WITH PASSWORD 'chatbot_pass_change_me';
+    CREATE USER time_tracking_service WITH PASSWORD 'time_tracking_pass_change_me';
+    
+    -- Grant privileges to each service user on their respective database
+    GRANT ALL PRIVILEGES ON DATABASE user_db TO user_service;
+    GRANT ALL PRIVILEGES ON DATABASE vehicle_db TO vehicle_service;
+    GRANT ALL PRIVILEGES ON DATABASE appointment_db TO appointment_service;
+    GRANT ALL PRIVILEGES ON DATABASE project_db TO project_service;
+    GRANT ALL PRIVILEGES ON DATABASE chatbot_db TO chatbot_service;
+    GRANT ALL PRIVILEGES ON DATABASE time_tracking_db TO time_tracking_service;
+    
+    -- Connect to each database and grant schema permissions
+    \c user_db;
+    GRANT ALL ON SCHEMA public TO user_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO user_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO user_service;
+    
+    \c vehicle_db;
+    GRANT ALL ON SCHEMA public TO vehicle_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO vehicle_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO vehicle_service;
+    
+    \c appointment_db;
+    GRANT ALL ON SCHEMA public TO appointment_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO appointment_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO appointment_service;
+    
+    \c project_db;
+    GRANT ALL ON SCHEMA public TO project_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO project_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO project_service;
+    
+    \c chatbot_db;
+    GRANT ALL ON SCHEMA public TO chatbot_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO chatbot_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO chatbot_service;
+    
+    \c time_tracking_db;
+    GRANT ALL ON SCHEMA public TO time_tracking_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO time_tracking_service;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO time_tracking_service;

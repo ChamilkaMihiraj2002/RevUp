@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_BASE = 'http://localhost:8080/api/v1';
+import API_BASE_URL from '../config/api.config';
 
 export interface VehicleResponse {
   vehicleId: number;
@@ -13,7 +12,7 @@ export interface VehicleResponse {
 }
 
 export const getVehiclesByUserId = async (userId: number, token: string): Promise<VehicleResponse[]> => {
-  const response = await axios.get(`${API_BASE}/vehicles/user/${userId}`, {
+  const response = await axios.get(`${API_BASE_URL}/vehicles/user/${userId}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -22,7 +21,7 @@ export const getVehiclesByUserId = async (userId: number, token: string): Promis
 };
 
 export const getVehicleById = async (vehicleId: number, token: string): Promise<VehicleResponse> => {
-  const response = await axios.get(`${API_BASE}/vehicles/${vehicleId}`, {
+  const response = await axios.get(`${API_BASE_URL}/vehicles/${vehicleId}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -31,7 +30,7 @@ export const getVehicleById = async (vehicleId: number, token: string): Promise<
 };
 
 export const createVehicle = async (vehicleData: Omit<VehicleResponse, 'vehicleId'>, token: string): Promise<VehicleResponse> => {
-  const response = await axios.post(`${API_BASE}/vehicles`, vehicleData, {
+  const response = await axios.post(`${API_BASE_URL}/vehicles`, vehicleData, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'

@@ -5,21 +5,43 @@ spring:
   application:
     name: RevUp-EUREKA-SERVER
 
+# Default Eureka configuration (applies to all profiles unless overridden)
+eureka:
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+  server:
+    waitTimeInMsWhenSyncEmpty: 0
+    response-cache-update-interval-ms: 5000
+
 ---
 spring:
   config:
     activate:
       on-profile: dev
 
-# Move this to the config server
+# Local development configuration
 eureka:
   instance:
     hostname: localhost
   client:
-    registerWithEureka: false
-    fetchRegistry: false
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+---
+spring:
+  config:
+    activate:
+      on-profile: k8s
+
+# Kubernetes configuration
+eureka:
+  instance:
+    hostname: eureka-server-service.revup-backend.svc.cluster.local
+    preferIpAddress: false
+    instanceId: ${spring.application.name}:${POD_NAME:${random.value}}
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
   server:
-    waitTimeInMsWhenSyncEmpty: 0
-    response-cache-update-interval-ms: 5000
+    enableSelfPreservation: false

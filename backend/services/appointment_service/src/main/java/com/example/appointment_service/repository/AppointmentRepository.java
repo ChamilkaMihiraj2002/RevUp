@@ -21,6 +21,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     
     List<Appointment> findByStatus(AppointmentStatus status);
     
+    // Find unassigned appointments (technicianId is null and status is SCHEDULED)
+    List<Appointment> findByTechnicianIdIsNullAndStatus(AppointmentStatus status);
+    
     @Query("SELECT a FROM Appointment a WHERE a.scheduledStart >= :start AND a.scheduledEnd <= :end")
     List<Appointment> findByScheduledBetween(@Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end);
     

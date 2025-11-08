@@ -14,11 +14,12 @@ public class ProjectMapper {
         ProjectDto dto = new ProjectDto();
         dto.setProjectId(project.getProjectId());
         dto.setUserId(project.getUserId());
+        dto.setVehicleId(project.getVehicleId());
+        dto.setTechnicianId(project.getTechnicianId());
         dto.setDescription(project.getDescription());
         dto.setStatus(project.getStatus());
         dto.setEstimateTime(project.getEstimateTime());
-        dto.setStartTime(project.getStartTime());
-        dto.setEndTime(project.getEndTime());
+        dto.setEstimatedAmount(project.getEstimatedAmount());
         dto.setCreatedAt(project.getCreatedAt());
         dto.setUpdatedAt(project.getUpdatedAt());
         return dto;
@@ -27,6 +28,7 @@ public class ProjectMapper {
     public Project toEntity(CreateProjectRequest request) {
         Project project = new Project();
         project.setUserId(request.getUserId());
+        project.setVehicleId(request.getVehicleId());
         project.setDescription(request.getDescription());
         
         if (request.getStatus() != null && !request.getStatus().isEmpty()) {
@@ -36,8 +38,6 @@ public class ProjectMapper {
         }
         
         project.setEstimateTime(request.getEstimateTime());
-        project.setStartTime(request.getStartTime());
-        project.setEndTime(request.getEndTime());
         return project;
     }
 
@@ -50,12 +50,6 @@ public class ProjectMapper {
         }
         if (request.getEstimateTime() != null) {
             project.setEstimateTime(request.getEstimateTime());
-        }
-        if (request.getStartTime() != null) {
-            project.setStartTime(request.getStartTime());
-        }
-        if (request.getEndTime() != null) {
-            project.setEndTime(request.getEndTime());
         }
     }
 }

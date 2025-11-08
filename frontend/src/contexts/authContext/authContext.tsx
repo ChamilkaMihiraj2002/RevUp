@@ -6,6 +6,7 @@ import type { User } from "firebase/auth";
 import Cookies from "js-cookie";
 import { getUserByFirebaseUID } from "../../services/userService";
 import type { UserData } from "../../services/userService";
+import { toast } from "sonner";
 
 type AuthContextType = {
     currentUser: User | null;
@@ -72,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 console.error("Error fetching user data:", error);
                 setUserLoggedIn(false);
                 setCurrentUser(null);
-                alert("User not found in system. Please contact system assistance.");
+                toast.error("User not found in system. Please contact system assistance.");
                 await auth.signOut();
             }
         } else {

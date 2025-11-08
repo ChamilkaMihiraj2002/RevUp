@@ -26,6 +26,10 @@ public class CreateProjectRequest {
     @Schema(description = "ID of the user who owns this project", example = "123", required = true)
     private Long userId;
 
+    @Positive(message = "Vehicle ID must be positive")
+    @Schema(description = "ID of the vehicle associated with this project", example = "456")
+    private Long vehicleId;
+
     @NotBlank(message = "Description is required")
     @Schema(description = "Detailed description of the project", 
             example = "Full vehicle inspection and brake system repair", 
@@ -40,10 +44,4 @@ public class CreateProjectRequest {
     @Positive(message = "Estimate time must be positive")
     @Schema(description = "Estimated time to complete the project in hours", example = "8")
     private Integer estimateTime; // in hours
-
-    @Schema(description = "Scheduled start time of the project", example = "2025-11-10T09:00:00")
-    private LocalDateTime startTime;
-
-    @Schema(description = "Expected end time of the project", example = "2025-11-10T17:00:00")
-    private LocalDateTime endTime;
 }

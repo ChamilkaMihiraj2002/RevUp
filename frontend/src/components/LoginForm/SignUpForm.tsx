@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import { Button } from "../UI/Button"
 import { Input } from "../UI/Input"
 import { Label } from "../UI/Label"
@@ -11,7 +10,9 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { signUp, logInWithGoogle } from "../../firebase/auth"
 import { getFirebaseErrorMessage } from "../../firebase/errorUtils"
 import { useAuth } from "../../contexts/authContext/authContext"
-import { registerUser, getUserByFirebaseUID } from "../../services/userService"
+import { registerUser } from "../../services/userService"
+import { toast } from "sonner";
+
 
 export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }) {
   const [showPassword, setShowPassword] = useState(false)
@@ -27,25 +28,24 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
     password: "",
     confirmPassword: "",
   })
-  const { userLoggedIn, setUserData, setAccessToken } = useAuth()
-  const navigate = useNavigate()
+  const { userLoggedIn } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match!")
+      toast.error("Passwords do not match!")
       return
     }
 
     if (formData.password.length < 6) {
-      setError("Password should be at least 6 characters long.")
+      toast.warning("Password should be at least 6 characters long.")
       return
     }
 
     if (!/^\d{10}$/.test(formData.mobile)) {
-      setError("Mobile number must be exactly 10 digits.")
+      toast.warning("Mobile number must be exactly 10 digits.")
       return
     }
 
@@ -64,12 +64,13 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
       })
 
       console.log("Sign-up successful!")
-      setSuccessMessage("Account created successfully! Please log in.")
+      toast.success("Signup successful! Redirecting to login...")
       setTimeout(() => {
         onSwitchToLogin?.()
       }, 2000)
     } catch (err: any) {
-      setError(getFirebaseErrorMessage(err))
+       const message = getFirebaseErrorMessage(err);
+       toast.error(message);
       console.error("Sign-up error:", err)
     } finally {
       setIsLoading(false)
@@ -83,7 +84,6 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
     try {
       const result = await logInWithGoogle()
       const user = result.user
-      const token = await user.getIdToken()
       
       await registerUser({
         name: user.displayName || "Google User",
@@ -92,15 +92,14 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
         role: "CUSTOMER",
         firebaseUID: user.uid
       })
-      
-      const dbUser = await getUserByFirebaseUID(user.uid, token)
-      setUserData(dbUser)
-      setAccessToken(token)
 
-      console.log("Google sign-in successful!")
-      navigate('/overview')
+      console.log("Google sign-up successful!")
+      toast.success("Signup successful! Please login to the system. Redirecting...")
+      setTimeout(() => {
+        onSwitchToLogin?.()
+      }, 2000)
     } catch (err: any) {
-      setError(getFirebaseErrorMessage(err))
+      toast.error(getFirebaseErrorMessage(err))
       console.error("Google sign-in error:", err)
     } finally {
       setIsGoogleLoading(false)

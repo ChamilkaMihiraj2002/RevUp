@@ -13,6 +13,9 @@ public interface AppointmentServiceInterface {
     Flux<AppointmentResponse> getAllAppointments();
     Flux<AppointmentResponse> getAppointmentsByCustomerId(Long customerId);
     Flux<AppointmentResponse> getAppointmentsByVehicleId(Long vehicleId);
+    Flux<AppointmentResponse> getAppointmentsByTechnicianId(Long technicianId);
+    Flux<AppointmentResponse> getAppointmentsByStatus(String status);
+    Flux<AppointmentResponse> getUnassignedAppointments();
     Mono<AppointmentResponse> updateAppointment(Long id, UpdateAppointmentRequest request);
     Mono<Void> deleteAppointment(Long id);
     Mono<SlotAvailabilityResponse> checkSlotAvailability(LocalDate date, LocalTime time);
