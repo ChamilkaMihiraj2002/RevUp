@@ -20,7 +20,6 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const [error, setError] = useState("")
-  const [successMessage, setSuccessMessage] = useState("")
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -131,11 +130,6 @@ export function SignUpForm({ onSwitchToLogin }: { onSwitchToLogin?: () => void }
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
             {error}
-          </div>
-        )}
-        {successMessage && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-md text-sm">
-            {successMessage}
           </div>
         )}
 

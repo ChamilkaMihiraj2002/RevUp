@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: anjed11/frontend:v1.4
+        image: anjed11/frontend:v1.5
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
