@@ -1,0 +1,98 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: RevUp-User-Service
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+    username: postgres.cksrfhnqmjbrtzutnlim
+    password: "05102002"
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 3000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      pool-name: NotificationServiceHikariCP
+      connection-test-query: SELECT 1
+      register-mbeans: true
+
+  # Gmail SMTP Configuration
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "revupautomobile@gmail.com"    # Replace with your actual Gmail
+    password: "pvtn qqwf ajlr pdwh"    # Your Gmail App Password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+        transport:
+          protocol: smtp
+
+  # JPA Configuration
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 5
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
+
+  security:
+    csrf:
+      enabled: false
+
+# Eureka Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    initial-instance-info-replication-interval-seconds: 5
+    registry-fetch-interval-seconds: 5
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 5
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+
+eureka:
+client:
+  serviceUrl:
+    defaultZone: "http://localhost:8761/eureka/"
+  initialInstanceInfoReplicationIntervalSeconds: 5
+  registryFetchIntervalSeconds: 5
+instance:
+  preferIpAddress: true
+  leaseRenewalIntervalInSeconds: 5
+  leaseExpirationDurationInSeconds: 5
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: no_eureka
+
+eureka:
+  client:
+    enabled: false
